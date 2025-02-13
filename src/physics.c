@@ -340,6 +340,14 @@ float convertMsToKmh(float ms){
     return ms * 3.6;
 }
 
+/*
+    #########################################################
+    #                                                       #
+    #                   PHYSICS UPDATE                      #
+    #                                                       #
+    #########################################################
+*/
+
 // function to update the physics of the aircraft
 void updatePhysics(AircraftState *aircraft, float deltaTime) {
     const int mass = 4845;              // Static mass for J29F.
@@ -367,7 +375,7 @@ void updatePhysics(AircraftState *aircraft, float deltaTime) {
     };
     
     // Thrust force.
-    float thrustMagnitude = calculateThrust(21100, 27580, aircraft, 1060, 110);
+    float thrustMagnitude = calculateThrust(21100, 27580, aircraft, 1060, 100);
     Vector3 thrustForce = {
         thrustMagnitude * cosf(aircraft->pitch) * cosf(aircraft->yaw),
         thrustMagnitude * sinf(aircraft->pitch),

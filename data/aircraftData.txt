@@ -1,0 +1,3 @@
+# name|empty_mass_kg|wing_area_m2|wing_span_m|aspect_ratio|sweep_angle_deg|thrust_n|thrust_ab_n|max_speed_kph|stall_speed_kph|service_ceiling_km|fuel_capacity_kg|Cd0|max_aoa_deg|fuel_burn_kgps|fuel_burn_ab_kgps
+J29F|4845|24.15|10.23|4.33|25|21100|27580|1075|300|15.5|1680|0.015|25|0.61|0.798
+J32B|7500|37.4|13|4.52|35|56400|72800|1200|250|15|2800|0.018|40|1.489|3.822

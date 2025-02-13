@@ -2,7 +2,14 @@
 #include "aircraft.h"
 #include "physics.h"
 #include "textRenderer.h"
+#include "menu.h"
 #include <stdlib.h>
+
+#ifdef _WIN32 // Windows
+    #define CLEAR "cls"
+#else // Linux
+    #define CLEAR "clear"
+#endif
 
 int main() {
     long startTime, elapsedTime, previousTime;
@@ -14,12 +21,22 @@ int main() {
 
     previousTime = getTimeMicroseconds();
 
-    #ifdef _WIN32 // Windows
-        system("cls");
-    #else // Linux
-        system("clear");
-    #endif
+    system(CLEAR); // clear screen
 
+    // ----- SELECT AIRCRAFT -----
+
+    Aircraft aircraftList[MAX_AIRCRAFT];
+    int aircraftCount;
+
+    if (!loadAircraftNames("data/aircraftData.txt", aircraftList, &aircraftCount)) {
+        return 1; // Exit if file could not be loaded
+    }
+
+    int selectedIndex = selectAircraft(aircraftList, aircraftCount);
+
+    system(CLEAR); // clear screen
+
+    // ----- MAIN GAME LOOP -----
     while (1) {
         startTime = getTimeMicroseconds();
 
