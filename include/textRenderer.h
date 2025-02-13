@@ -1,8 +1,12 @@
 #ifndef TEXT_RENDERER_H
 #define TEXT_RENDERER_H
 
-#include "aircraft.h"
+#define DEBUG_MODE 0 // uncomment this for debug mode (more printing)
 
-void printInfo(AircraftState *aircraft, float fps);
+#include "aircraft.h"
+#include "aircraftData.h"
+
+// Function to print the aircraft information
+void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps);
 
 #endif // TEXT_RENDERER_H

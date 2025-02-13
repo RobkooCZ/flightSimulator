@@ -340,6 +340,10 @@ float convertMsToKmh(float ms){
     return ms * 3.6;
 }
 
+float convertMsToMach(float ms){
+    return ms / 343;
+}
+
 /*
     #########################################################
     #                                                       #
@@ -349,54 +353,66 @@ float convertMsToKmh(float ms){
 */
 
 // function to update the physics of the aircraft
-void updatePhysics(AircraftState *aircraft, float deltaTime) {
-    const int mass = 4845;              // Static mass for J29F.
-    
-    // Gravity force.
-    Vector3 gravityForce = {0, -GRAVITY * mass, 0};
-    
-    // Calculate AoA based on flight path.
+void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircraftData) {
+    // Use aircraftData values for mass and wing area
+    float mass = aircraftData->mass;
+    float wingArea = aircraftData->wingArea;
+
+    // --- GRAVITY ---
+    Vector3 gravityForce = { 0, -GRAVITY * mass, 0 };
+
+    // --- LIFT ---
     float AoA = calculateAoA(aircraft);
     float liftCoefficient = calculateLiftCoefficient(AoA);
-    
-    // Compute lift force using the new routine (wingArea = 24.15 m²).
-    Vector3 liftForce = computeLiftForceComponents(aircraft, 24.15, liftCoefficient);
-    
-    // Drag force calculations.
-    float aspectRatio = calculateAspectRatio(10.23, 24.15);
+    Vector3 liftForce = computeLiftForceComponents(aircraft, wingArea, liftCoefficient);
+
+    // --- DRAG ---
+    // Calculate aspect ratio using wing span from aircraftData (assuming wingSpan is provided)
+    float aspectRatio = (aircraftData->wingSpan * aircraftData->wingSpan) / wingArea;
     float inducedDrag = calculateInducedDrag(liftCoefficient, aspectRatio);
     float dragCoefficient = calculateTotalDragCoefficient(inducedDrag);
-    float dragForceMag = calculateDragForce(dragCoefficient, getAirDensity(aircraft->y), aircraft, 24.15);
+    float dragForceMag = calculateDragForce(dragCoefficient, getAirDensity(aircraft->y), aircraft, wingArea);
     Vector3 velocityUnit = getUnitVector(aircraft);
     Vector3 dragForce = {
         -velocityUnit.x * dragForceMag,
         -velocityUnit.y * dragForceMag,
         -velocityUnit.z * dragForceMag
     };
-    
-    // Thrust force.
-    float thrustMagnitude = calculateThrust(21100, 27580, aircraft, 1060, 100);
+
+    // --- THRUST ---
+    // Pass in aircraftData fields for thrust values and maxSpeed
+    float thrustMagnitude = calculateThrust(
+        aircraftData->thrust, 
+        aircraftData->afterburnerThrust, 
+        aircraft, 
+        aircraftData->maxSpeed, 
+        110  // Using a control percentage value (adjust as needed)
+    );
     Vector3 thrustForce = {
-        thrustMagnitude * cosf(aircraft->pitch) * cosf(aircraft->yaw),
-        thrustMagnitude * sinf(aircraft->pitch),
-        thrustMagnitude * cosf(aircraft->pitch) * sinf(aircraft->yaw)
+        thrustMagnitude * cos(aircraft->pitch) * cos(aircraft->yaw),
+        thrustMagnitude * sin(aircraft->pitch),
+        thrustMagnitude * cos(aircraft->pitch) * sin(aircraft->yaw)
     };
-    
-    // Sum all forces.
+
+    // --- VERTICAL DAMPING ---
+    const float VERTICAL_DAMPING = 2000.0f;  // Adjust this constant if necessary
+    Vector3 dampingForce = { 0, -VERTICAL_DAMPING * aircraft->vy, 0 };
+
+    // --- SUM ALL FORCES ---
     Vector3 netForce = {
-        gravityForce.x + liftForce.x + dragForce.x + thrustForce.x,
-        gravityForce.y + liftForce.y + dragForce.y + thrustForce.y,
-        gravityForce.z + liftForce.z + dragForce.z + thrustForce.z,
+        gravityForce.x + liftForce.x + dragForce.x + thrustForce.x + dampingForce.x,
+        gravityForce.y + liftForce.y + dragForce.y + thrustForce.y + dampingForce.y,
+        gravityForce.z + liftForce.z + dragForce.z + thrustForce.z + dampingForce.z
     };
-    
-    // Compute acceleration.
+
+    // --- COMPUTE ACCELERATION ---
     Vector3 acceleration = {
         netForce.x / mass,
         netForce.y / mass,
         netForce.z / mass
     };
-    
-    // Update velocities.
+
+    // --- UPDATE VELOCITY ---
     aircraft->vx += acceleration.x * deltaTime;
     aircraft->vy += acceleration.y * deltaTime;
     aircraft->vz += acceleration.z * deltaTime;

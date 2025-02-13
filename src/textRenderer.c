@@ -4,14 +4,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void printInfo(AircraftState *aircraft, float fps){
+void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps){
     printf("\033[H"); // ASCII escape code to avoid flickering
 
-    printf("----- J29F INFO -----");
+    printf("----- %s INFO -----", aircraftData->name);
     printf("\nFPS: %.2f  ", fps);
 
     printf("\n\nAirspeed: %.2fkm/h  ", convertMsToKmh(calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz)));
-    
+    printf("\nMach: %.2f  ", convertMsToMach(aircraft->vx));
+
     printf("\n\nThrottle: %d%%  ", 100);
 
     printf("\n\nX: %.2f  ", aircraft->x);

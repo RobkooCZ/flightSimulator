@@ -7,6 +7,7 @@
 #define OEF 0.8 // Oswald Efficiency Factor (~0.8 for a jet)
 
 #include "aircraft.h"
+#include "aircraftData.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -67,8 +68,9 @@ Vector3 getUpVector(AircraftState *aircraft);
 float convertRadiansToDeg(float radians);
 float convertKmhToMs(float kmh);
 float convertMsToKmh(float ms);
+float convertMsToMach(float ms);
 
 // physics update
-void updatePhysics(AircraftState *aircraft, float deltaTime);
+void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircraftData);
 
 #endif // PHYSICS_H
