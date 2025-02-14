@@ -13,7 +13,29 @@ void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps){
     printf("\n\nAirspeed: %.2fkm/h  ", convertMsToKmh(calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz)));
     printf("\nMach: %.2f  ", convertMsToMach(aircraft->vx));
 
-    printf("\n\nThrottle: %d%%  ", 100);
+    if (!aircraft->controls.afterburner) {
+        printf("\n\nThrottle: %.0f%%  ", aircraft->controls.throttle * 100);
+    }
+    else {
+        printf("\n\nThrottle: WEP  ");
+    }
+
+    printf("\nAfterburner: %s  ", aircraft->controls.afterburner ? "ON" : "OFF");
+
+    if (aircraft->controls.afterburner){
+        printf("\nExpected engine output: %dN  ", aircraftData->afterburnerThrust);
+    }
+    else{
+        printf("\nExpected engine output: %.0fN      ", aircraftData->thrust * aircraft->controls.throttle);
+    }
+
+    printf("\nActual engine output: %.0fN       ", calculateThrust(
+        aircraftData->thrust, 
+        aircraftData->afterburnerThrust, 
+        aircraft, 
+        aircraftData->maxSpeed, 
+        aircraft->controls.throttle * 100
+    ));
 
     printf("\n\nX: %.2f  ", aircraft->x);
     printf("\nY: %.2f  ", aircraft->y);
@@ -29,4 +51,6 @@ void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps){
 
     printf("\n\nAoA: %.2f°  ", convertRadiansToDeg(calculateAoA(aircraft)));
     printf("\nLift: %.2fN  ", calculateLift(aircraft));
+
+    fflush(stdout);
 }

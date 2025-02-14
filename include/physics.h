@@ -6,11 +6,9 @@
 #define C_D0 0.02 // estimation of the zero lift drag for a jet fighter
 #define OEF 0.8 // Oswald Efficiency Factor (~0.8 for a jet)
 
-#include "aircraft.h"
 #include "aircraftData.h"
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
+#include "controls.h"
+#include "aircraft.h"
 
 // Define a structure to hold altitude and air density pair
 typedef struct {
@@ -29,6 +27,11 @@ typedef struct {
 typedef struct {
     float x, y, z;
 } Vector3;
+
+// orientation structure
+typedef struct {
+    float yaw, pitch, roll;
+} Orientation;
 
 // air density
 float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float upperDensity, float targetAltitude);
@@ -61,6 +64,10 @@ float calculateDragForce(float dragCoefficient, float airDensity, AircraftState 
 
 // thrust calculation functions
 float calculateThrust(float thrust, float afterburnerThrust, AircraftState *aircraft, float maxSpeed, int percentControl);
+
+// Aircraft orientation functions
+Orientation calculateNewOrientation(float deltaTime);
+Vector3 getDirectionVector(Orientation newOrientation);
 
 // Helper functions
 Vector3 vectorCross(Vector3 a, Vector3 b);

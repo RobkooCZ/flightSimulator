@@ -1,5 +1,7 @@
+#include "controls.h"
 #include "aircraft.h"
 #include <math.h>
+#include <stdlib.h>
 
 void initAircraft(AircraftState *aircraft) {
     // Initialize the aircraft's state with zero values or default values
@@ -12,6 +14,10 @@ void initAircraft(AircraftState *aircraft) {
     aircraft->yaw = 0.0f;   // Facing straight
     aircraft->pitch = 0.0f; // Level flight
     aircraft->roll = 0.0f;  // Level flight
+    aircraft->hasAfterburner = false; // default false
+
+    // Initialize controls
+    controlsInit(&aircraft->controls);
 }
 
 void updateAircraftState(AircraftState *aircraft, float deltaTime) {
@@ -21,7 +27,7 @@ void updateAircraftState(AircraftState *aircraft, float deltaTime) {
     aircraft->z += aircraft->vz * deltaTime;
 
     // Prevent minor residual vy from causing oscillations.
-    if (fabs(aircraft->vy) < 0.5f) {
+    if (fabs(aircraft->vy) < 0.25f) {
         aircraft->vy = 0.0f;
     }
 }

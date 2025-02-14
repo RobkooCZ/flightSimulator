@@ -1,40 +1,13 @@
 #include "menu.h"
+#include "controls.h" // for real time input
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef _WIN32
-    #include <conio.h>
     #define CLEAR "cls"
 #else
-    #include <termios.h>
-    #include <unistd.h>
     #define CLEAR "clear"
-
-    // linux only functions for real time keyboard input
-
-    // Function to enable raw mode for terminal input
-    void enableRawMode(){
-        struct termios term; // Declare a termios structure to hold terminal attributes
-        tcgetattr(STDIN_FILENO, &term); // Get the current terminal attributes
-        term.c_lflag &= ~(ICANON | ECHO); // Disable canonical mode and echo
-        tcsetattr(STDIN_FILENO, TCSANOW, &term); // Set the terminal attributes immediately
-    }
-
-    // Function to disable raw mode for terminal input
-    void disableRawMode(){
-        struct termios term; // Declare a termios structure to hold terminal attributes
-        tcgetattr(STDIN_FILENO, &term); // Get the current terminal attributes
-        term.c_lflag |= (ICANON | ECHO); // Enable canonical mode and echo
-        tcsetattr(STDIN_FILENO, TCSANOW, &term); // Set the terminal attributes immediately
-    }
-
-    // Function to get a single key press without waiting for Enter
-    char getKeyPress(){
-        char key; // Declare a variable to hold the key press
-        read(STDIN_FILENO, &key, 1); // Read a single character from standard input
-        return key; // Return the key press
-    }
 #endif
 
 // Function to load aircraft names from a file

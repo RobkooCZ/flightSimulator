@@ -1,4 +1,9 @@
 #include "physics.h"
+#include "controls.h"
+
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 AltitudeAirDensity airDensityTable[] = {
     {0.0, 1.225}, // altitude, meters
@@ -265,8 +270,14 @@ float calculateDragForce(float dragCoefficient, float airDensity, AircraftState 
     return 0.5f * dragCoefficient * airDensity * wingArea * speedSquared;
 }
 
+/*
+    #########################################################
+    #                                                       #
+    #                   THRUST CALCULATION                  #
+    #                                                       #
+    #########################################################
+*/
 
-// ----- THRUST -----
 float calculateThrust(float thrust, float afterburnerThrust, AircraftState *aircraft, float maxSpeed, int percentControl){
     float usedThrust;
     bool afterBurnerOn;
@@ -291,9 +302,40 @@ float calculateThrust(float thrust, float afterburnerThrust, AircraftState *airc
 
     float calculatedThrust = usedThrust * (airDensityAtCurrentAltitude/airDensityAtSeaLevel) * (1 + 0.2 * (currentSpeed/maxSpeed));
 
-    calculatedThrust = (percentControl/100) * calculatedThrust; // apply the user control to the thrust
+    calculatedThrust = ((float)percentControl/100) * calculatedThrust; // apply the user control to the thrust
 
     return calculatedThrust;
+}
+
+/*
+    #########################################################
+    #                                                       #
+    #                      ORIENTATION                      #
+    #                                                       #
+    #########################################################
+*/
+
+// ===== NOT USED ATM =====
+
+Orientation calculateNewOrientation(float deltaTime){
+    AircraftControls *controls = getControls();
+
+    // Calculate new orientation based on rates of change
+    Orientation newOrientation;
+    newOrientation.yaw = controls->yaw + (controls->yawRate * deltaTime);
+    newOrientation.pitch = controls->pitch + (controls->pitchRate * deltaTime);
+    newOrientation.roll = controls->roll + (controls->rollRate * deltaTime);
+    return newOrientation;
+}
+
+Vector3 getDirectionVector(Orientation newOrientation){
+    Vector3 directionVector;
+
+    directionVector.x = cos(newOrientation.pitch) * cos(newOrientation.yaw);
+    directionVector.y = sin(newOrientation.pitch);
+    directionVector.z = cos(newOrientation.pitch) * sin(newOrientation.yaw);
+
+    return directionVector;
 }
 
 /*
@@ -367,7 +409,7 @@ void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircr
     Vector3 liftForce = computeLiftForceComponents(aircraft, wingArea, liftCoefficient);
 
     // --- DRAG ---
-    // Calculate aspect ratio using wing span from aircraftData (assuming wingSpan is provided)
+    // Calculate aspect ratio using wing span from aircraftData 
     float aspectRatio = (aircraftData->wingSpan * aircraftData->wingSpan) / wingArea;
     float inducedDrag = calculateInducedDrag(liftCoefficient, aspectRatio);
     float dragCoefficient = calculateTotalDragCoefficient(inducedDrag);
@@ -386,8 +428,9 @@ void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircr
         aircraftData->afterburnerThrust, 
         aircraft, 
         aircraftData->maxSpeed, 
-        110  // Using a control percentage value (adjust as needed)
+        aircraft->controls.throttle * 100
     );
+
     Vector3 thrustForce = {
         thrustMagnitude * cos(aircraft->pitch) * cos(aircraft->yaw),
         thrustMagnitude * sin(aircraft->pitch),
@@ -395,14 +438,14 @@ void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircr
     };
 
     // --- VERTICAL DAMPING ---
-    const float VERTICAL_DAMPING = 2000.0f;  // Adjust this constant if necessary
-    Vector3 dampingForce = { 0, -VERTICAL_DAMPING * aircraft->vy, 0 };
+    // const float VERTICAL_DAMPING = 2000.0f;  // Adjust this constant if necessary
+    // Vector3 dampingForce = { 0, -VERTICAL_DAMPING * aircraft->vy, 0 };
 
     // --- SUM ALL FORCES ---
     Vector3 netForce = {
-        gravityForce.x + liftForce.x + dragForce.x + thrustForce.x + dampingForce.x,
-        gravityForce.y + liftForce.y + dragForce.y + thrustForce.y + dampingForce.y,
-        gravityForce.z + liftForce.z + dragForce.z + thrustForce.z + dampingForce.z
+        gravityForce.x + liftForce.x + dragForce.x + thrustForce.x,// + dampingForce.x,
+        gravityForce.y + liftForce.y + dragForce.y + thrustForce.y,// + dampingForce.y,
+        gravityForce.z + liftForce.z + dragForce.z + thrustForce.z// + dampingForce.z
     };
 
     // --- COMPUTE ACCELERATION ---
