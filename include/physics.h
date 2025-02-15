@@ -34,7 +34,6 @@ typedef struct {
 } Orientation;
 
 // air density
-float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float upperDensity, float targetAltitude);
 float getAirDensity(float altitude);
 
 // AoA calculation functions
@@ -69,13 +68,20 @@ float calculateThrust(float thrust, float afterburnerThrust, AircraftState *airc
 Orientation calculateNewOrientation(float deltaTime);
 Vector3 getDirectionVector(Orientation newOrientation);
 
+// TAS calculation functions (temp, pressure)
+double getTemperatureKelvin(double altitudeMeters);
+double getPressureAtAltitude(float altitudeMeters);
+float calculateTAS(AircraftState *aircraft);
+
 // Helper functions
 Vector3 vectorCross(Vector3 a, Vector3 b);
 Vector3 getUpVector(AircraftState *aircraft);
 float convertRadiansToDeg(float radians);
 float convertKmhToMs(float kmh);
 float convertMsToKmh(float ms);
-float convertMsToMach(float ms);
+float calculateSpeedOfSound(float altitude);
+float convertMsToMach(float ms, float altitude);
+float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float upperDensity, float targetAltitude);
 
 // physics update
 void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircraftData);

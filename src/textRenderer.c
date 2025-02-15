@@ -10,8 +10,9 @@ void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps){
     printf("----- %s INFO -----", aircraftData->name);
     printf("\nFPS: %.2f  ", fps);
 
-    printf("\n\nAirspeed: %.2fkm/h  ", convertMsToKmh(calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz)));
-    printf("\nMach: %.2f  ", convertMsToMach(aircraft->vx));
+    printf("\n\nIAS: %.2fkm/h  ", convertMsToKmh(calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz)));
+    printf("\nTAS: %.2fkm/h  ", convertMsToKmh(calculateTAS(aircraft)));
+    printf("\nMach: %.2f  ", convertMsToMach(calculateTAS(aircraft), aircraft->y));
 
     if (!aircraft->controls.afterburner) {
         printf("\n\nThrottle: %.0f%%  ", aircraft->controls.throttle * 100);

@@ -5,56 +5,23 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-AltitudeAirDensity airDensityTable[] = {
-    {0.0, 1.225}, // altitude, meters
-    {1000.0, 1.112},
-    {2000.0, 1.007},
-    {3000.0, 0.9093},
-    {4000.0, 0.8194},
-    {5000.0, 0.7364},
-    {6000.0, 0.6614},
-    {7000.0, 0.5930},
-    {8000.0, 0.5321},
-    {9000.0, 0.4788},
-    {10000.0, 0.4335},
-    {11000.0, 0.3955},
-    {12000.0, 0.3643},
-    {13000.0, 0.3394},
-    {14000.0, 0.3190},
-    {15000.0, 0.3024}
-};
-
-#define AIR_DENSITY_TABLE_SIZE (sizeof(airDensityTable) / sizeof(airDensityTable[0])) 
-
-// Function to perform linear interpolation between two points
-float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float upperDensity, float targetAltitude) {
-    float fraction = (targetAltitude - lowerAlt) / (upperAlt - lowerAlt);
-    return lowerDensity + fraction * (upperDensity - lowerDensity);
-}
+/*
+    #########################################################
+    #                                                       #
+    #                      AIR DENSITY                      #
+    #                                                       #
+    #########################################################
+*/
 
 // Function to get the air density at a given altitude
 float getAirDensity(float altitude) {
-    // If the altitude is below the first entry, return the first value
-    if (altitude <= airDensityTable[0].altitude) {
-        return airDensityTable[0].airDensity;
-    }
-    
-    // If the altitude is above the last entry, return the last value
-    if (altitude >= airDensityTable[AIR_DENSITY_TABLE_SIZE - 1].altitude) {
-        return airDensityTable[AIR_DENSITY_TABLE_SIZE - 1].airDensity;
-    }
+    const float P = getPressureAtAltitude(altitude); // Pressure at the given altitude
+    const float R = 287.05; // Specific gas constant for dry air in J/(kg·K)
+    const float T = getTemperatureKelvin(altitude); // Temperature at the given altitude
 
-    // Iterate through the table to find the two points for interpolation
-    for (size_t i = 1; i < AIR_DENSITY_TABLE_SIZE; i++) {
-        if (altitude < airDensityTable[i].altitude) {
-            // Perform linear interpolation
-            return interpolate(airDensityTable[i - 1].altitude, airDensityTable[i].altitude,
-                               airDensityTable[i - 1].airDensity, airDensityTable[i].airDensity, altitude);
-        }
-    }
+    const float p = P / (R * T); // Calculate the air density at the given altitude
 
-    // Default return (should not be reached)
-    return 0.0;
+    return p; // Return the calculated air density
 }
 
 /*
@@ -341,6 +308,58 @@ Vector3 getDirectionVector(Orientation newOrientation){
 /*
     #########################################################
     #                                                       #
+    #                   TAS CALCULATION                     #
+    #                                                       #
+    #########################################################
+*/
+
+double getTemperatureKelvin(double altitudeMeters){
+    double T0 = 288.15;
+    double lapseRate = 0.0065; // Standart lapse rate (in K/m)
+
+    // calculate temperature in Celsius
+    double TCelsius = T0 - (lapseRate * altitudeMeters);
+
+    // Convert to kelvin and return
+    double TKelvin = TCelsius + 273.15;
+    return TKelvin;
+}
+
+// Function to calculate the pressure at a given altitude
+double getPressureAtAltitude(float altitudeMeters){
+    const float P0 = 101325; // Pressure at sea level in Pascals
+    const float L = 0.0065; // Lapse rate in K/m
+    const float h = altitudeMeters; // meters above sea level
+    const float T0 = 288.15; // Temperature at sea level in Kelvin
+    const float g0 = 9.80665; // Gravity
+    const float M = 0.0289644; // Molar mass of Earth's air in kg/mol
+    const float R = 8.3144598; // Ideal gas constant in J/(mol·K)
+
+    const float exponent = (g0 * M) / (R * L); // Calculate the exponent for the pressure equation
+    const float bracket = (1 - ((L * h)/T0)); // Calculate the bracketed term for the pressure equation
+
+    const float P = P0 * powf(bracket, exponent); // Calculate the pressure at the given altitude
+
+    return P; // Return the calculated pressure
+}
+
+// Calculate True Air Speed (TAS) in m/s
+float calculateTAS(AircraftState *aircraft) {
+    // Compute the magnitude of the velocity vector (IAS)
+    float IAS = calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz);
+    
+    // Get air density at current altitude and at sea level
+    float airDensityCurrent = getAirDensity(aircraft->y);
+    float airDensitySeaLevel = getAirDensity(0);
+    
+    // Correct IAS to get TAS
+    float TAS = IAS / sqrtf(airDensityCurrent / airDensitySeaLevel);
+    return TAS;
+}
+
+/*
+    #########################################################
+    #                                                       #
     #                   HELPER FUNCTIONS                    #
     #                                                       #
     #########################################################
@@ -382,8 +401,22 @@ float convertMsToKmh(float ms){
     return ms * 3.6;
 }
 
-float convertMsToMach(float ms){
-    return ms / 343;
+float calculateSpeedOfSound(float altitude){
+    float gamma = 1.4; // ratio of specific heats for air, aprox 1.4 for dry hair
+    float R = 287.05; // specific gas constant for dry air in J/(kg·K)
+    float T = getTemperatureKelvin(altitude); // temperature in kelvin
+
+    return sqrt(gamma * R * T);
+}
+
+float convertMsToMach(float ms, float altitude){
+    return ms / calculateSpeedOfSound(altitude);
+}
+
+// Function to perform linear interpolation between two points
+float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float upperDensity, float targetAltitude) {
+    float fraction = (targetAltitude - lowerAlt) / (upperAlt - lowerAlt);
+    return lowerDensity + fraction * (upperDensity - lowerDensity);
 }
 
 /*

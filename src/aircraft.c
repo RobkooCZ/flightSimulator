@@ -6,7 +6,7 @@
 void initAircraft(AircraftState *aircraft) {
     // Initialize the aircraft's state with zero values or default values
     aircraft->x = 0.0f;
-    aircraft->y = 1000.0f;  // Start at an altitude (e.g., 1000 meters)
+    aircraft->y = 1000.0f;  // Start at an altitude
     aircraft->z = 0.0f;
     aircraft->vx = 100.0f;  // Set an initial forward velocity (e.g., 100m/s)
     aircraft->vy = 0.0f;
