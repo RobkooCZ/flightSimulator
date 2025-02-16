@@ -67,6 +67,7 @@ float calculateThrust(int thrust, int afterburnerThrust, AircraftState *aircraft
 // Aircraft orientation functions
 Orientation calculateNewOrientation(float deltaTime);
 Vector3 getDirectionVector(Orientation newOrientation);
+void updateVelocity(AircraftState *aircraft, float deltaTime);
 
 // TAS calculation functions (temp, pressure)
 float getTemperatureKelvin(float altitudeMeters);

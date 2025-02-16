@@ -62,12 +62,11 @@ float calculateDotProduct(LAV lav, float vx, float vy, float vz) {
 // Function to calculate the Angle of Attack (AoA)
 float calculateAoA(AircraftState *aircraft) {
     float horizontalSpeed = sqrtf(aircraft->vx * aircraft->vx + aircraft->vz * aircraft->vz);
-    float totalSpeed = calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz);
-    if (totalSpeed < 1e-6f) { // avoid division by zero for very slow speeds
+    if (horizontalSpeed < 1e-6f) { // avoid division by zero for very slow speeds
         return 0.0f;
     }
-    // Use atan2 so that a descending flight (negative vy) gives a positive AoA.
-    return atan2f(-aircraft->vy, horizontalSpeed);
+
+    return aircraft->pitch - atan2f(aircraft->vy, horizontalSpeed);
 }
 
 /*
@@ -306,6 +305,27 @@ Vector3 getDirectionVector(Orientation newOrientation){
     return directionVector;
 }
 
+void updateVelocity(AircraftState *aircraft, float deltaTime){
+    // Get the current speed
+    float speed = calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz);
+
+    // update movement direction
+    Vector3 direction;
+    direction.x = cosf(aircraft->pitch) * cosf(aircraft->yaw);
+    direction.y = sinf(aircraft->pitch);
+    direction.z = cosf(aircraft->pitch) * sinf(aircraft->yaw);
+
+    // apply speed to new direction
+    aircraft->vx = speed * direction.x;
+    aircraft->vy = speed * direction.y;
+    aircraft->vz = speed * direction.z;
+
+    // apply roll effect
+    float rollTurningFactor = 0.5f;
+    aircraft->yaw += sinf(aircraft->roll) * rollTurningFactor * deltaTime;
+}
+
+
 /*
     #########################################################
     #                                                       #
@@ -493,4 +513,7 @@ void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircr
     aircraft->vx += acceleration.x * deltaTime;
     aircraft->vy += acceleration.y * deltaTime;
     aircraft->vz += acceleration.z * deltaTime;
+
+    // --- UPDATE ORIENTATION BASED ON CONTROLS ---
+    updateVelocity(aircraft, deltaTime);
 }

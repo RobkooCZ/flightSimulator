@@ -2,6 +2,18 @@
 
 Every update to this **Flight Simulator** will be documented in this file.
 
+## [Version 1.2.3] - 16.02.2025
+
+## Added
+- Velocity change based on orientation (yaw, pitch, roll)
+
+## Changed
+- Improved AoA calculation, now if you pitch up using controls, you climb steadily
+
+## Fixed
+- Some windows only functions
+- Minor bugs in controls.c
+
 ## [Version 1.2.2] - 16.02.2025
 
 ### Added

@@ -70,15 +70,15 @@ static AircraftControls controls;  // Global controls struct
 
 #ifdef _WIN32
     DWORD WINAPI inputThread(LPVOID lpParam) {
+        (void)lpParam; // unused parameter
 #else
     void *inputThread(void *arg) {
+        (void)arg; // unused parameter
 #endif
-    (void)arg;  // Unused parameter
-
     while (1) {
         #ifdef _WIN32
             if (_kbhit()) {
-                char key = _getch();
+                char key = (char)_getch();
                 adjustValues(key);
             }
             Sleep(10);
@@ -137,12 +137,12 @@ void adjustValues(char key) {
 }
 
 void startControls(void) {
-    pthread_t thread;
     controlsInit();
     
     #ifdef _WIN32
         CreateThread(NULL, 0, inputThread, NULL, 0, NULL);
     #else
+        pthread_t thread;
         pthread_create(&thread, NULL, inputThread, NULL);
     #endif
 }
