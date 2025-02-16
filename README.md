@@ -112,16 +112,16 @@ Ensure you have **MinGW-w64** and **CMake** installed.
 
 1. Download **MinGW-w64** from [mingw-w64.org](https://www.mingw-w64.org/downloads/) and install it.
 2. Add MinGW binaries to **PATH**:
-        ```sh
-        set PATH=C:\path\to\mingw64\bin;%PATH%
-        ```
-        > Note: See [Note 1](#note-1).
+```sh
+set PATH=C:\path\to\mingw64\bin;%PATH%
+```
+> Note: See [Note 1](#note-1).
 3. Download **CMake** from [cmake.org](https://cmake.org/download/) and install it.
 4. Ensure CMake binaries are in **PATH**:
-        ```sh
-        set PATH=C:\path\to\cmake\bin;%PATH%
-        ```
-        > Note: See [Note 1](#note-1).
+```sh
+set PATH=C:\path\to\cmake\bin;%PATH%
+```
+> Note: See [Note 1](#note-1).
 
 Verify installations:
 ```sh
@@ -141,25 +141,25 @@ cmake --version
 
 1. Navigate to the project directory.
 2. Compile the project:
-        ```sh
-        make
-        ```
+```sh
+make
+```
 3. Run the simulator:
-        ```sh
-        ./build/flightSimulator
-        ```
+```sh
+./build/flightSimulator
+```
 
 #### Using CMake
 
 1. Navigate to the project directory.
 2. Compile the project:
-        ```sh
-        cmake -B build && cmake --build build
-        ```
+```sh
+cmake -B build && cmake --build build
+```
 3. Run the simulator:
-        ```sh
-        ./build/flightSimulator
-        ```
+```sh
+./build/flightSimulator
+```
 
 ---
 
@@ -169,29 +169,29 @@ cmake --version
 
 1. Navigate to the project directory.
 2. Compile the project:
-        ```sh
-        cmake -G "MinGW Makefiles" -B build && cmake --build build
-        ```
+```sh
+cmake -G "MinGW Makefiles" -B build && cmake --build build
+```
 3. Run the simulator:
-        ```sh
-        build\flightSimulator.exe
-        ```
+```sh
+build\flightSimulator.exe
+```
 
 #### PowerShell
 
 1. Navigate to the project directory.
 2. Compile the project:
-        ```sh
-        cmake -G "MinGW Makefiles" -B build ; cmake --build build
-        ```
+```sh
+cmake -G "MinGW Makefiles" -B build ; cmake --build build
+```
 3. Run the simulator:
-        ```sh
-        .\build\flightSimulator.exe
-        ```
+```sh
+.\build\flightSimulator.exe
+```
 
 ---
 
 ## Notes
 
 <a name="note-1"></a>
-> Note 1: When modifying the PATH environment variable manually (via System Properties > Environment Variables), ensure you restart your terminal or your computer for the changes to take effect.
+> Note 1: To make these changes permanent, you can add them to your environment variables manually (through System Properties > Environment Variables). If you add it to your PATH manually, make sure you restart your terminal or your computer for the changes to take effect.
