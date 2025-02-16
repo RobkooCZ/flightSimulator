@@ -67,6 +67,7 @@ void displayMenu(Aircraft aircraftList[], int aircraftCount, int selectedIndex){
 
 int selectAircraft(Aircraft aircraftList[], int aircraftCount){
     int selectedIndex = 0; // Initialize the selected index to 0
+    int maxIndex = aircraftCount - 1; // Store the maximum valid index
     char key; // Variable to store the key press
 
     #ifdef _WIN32
@@ -78,10 +79,12 @@ int selectAircraft(Aircraft aircraftList[], int aircraftCount){
                 return selectedIndex; // Return the selected index
             }
             else if(key == 'w' || key == 72){ // 'w' or up arrow key pressed
-                if (selectedIndex > 0) selectedIndex--; // Move selection up
+                if (selectedIndex > 0) 
+                    selectedIndex--; // Move selection up
             }
             else if(key == 's' || key == 80){ // 's' or down arrow key pressed
-                if (selectedIndex < aircraftCount - 1) selectedIndex++; // Move selection down
+                if (selectedIndex < maxIndex) 
+                    selectedIndex++; // Move selection down
             }
         }
     #else
@@ -95,10 +98,12 @@ int selectAircraft(Aircraft aircraftList[], int aircraftCount){
                 return selectedIndex; // Return the selected index
             }
             else if(key == 'w' || key == 'A'){ // 'w' or up arrow key pressed
-                if (selectedIndex > 0) selectedIndex--; // Move selection up
+                if (selectedIndex > 0) 
+                    selectedIndex--; // Move selection up
             }
             else if(key == 's' || key == 'B'){ // 's' or down arrow key pressed
-                if (selectedIndex < aircraftCount - 1) selectedIndex++; // Move selection down
+                if (selectedIndex < maxIndex) 
+                    selectedIndex++; // Move selection down
             }
         }
     #endif
