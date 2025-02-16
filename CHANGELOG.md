@@ -2,6 +2,11 @@
 
 Every update to this **Flight Simulator** will be documented in this file.
 
+## [Version 1.2.3.2] - 16.02.2025
+
+## Fixed
+- cmake for windows flags fix (-fsanitize)
+
 ## [Version 1.2.3.1] - 16.02.2025
 
 ## Fixed
