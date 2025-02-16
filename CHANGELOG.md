@@ -2,6 +2,11 @@
 
 Every update to this **Flight Simulator** will be documented in this file.
 
+## [Version 1.2.3.1] - 16.02.2025
+
+## Fixed
+- minor windows only conversion errors
+
 ## [Version 1.2.3] - 16.02.2025
 
 ## Added

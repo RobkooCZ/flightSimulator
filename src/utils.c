@@ -12,7 +12,7 @@
 
 void sleepMicroseconds(long microseconds) {
     #ifdef _WIN32
-        Sleep(microseconds / 1000);  // Convert to milliseconds
+        Sleep((DWORD)(microseconds / 1000));  // Convert to milliseconds
     #else
         struct timespec req = {0};
         req.tv_sec = microseconds / 1000000;  // Convert to seconds
@@ -24,7 +24,7 @@ void sleepMicroseconds(long microseconds) {
 
 void sleepMilliseconds(int milliseconds) {
     #ifdef _WIN32
-        Sleep(milliseconds);
+        Sleep((DWORD)milliseconds);
     #else
         struct timespec ts;
         ts.tv_sec = milliseconds / 1000;
@@ -44,7 +44,7 @@ long getTimeMicroseconds(void) {
         }
         
         QueryPerformanceCounter(&now);
-        return (now.QuadPart * 1000000) / frequency.QuadPart;
+        return (long)((now.QuadPart * 1000000) / frequency.QuadPart);
     #else
         struct timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);  // Works now with _POSIX_C_SOURCE

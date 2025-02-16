@@ -72,7 +72,7 @@ int selectAircraft(Aircraft aircraftList[], int aircraftCount){
     #ifdef _WIN32
         while (1){
             displayMenu(aircraftList, aircraftCount, selectedIndex); // Display the menu
-            key = _getch(); // Get key press
+            key = (char)_getch(); // Get key press
 
             if (key == '\r'){ // Enter key pressed
                 return selectedIndex; // Return the selected index
