@@ -2,10 +2,15 @@
 
 Every update to this **Flight Simulator** will be documented in this file.
 
+## [Version 1.2.3.3.1] - 16.02.2025
+
+## Fixed
+- strict-overflow error in selectAircraft() fix (attempt 2)
+
 ## [Version 1.2.3.3] - 16.02.2025
 
 ## Fixed
-- strict-overflow error in selectAircraft() fix
+- strict-overflow error in selectAircraft() fix (unsucessful)
 
 ## [Version 1.2.3.2] - 16.02.2025
 

@@ -66,17 +66,17 @@ void displayMenu(Aircraft aircraftList[], int aircraftCount, int selectedIndex){
 }
 
 int selectAircraft(Aircraft aircraftList[], int aircraftCount){
-    int selectedIndex = 0; // Initialize the selected index to 0
-    int maxIndex = aircraftCount - 1; // Store the maximum valid index
-    char key; // Variable to store the key press
+    unsigned int selectedIndex = 0;         // Use unsigned since count is nonnegative
+    unsigned int maxIndex = (unsigned int)aircraftCount - 1; // Maximum valid index
+    char key;                               // Variable to store key press
 
     #ifdef _WIN32
         while (1){
-            displayMenu(aircraftList, aircraftCount, selectedIndex); // Display the menu
+            displayMenu(aircraftList, aircraftCount, (int)selectedIndex); // Display the menu
             key = (char)_getch(); // Get key press
 
             if (key == '\r'){ // Enter key pressed
-                return selectedIndex; // Return the selected index
+                return (int)selectedIndex; // Return the selected index
             }
             else if(key == 'w' || key == 72){ // 'w' or up arrow key pressed
                 if (selectedIndex > 0) 
@@ -90,12 +90,12 @@ int selectAircraft(Aircraft aircraftList[], int aircraftCount){
     #else
         enableRawMode(); // Enable raw mode for terminal input
         while (1){
-            displayMenu(aircraftList, aircraftCount, selectedIndex); // Display the menu
+            displayMenu(aircraftList, aircraftCount, (int)selectedIndex); // Display the menu
             key = getKeyPress(); // Get key press
 
             if (key == '\n'){ // Enter key pressed
                 disableRawMode(); // Disable raw mode
-                return selectedIndex; // Return the selected index
+                return (int)selectedIndex; // Return the selected index
             }
             else if(key == 'w' || key == 'A'){ // 'w' or up arrow key pressed
                 if (selectedIndex > 0) 
