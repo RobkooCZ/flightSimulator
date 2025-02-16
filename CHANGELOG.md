@@ -2,10 +2,15 @@
 
 Every update to this **Flight Simulator** will be documented in this file.
 
+## [Version 1.2.3.4.1] - 16.02.2025
+
+## Fixed
+- "˚" not printing correctly on windows (attempt 2)
+
 ## [Version 1.2.3.4] - 16.02.2025
 
 ## Fixed
-- "˚" not printing correctly on windows
+- "˚" not printing correctly on windows (unsuccessful)
 
 ## [Version 1.2.3.3.1] - 16.02.2025
 

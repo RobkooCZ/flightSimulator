@@ -11,6 +11,7 @@
 
 #ifdef _WIN32 // Windows
     #define CLEAR "cls"
+    #include <windows.h>
 #else // Linux
     #define CLEAR "clear"
 #endif
@@ -20,6 +21,10 @@ int main(void) {
     float deltaTime; // for precision
     float fps;
     AircraftState aircraft;
+
+    #ifdef _WIN32 // for printing out "°" on windows
+        SetConsoleOutputCP(CP_UTF8);
+    #endif
 
     initAircraft(&aircraft);
 
