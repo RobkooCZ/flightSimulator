@@ -1,5 +1,6 @@
 #include "physics.h"
 #include "controls.h"
+#include "weather.h"
 
 #include <math.h>
 #include <stdbool.h>
@@ -227,10 +228,8 @@ float calculateTotalDragCoefficient(float inducedDrag){
     return C_D0 + inducedDrag;
 }
 
-float calculateDragForce(float dragCoefficient, float airDensity, AircraftState *aircraft, float wingArea) {
-    float speedSquared = aircraft->vx * aircraft->vx + 
-                         aircraft->vy * aircraft->vy + 
-                         aircraft->vz * aircraft->vz;
+float calculateDragForce(float dragCoefficient, float airDensity, float relativeSpeed, float wingArea) {
+    float speedSquared = relativeSpeed * relativeSpeed;
     if (speedSquared < 0.0001f) return 0.0f; // Avoid division by zero
 
     return 0.5f * dragCoefficient * airDensity * wingArea * speedSquared;
@@ -410,6 +409,16 @@ Vector3 getUpVector(AircraftState *aircraft) {
     return up;
 }
 
+Vector3 getUnitVectorFromVector(Vector3 vector) {
+    float magnitude = calculateMagnitude(vector.x, vector.y, vector.z);
+    if (magnitude < 0.0001f) { // Prevent division by zero
+        return (Vector3){0.0f, 0.0f, 0.0f}; 
+    }
+    return (Vector3){ vector.x / magnitude, 
+                      vector.y / magnitude, 
+                      vector.z / magnitude };
+}
+
 float convertRadiansToDeg(float radians){
     return radians * (180.0f / PI);
 }
@@ -449,7 +458,7 @@ float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float uppe
 */
 
 // function to update the physics of the aircraft
-void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircraftData) {
+void updatePhysics(AircraftState *aircraft, float deltaTime, float simulationTime, AircraftData *aircraftData) {
     // Use aircraftData values for mass and wing area
     float mass = aircraftData->mass;
     float wingArea = aircraftData->wingArea;
@@ -462,21 +471,33 @@ void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircr
     float liftCoefficient = calculateLiftCoefficient(AoA);
     Vector3 liftForce = computeLiftForceComponents(aircraft, wingArea, liftCoefficient);
 
+    // --- WIND & RELATIVE VELOCITY ---
+    // Calculate wind vector based on current altitude and simulation time
+    Vector3 wind = getWindVector(aircraft->y, simulationTime);
+    // Compute relative velocity (aircraft velocity relative to the moving air)
+    Vector3 relativeVelocity = {
+        aircraft->vx - wind.x,
+        aircraft->vy - wind.y,
+        aircraft->vz - wind.z
+    };
+
     // --- DRAG ---
     // Calculate aspect ratio using wing span from aircraftData 
     float aspectRatio = (aircraftData->wingSpan * aircraftData->wingSpan) / wingArea;
     float inducedDrag = calculateInducedDrag(liftCoefficient, aspectRatio);
     float dragCoefficient = calculateTotalDragCoefficient(inducedDrag);
-    float dragForceMag = calculateDragForce(dragCoefficient, getAirDensity(aircraft->y), aircraft, wingArea);
-    Vector3 velocityUnit = getUnitVector(aircraft);
+    // Use the magnitude of the relative velocity for drag force calculation
+    float relativeSpeed = calculateMagnitude(relativeVelocity.x, relativeVelocity.y, relativeVelocity.z);
+    float dragForceMag = calculateDragForce(dragCoefficient, getAirDensity(aircraft->y), relativeSpeed, wingArea);
+    // Compute unit vector from the relative velocity vector
+    Vector3 relativeVelocityUnit = getUnitVectorFromVector(relativeVelocity);
     Vector3 dragForce = {
-        -velocityUnit.x * dragForceMag,
-        -velocityUnit.y * dragForceMag,
-        -velocityUnit.z * dragForceMag
+        -relativeVelocityUnit.x * dragForceMag,
+        -relativeVelocityUnit.y * dragForceMag,
+        -relativeVelocityUnit.z * dragForceMag
     };
 
     // --- THRUST ---
-    // Pass in aircraftData fields for thrust values and maxSpeed
     float thrustMagnitude = calculateThrust(
         aircraftData->thrust, 
         aircraftData->afterburnerThrust, 
@@ -484,22 +505,17 @@ void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircr
         aircraftData->maxSpeed, 
         (int)(aircraft->controls.throttle * 100)
     );
-
     Vector3 thrustForce = {
         thrustMagnitude * cosf(aircraft->pitch) * cosf(aircraft->yaw),
         thrustMagnitude * sinf(aircraft->pitch),
         thrustMagnitude * cosf(aircraft->pitch) * sinf(aircraft->yaw)
     };
 
-    // --- VERTICAL DAMPING ---
-    // const float VERTICAL_DAMPING = 2000.0f;  // Adjust this constant if necessary
-    // Vector3 dampingForce = { 0, -VERTICAL_DAMPING * aircraft->vy, 0 };
-
     // --- SUM ALL FORCES ---
     Vector3 netForce = {
-        gravityForce.x + liftForce.x + dragForce.x + thrustForce.x,// + dampingForce.x,
-        gravityForce.y + liftForce.y + dragForce.y + thrustForce.y,// + dampingForce.y,
-        gravityForce.z + liftForce.z + dragForce.z + thrustForce.z// + dampingForce.z
+        gravityForce.x + liftForce.x + dragForce.x + thrustForce.x,
+        gravityForce.y + liftForce.y + dragForce.y + thrustForce.y,
+        gravityForce.z + liftForce.z + dragForce.z + thrustForce.z
     };
 
     // --- COMPUTE ACCELERATION ---

@@ -7,6 +7,6 @@
 #include "aircraftData.h"
 
 // Function to print the aircraft information
-void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps);
+void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps, float simulatedTime);
 
 #endif // TEXT_RENDERER_H

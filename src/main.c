@@ -21,6 +21,7 @@ int main(void) {
     float deltaTime; // for precision
     float fps;
     AircraftState aircraft;
+    float simulationTime = 0.0f; // to track how long the simulation has been running
 
     #ifdef _WIN32 // for printing out "°" on windows
         SetConsoleOutputCP(CP_UTF8);
@@ -65,6 +66,7 @@ int main(void) {
 
         // Calculate delta time
         deltaTime = (float)((double)(startTime - previousTime) / 1000000.0);
+        simulationTime += deltaTime;
         previousTime = startTime;
 
         // Calculate frames per second
@@ -83,13 +85,13 @@ int main(void) {
         // adjustValues(key, aircraft.controls, &aircraft);
 
         // // 2. Update physics (velocity, acceleration, forces)
-        updatePhysics(&aircraft, deltaTime, &aircraftData);
+        updatePhysics(&aircraft, deltaTime, simulationTime, &aircraftData);
         
         // Update aircraft state (position, orientation)
         updateAircraftState(&aircraft, deltaTime);
 
         // // 3. Render (text for now)
-        printInfo(&aircraft, &aircraftData, fps);
+        printInfo(&aircraft, &aircraftData, fps, simulationTime);
 
         // 4. Frame rate control
         elapsedTime = getTimeMicroseconds() - startTime;

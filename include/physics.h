@@ -59,7 +59,7 @@ Vector3 computeLiftForceComponents(AircraftState *aircraft, float wingArea, floa
 float calculateAspectRatio(float wingspan, float wingArea);
 float calculateInducedDrag(float liftCoefficient, float aspectRatio);
 float calculateTotalDragCoefficient(float inducedDrag);
-float calculateDragForce(float dragCoefficient, float airDensity, AircraftState *aircraft, float wingArea);
+float calculateDragForce(float dragCoefficient, float airDensity, float relativeSpeed, float wingArea);
 
 // thrust calculation functions
 float calculateThrust(int thrust, int afterburnerThrust, AircraftState *aircraft, float maxSpeed, int percentControl);
@@ -77,6 +77,7 @@ float calculateTAS(AircraftState *aircraft);
 // Helper functions
 Vector3 vectorCross(Vector3 a, Vector3 b);
 Vector3 getUpVector(AircraftState *aircraft);
+Vector3 getUnitVectorFromVector(Vector3 vector);
 float convertRadiansToDeg(float radians);
 float convertKmhToMs(float kmh);
 float convertMsToKmh(float ms);
@@ -85,6 +86,6 @@ float convertMsToMach(float ms, float altitude);
 float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float upperDensity, float targetAltitude);
 
 // physics update
-void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircraftData);
+void updatePhysics(AircraftState *aircraft, float deltaTime, float simulationTime, AircraftData *aircraftData);
 
 #endif // PHYSICS_H
