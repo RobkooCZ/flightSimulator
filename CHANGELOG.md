@@ -2,15 +2,20 @@
 
 Every update to this **Flight Simulator** will be documented in this file.
 
+## [Version 1.2.3.4] - 16.02.2025
+
+## Fixed
+- "˚" not printing correctly on windows
+
 ## [Version 1.2.3.3.1] - 16.02.2025
 
 ## Fixed
-- strict-overflow error in selectAircraft() fix (attempt 2)
+- strict-overflow error in selectAircraft() fix (attempt 2 (successful))
 
 ## [Version 1.2.3.3] - 16.02.2025
 
 ## Fixed
-- strict-overflow error in selectAircraft() fix (unsucessful)
+- strict-overflow error in selectAircraft() fix (unsuccessful)
 
 ## [Version 1.2.3.2] - 16.02.2025
 

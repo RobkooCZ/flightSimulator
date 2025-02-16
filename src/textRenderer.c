@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define DEGREE_ASCII_ESCAPE_CODE "\u00B0"
+
 void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps){
     printf("\033[H"); // ASCII escape code to avoid flickering
 
@@ -46,11 +48,11 @@ void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps){
     printf("\nVY: %.2f  ", aircraft->vy);
     printf("\nVZ: %.2f  ", aircraft->vz);
 
-    printf("\n\nYaw: %.2f˚  ", convertRadiansToDeg(aircraft->yaw));
-    printf("\nPitch: %.2f˚  ", convertRadiansToDeg(aircraft->pitch));
-    printf("\nRoll: %.2f˚  ", convertRadiansToDeg(aircraft->roll));
+    printf("\n\nYaw: %.2f" DEGREE_ASCII_ESCAPE_CODE "  ", convertRadiansToDeg(aircraft->yaw));
+    printf("\nPitch: %.2f" DEGREE_ASCII_ESCAPE_CODE "  ", convertRadiansToDeg(aircraft->pitch));
+    printf("\nRoll: %.2f" DEGREE_ASCII_ESCAPE_CODE "  ", convertRadiansToDeg(aircraft->roll));
 
-    printf("\n\nAoA: %.2f°  ", convertRadiansToDeg(calculateAoA(aircraft)));
+    printf("\n\nAoA: %.2f" DEGREE_ASCII_ESCAPE_CODE "  ", convertRadiansToDeg(calculateAoA(aircraft)));
     printf("\nLift: %.2fN  ", calculateLift(aircraft, aircraftData->wingArea));
 
     fflush(stdout);
