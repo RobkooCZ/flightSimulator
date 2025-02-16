@@ -27,7 +27,7 @@ void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps){
         printf("\nExpected engine output: %dN  ", aircraftData->afterburnerThrust);
     }
     else{
-        printf("\nExpected engine output: %.0fN      ", aircraftData->thrust * aircraft->controls.throttle);
+        printf("\nExpected engine output: %.0fN      ", (float)aircraftData->thrust * aircraft->controls.throttle);
     }
 
     printf("\nActual engine output: %.0fN       ", calculateThrust(
@@ -35,7 +35,7 @@ void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps){
         aircraftData->afterburnerThrust, 
         aircraft, 
         aircraftData->maxSpeed, 
-        aircraft->controls.throttle * 100
+        (int)(aircraft->controls.throttle * 100)
     ));
 
     printf("\n\nX: %.2f  ", aircraft->x);
@@ -51,7 +51,7 @@ void printInfo(AircraftState *aircraft, AircraftData *aircraftData, float fps){
     printf("\nRoll: %.2f˚  ", convertRadiansToDeg(aircraft->roll));
 
     printf("\n\nAoA: %.2f°  ", convertRadiansToDeg(calculateAoA(aircraft)));
-    printf("\nLift: %.2fN  ", calculateLift(aircraft));
+    printf("\nLift: %.2fN  ", calculateLift(aircraft, aircraftData->wingArea));
 
     fflush(stdout);
 }

@@ -2,9 +2,9 @@
 #define PHYSICS_H
 
 #define GRAVITY 9.81f
-#define PI 3.14159265358979323846
-#define C_D0 0.02 // estimation of the zero lift drag for a jet fighter
-#define OEF 0.8 // Oswald Efficiency Factor (~0.8 for a jet)
+#define PI 3.14159265358979323846f
+#define C_D0 0.02f // estimation of the zero lift drag for a jet fighter
+#define OEF 0.8f // Oswald Efficiency Factor (~0.8 for a jet)
 
 #include "aircraftData.h"
 #include "controls.h"
@@ -45,7 +45,7 @@ float calculateAoA(AircraftState *aircraft);
 
 // Lift calculation functions 
 float calculateLiftCoefficient(float AoA); // simplified coefficient calculation
-float calculateLift(AircraftState *aircraft);
+float calculateLift(AircraftState *aircraft, float wingArea);
 float calculateAy(float lift, float mass);
 
 // LIft direction functions
@@ -62,15 +62,15 @@ float calculateTotalDragCoefficient(float inducedDrag);
 float calculateDragForce(float dragCoefficient, float airDensity, AircraftState *aircraft, float wingArea);
 
 // thrust calculation functions
-float calculateThrust(float thrust, float afterburnerThrust, AircraftState *aircraft, float maxSpeed, int percentControl);
+float calculateThrust(int thrust, int afterburnerThrust, AircraftState *aircraft, float maxSpeed, int percentControl);
 
 // Aircraft orientation functions
 Orientation calculateNewOrientation(float deltaTime);
 Vector3 getDirectionVector(Orientation newOrientation);
 
 // TAS calculation functions (temp, pressure)
-double getTemperatureKelvin(double altitudeMeters);
-double getPressureAtAltitude(float altitudeMeters);
+float getTemperatureKelvin(float altitudeMeters);
+float getPressureAtAltitude(float altitudeMeters);
 float calculateTAS(AircraftState *aircraft);
 
 // Helper functions

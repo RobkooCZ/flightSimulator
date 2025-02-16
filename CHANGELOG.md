@@ -2,6 +2,20 @@
 
 Every update to this **Flight Simulator** will be documented in this file.
 
+## [Version 1.2.2] - 16.02.2025
+
+### Added
+- windows compilation support using CMake
+
+### Changed
+- the compilation flags are now much stricter
+- Hugely improved the README.md file
+
+### Fixed
+- Many conversion issues that caused precision problems
+- Static wing area in calculateLift() function changed to the selected aircraft's wing area
+- other minor warnings that were raised due to the stricter compiler
+
 ## [Version 1.2.1] - 15.02.2025
 
 ### Added

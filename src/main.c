@@ -19,7 +19,6 @@ int main(void) {
     long startTime, elapsedTime, previousTime;
     float deltaTime; // for precision
     float fps;
-    char key;
     AircraftState aircraft;
 
     initAircraft(&aircraft);
@@ -60,11 +59,11 @@ int main(void) {
         startTime = getTimeMicroseconds();
 
         // Calculate delta time
-        deltaTime = (startTime - previousTime) / 1000000.0;
+        deltaTime = (float)((double)(startTime - previousTime) / 1000000.0);
         previousTime = startTime;
 
         // Calculate frames per second
-        fps = 1.0 / deltaTime;
+        fps = 1.0f / deltaTime;
 
         // PSEUDOCODE
         // // 1. Process input (e.g., throttle, controls)

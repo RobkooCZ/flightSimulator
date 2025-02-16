@@ -17,7 +17,7 @@ void initAircraft(AircraftState *aircraft) {
     aircraft->hasAfterburner = false; // default false
 
     // Initialize controls
-    controlsInit(&aircraft->controls);
+    controlsInit();
 }
 
 void updateAircraftState(AircraftState *aircraft, float deltaTime) {

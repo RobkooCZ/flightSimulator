@@ -34,7 +34,7 @@ void sleepMilliseconds(int milliseconds) {
 }
 
 // Cross-platform high-resolution timer
-long getTimeMicroseconds() {
+long getTimeMicroseconds(void) {
     #ifdef _WIN32
         static LARGE_INTEGER frequency;
         LARGE_INTEGER now;

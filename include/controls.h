@@ -44,8 +44,8 @@ typedef struct AircraftControls {
 
     // ----- INPUT SYSTEM -----
     void enableRawMode(void);
-    void disableRawMode();
-    char getKeyPress();
+    void disableRawMode(void);
+    char getKeyPress(void);
 
     // ----- INPUT HANDLING THREAD -----
     void *inputThread(void *arg);
@@ -53,9 +53,9 @@ typedef struct AircraftControls {
 #endif
 
 // ----- CONTROLS & ADJUSTEMENT -----
-void controlsInit();
+void controlsInit(void);
 void adjustValues(char key);
-void startControls();
-AircraftControls *getControls();
+void startControls(void);
+AircraftControls *getControls(void);
 
 #endif // CONTROLS_H

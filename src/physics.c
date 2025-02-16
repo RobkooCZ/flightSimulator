@@ -16,7 +16,7 @@
 // Function to get the air density at a given altitude
 float getAirDensity(float altitude) {
     const float P = getPressureAtAltitude(altitude); // Pressure at the given altitude
-    const float R = 287.05; // Specific gas constant for dry air in J/(kg·K)
+    const float R = 287.05f; // Specific gas constant for dry air in J/(kg·K)
     const float T = getTemperatureKelvin(altitude); // Temperature at the given altitude
 
     const float p = P / (R * T); // Calculate the air density at the given altitude
@@ -34,7 +34,7 @@ float getAirDensity(float altitude) {
 */
 
 float convertDegToRadians(float degrees){
-    return degrees * (PI / 180.0);
+    return degrees * (PI / 180.0f);
 }
 
 // Function to calculate the longitudinal axis vector based on pitch and yaw
@@ -43,15 +43,15 @@ LAV calculateLAV(AircraftState *aircraft) {
     float yawRad = convertDegToRadians(aircraft->yaw);      // Convert yaw to radians
 
     LAV lav;
-    lav.lx = cos(pitchRad) * cos(yawRad);  // X component of LAV
-    lav.ly = cos(pitchRad) * sin(yawRad);  // Y component of LAV
-    lav.lz = sin(pitchRad);                // Z component of LAV
+    lav.lx = cosf(pitchRad) * cosf(yawRad);  // X component of LAV
+    lav.ly = cosf(pitchRad) * sinf(yawRad);  // Y component of LAV
+    lav.lz = sinf(pitchRad);                 // Z component of LAV
     return lav;
 }
 
 // Function to calculate the magnitude of a vector
 float calculateMagnitude(float x, float y, float z) {
-    return sqrt(x * x + y * y + z * z);
+    return sqrtf(x * x + y * y + z * z);
 }
 
 // Function to calculate the dot product between velocity and longitudinal axis vectors
@@ -81,15 +81,15 @@ float calculateAoA(AircraftState *aircraft) {
 
 float calculateLiftCoefficient(float AoA) {
     const float cl0 = 0.36f;      // Baseline lift coefficient for zero (relative) AoA (accounting for wing incidence)
-    const float cl_alpha = 2 * PI; // Lift curve slope (per radian)
+    const float cl_alpha = 2.0f * PI; // Lift curve slope (per radian)
     return cl0 + cl_alpha * AoA;
 }
 
-float calculateLift(AircraftState *aircraft) {
+float calculateLift(AircraftState *aircraft, float wingArea) {
     // L = 0.5 * rho * V^2 * S * C_L
     float V = calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz);
     float rho = getAirDensity(aircraft->y);  // altitude in meters
-    float S = 24.15; // wing area for J29F (static value)
+    float S = wingArea; // wing area for the plane (in m^2)
     // Use the new AoA directly from the aircraft state.
     float AoA = calculateAoA(aircraft);
     float C_L = calculateLiftCoefficient(AoA);
@@ -130,9 +130,9 @@ Vector3 rotateAroundVector(Vector3 V, Vector3 K, float theta) {
     float dot = V.x * K.x + V.y * K.y + V.z * K.z;
 
     // Apply Rodrigues' rotation formula
-    rotated.x = V.x * cos(theta) + cross.x * sin(theta) + K.x * dot * (1 - cos(theta));
-    rotated.y = V.y * cos(theta) + cross.y * sin(theta) + K.y * dot * (1 - cos(theta));
-    rotated.z = V.z * cos(theta) + cross.z * sin(theta) + K.z * dot * (1 - cos(theta));
+    rotated.x = V.x * cosf(theta) + cross.x * sinf(theta) + K.x * dot * (1 - cosf(theta));
+    rotated.y = V.y * cosf(theta) + cross.y * sinf(theta) + K.y * dot * (1 - cosf(theta));
+    rotated.z = V.z * cosf(theta) + cross.z * sinf(theta) + K.z * dot * (1 - cosf(theta));
 
     return rotated;
 }
@@ -141,9 +141,9 @@ Vector3 getRightWingDirection(AircraftState *aircraft){
     Vector3 wingRight;
 
     // Base right-wing direction (ignoring roll)
-    wingRight.x = cos(aircraft->yaw);
+    wingRight.x = cosf(aircraft->yaw);
     wingRight.y = 0;
-    wingRight.z = -sin(aircraft->yaw);
+    wingRight.z = -sinf(aircraft->yaw);
 
     // Get unit velocity vector (Vunit)
     Vector3 Vunit = getUnitVector(aircraft);
@@ -245,14 +245,15 @@ float calculateDragForce(float dragCoefficient, float airDensity, AircraftState 
     #########################################################
 */
 
-float calculateThrust(float thrust, float afterburnerThrust, AircraftState *aircraft, float maxSpeed, int percentControl){
-    float usedThrust;
+float calculateThrust(int thrust, int afterburnerThrust, AircraftState *aircraft, float maxSpeed, int percentControl){
+    int usedThrust;
     bool afterBurnerOn;
 
     if (percentControl > 100){
         afterBurnerOn = true;
         percentControl = 100; // set to 100 so in later calculations its not > 100
-    }else{
+    }
+    else{
         afterBurnerOn = false;
     }
 
@@ -267,9 +268,9 @@ float calculateThrust(float thrust, float afterburnerThrust, AircraftState *airc
     float airDensityAtSeaLevel = getAirDensity(0);
     float currentSpeed = calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz);
 
-    float calculatedThrust = usedThrust * (airDensityAtCurrentAltitude/airDensityAtSeaLevel) * (1 + 0.2 * (currentSpeed/maxSpeed));
+    float calculatedThrust = (float)usedThrust * (airDensityAtCurrentAltitude/airDensityAtSeaLevel) * (1.0f + 0.2f * (currentSpeed/maxSpeed));
 
-    calculatedThrust = ((float)percentControl/100) * calculatedThrust; // apply the user control to the thrust
+    calculatedThrust = ((float)percentControl/100.0f) * calculatedThrust; // apply the user control to the thrust
 
     return calculatedThrust;
 }
@@ -298,9 +299,9 @@ Orientation calculateNewOrientation(float deltaTime){
 Vector3 getDirectionVector(Orientation newOrientation){
     Vector3 directionVector;
 
-    directionVector.x = cos(newOrientation.pitch) * cos(newOrientation.yaw);
-    directionVector.y = sin(newOrientation.pitch);
-    directionVector.z = cos(newOrientation.pitch) * sin(newOrientation.yaw);
+    directionVector.x = cosf(newOrientation.pitch) * cosf(newOrientation.yaw);
+    directionVector.y = sinf(newOrientation.pitch);
+    directionVector.z = cosf(newOrientation.pitch) * sinf(newOrientation.yaw);
 
     return directionVector;
 }
@@ -313,27 +314,27 @@ Vector3 getDirectionVector(Orientation newOrientation){
     #########################################################
 */
 
-double getTemperatureKelvin(double altitudeMeters){
-    double T0 = 288.15;
-    double lapseRate = 0.0065; // Standart lapse rate (in K/m)
+float getTemperatureKelvin(float altitudeMeters){
+    float T0 = 288.15f; // Standart temperature at sea level (in K)
+    float lapseRate = 0.0065f; // Standart lapse rate (in K/m)
 
     // calculate temperature in Celsius
-    double TCelsius = T0 - (lapseRate * altitudeMeters);
+    float TCelsius = T0 - (lapseRate * altitudeMeters);
 
     // Convert to kelvin and return
-    double TKelvin = TCelsius + 273.15;
+    float TKelvin = TCelsius + 273.15f;
     return TKelvin;
 }
 
 // Function to calculate the pressure at a given altitude
-double getPressureAtAltitude(float altitudeMeters){
+float getPressureAtAltitude(float altitudeMeters){
     const float P0 = 101325; // Pressure at sea level in Pascals
-    const float L = 0.0065; // Lapse rate in K/m
+    const float L = 0.0065f; // Lapse rate in K/m
     const float h = altitudeMeters; // meters above sea level
-    const float T0 = 288.15; // Temperature at sea level in Kelvin
-    const float g0 = 9.80665; // Gravity
-    const float M = 0.0289644; // Molar mass of Earth's air in kg/mol
-    const float R = 8.3144598; // Ideal gas constant in J/(mol·K)
+    const float T0 = 288.15f; // Temperature at sea level in Kelvin
+    const float g0 = 9.80665f; // Gravity
+    const float M = 0.0289644f; // Molar mass of Earth's air in kg/mol
+    const float R = 8.3144598f; // Ideal gas constant in J/(mol·K)
 
     const float exponent = (g0 * M) / (R * L); // Calculate the exponent for the pressure equation
     const float bracket = (1 - ((L * h)/T0)); // Calculate the bracketed term for the pressure equation
@@ -390,23 +391,23 @@ Vector3 getUpVector(AircraftState *aircraft) {
 }
 
 float convertRadiansToDeg(float radians){
-    return radians * (180.0 / PI);
+    return radians * (180.0f / PI);
 }
 
 float convertKmhToMs(float kmh){
-    return kmh / 3.6;
+    return kmh / 3.6f;
 }
 
 float convertMsToKmh(float ms){
-    return ms * 3.6;
+    return ms * 3.6f;
 }
 
 float calculateSpeedOfSound(float altitude){
-    float gamma = 1.4; // ratio of specific heats for air, aprox 1.4 for dry hair
-    float R = 287.05; // specific gas constant for dry air in J/(kg·K)
+    float gamma = 1.4f; // ratio of specific heats for air, aprox 1.4 for dry hair
+    float R = 287.05f; // specific gas constant for dry air in J/(kg·K)
     float T = getTemperatureKelvin(altitude); // temperature in kelvin
 
-    return sqrt(gamma * R * T);
+    return sqrtf(gamma * R * T);
 }
 
 float convertMsToMach(float ms, float altitude){
@@ -461,13 +462,13 @@ void updatePhysics(AircraftState *aircraft, float deltaTime, AircraftData *aircr
         aircraftData->afterburnerThrust, 
         aircraft, 
         aircraftData->maxSpeed, 
-        aircraft->controls.throttle * 100
+        (int)(aircraft->controls.throttle * 100)
     );
 
     Vector3 thrustForce = {
-        thrustMagnitude * cos(aircraft->pitch) * cos(aircraft->yaw),
-        thrustMagnitude * sin(aircraft->pitch),
-        thrustMagnitude * cos(aircraft->pitch) * sin(aircraft->yaw)
+        thrustMagnitude * cosf(aircraft->pitch) * cosf(aircraft->yaw),
+        thrustMagnitude * sinf(aircraft->pitch),
+        thrustMagnitude * cosf(aircraft->pitch) * sinf(aircraft->yaw)
     };
 
     // --- VERTICAL DAMPING ---

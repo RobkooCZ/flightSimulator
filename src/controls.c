@@ -1,6 +1,7 @@
 #include "controls.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 static AircraftControls controls;  // Global controls struct
 
@@ -16,18 +17,18 @@ static AircraftControls controls;  // Global controls struct
     void enableRawMode(void) {
         struct termios term;
         tcgetattr(STDIN_FILENO, &term);
-        term.c_lflag &= ~(ICANON | ECHO);
+        term.c_lflag &= (tcflag_t)~(ICANON | ECHO);
         tcsetattr(STDIN_FILENO, TCSANOW, &term);
     }
 
-    void disableRawMode() {
+    void disableRawMode(void) {
         struct termios term;
         tcgetattr(STDIN_FILENO, &term);
         term.c_lflag |= (ICANON | ECHO);
         tcsetattr(STDIN_FILENO, TCSANOW, &term);
     }
 
-    char getKeyPress() {
+    char getKeyPress(void) {
         char key;
         read(STDIN_FILENO, &key, 1);
         return key;
@@ -40,7 +41,7 @@ static AircraftControls controls;  // Global controls struct
 
         tcgetattr(STDIN_FILENO, &oldt);
         newt = oldt;
-        newt.c_lflag &= ~(ICANON | ECHO);
+        newt.c_lflag &= (tcflag_t)~(ICANON | ECHO);
         tcsetattr(STDIN_FILENO, TCSANOW, &newt);
         oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
         fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
@@ -83,7 +84,7 @@ static AircraftControls controls;  // Global controls struct
             Sleep(10);
         #else
             if (kbhit()) {
-                char key = getchar();
+                char key = (char)getchar();
                 adjustValues(key);
             }
             
@@ -101,7 +102,7 @@ static AircraftControls controls;  // Global controls struct
     ########################################################
 */
 
-void controlsInit() {
+void controlsInit(void) {
     controls.throttle = 1.0;
     controls.afterburner = false;
     controls.yawRate = 0.5;
@@ -125,15 +126,17 @@ void adjustValues(char key) {
         case 'e': controls.roll += sensitivity; break;  // Roll right
         case 'z': controls.throttle += throttleStep; break; // Increase throttle
         case 'x': controls.throttle -= throttleStep; break; // Decrease throttle
+        default: break;
     }
 
     // Clamp throttle and set afterburner flag
     if (controls.throttle < 0) controls.throttle = 0;
-    if (controls.throttle > 1.01) controls.throttle = 1.01;
-    controls.afterburner = (controls.throttle == 1.01);
+    if (controls.throttle > 1.01f) controls.throttle = 1.01f;
+    float tolerance = 0.0001f;
+    controls.afterburner = (fabs(controls.throttle - 1.01f) < tolerance);
 }
 
-void startControls() {
+void startControls(void) {
     pthread_t thread;
     controlsInit();
     
@@ -144,6 +147,6 @@ void startControls() {
     #endif
 }
 
-AircraftControls *getControls() {
+AircraftControls *getControls(void) {
     return &controls;
 }

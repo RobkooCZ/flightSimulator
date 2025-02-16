@@ -4,6 +4,8 @@
 
 void getAircraftDataByName(const char *filename, const char *aircraftName, AircraftData *aircraftData) {
     FILE *file = fopen(filename, "r");
+    const char *DELIMITER = "|";
+
     if (!file) {
         printf("Error: Could not open data file %s\n", filename);
         return;
@@ -25,7 +27,7 @@ void getAircraftDataByName(const char *filename, const char *aircraftName, Aircr
         }
         
         // Tokenize the line using "|" separator
-        char *token = strtok(line, "|");
+        char *token = strtok(line, DELIMITER);
         if (token == NULL) 
             continue;
         
@@ -35,47 +37,47 @@ void getAircraftDataByName(const char *filename, const char *aircraftName, Aircr
             strncpy(aircraftData->name, token, MAX_NAME_LENGTH - 1);
             aircraftData->name[MAX_NAME_LENGTH - 1] = '\0';
             
-            token = strtok(NULL, "|");
-            if (token) aircraftData->mass = atof(token);
+            token = strtok(NULL, DELIMITER);
+            if (token) aircraftData->mass = (float)atof(token);
             
-            token = strtok(NULL, "|");
-            if (token) aircraftData->wingArea = atof(token);
+            token = strtok(NULL, DELIMITER);
+            if (token) aircraftData->wingArea = (float)atof(token);
             
-            token = strtok(NULL, "|");
-            if (token) aircraftData->wingSpan = atof(token);
+            token = strtok(NULL, DELIMITER);
+            if (token) aircraftData->wingSpan = (float)atof(token);
             
-            token = strtok(NULL, "|");
-            if (token) aircraftData->sweepAngle = atof(token);
+            token = strtok(NULL, DELIMITER);
+            if (token) aircraftData->sweepAngle = (float)atof(token);
             
-            token = strtok(NULL, "|");
+            token = strtok(NULL, DELIMITER);
             if (token) aircraftData->thrust = atoi(token);
             
-            token = strtok(NULL, "|");
+            token = strtok(NULL, DELIMITER);
             if (token) aircraftData->afterburnerThrust = atoi(token);
             
-            token = strtok(NULL, "|");
-            if (token) aircraftData->maxSpeed = atof(token);
+            token = strtok(NULL, DELIMITER);
+            if (token) aircraftData->maxSpeed = (float)atof(token);
             
-            token = strtok(NULL, "|");
-            if (token) aircraftData->stallSpeed = atof(token);
+            token = strtok(NULL, DELIMITER);
+            if (token) aircraftData->stallSpeed = (float)atof(token);
             
-            token = strtok(NULL, "|");
+            token = strtok(NULL, DELIMITER);
             if (token) aircraftData->serviceCeiling = atoi(token);
             
-            token = strtok(NULL, "|");
+            token = strtok(NULL, DELIMITER);
             if (token) aircraftData->fuelCapacity = atoi(token);
             
-            token = strtok(NULL, "|");
-            if (token) aircraftData->cd0 = atof(token);
+            token = strtok(NULL, DELIMITER);
+            if (token) aircraftData->cd0 = (float)atof(token);
             
-            token = strtok(NULL, "|");
-            if (token) aircraftData->maxAoA = atof(token);
+            token = strtok(NULL, DELIMITER);
+            if (token) aircraftData->maxAoA = (float)atof(token);
             
-            token = strtok(NULL, "|");
-            if (token) aircraftData->fuelBurn = atof(token);
+            token = strtok(NULL, DELIMITER);
+            if (token) aircraftData->fuelBurn = (float)atof(token);
             
-            token = strtok(NULL, "|");
-            if (token) aircraftData->afterburnerFuelBurn = atof(token);
+            token = strtok(NULL, DELIMITER);
+            if (token) aircraftData->afterburnerFuelBurn = (float)atof(token);
             
             break;
         }

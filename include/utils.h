@@ -7,6 +7,6 @@
 // Function declarations
 void sleepMicroseconds(long microseconds);
 void sleepMilliseconds(int milliseconds);
-long getTimeMicroseconds();
+long getTimeMicroseconds(void);
 
 #endif // UTILS_H
