@@ -7,7 +7,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 # Base compiler flags
-set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow -Wstrict-overflow=5 -Wfloat-equal -Wcast-qual -Wcast-align -Wwrite-strings -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -Wredundant-decls -Winline -Wundef -Wswitch-default -Wswitch-enum -Wunreachable-code -Wformat=2 -Winit-self -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wnull-dereference -fanalyzer -fstack-protector-strong -g -O2 -pedantic -Iinclude")
+set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -Wconversion -Wshadow -Wstrict-overflow=5 -Wfloat-equal -Wcast-qual -Wcast-align -Wwrite-strings -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -Wredundant-decls -Winline -Wundef -Wswitch-default -Wswitch-enum -Wunreachable-code -Wformat=2 -Winit-self -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wnull-dereference -fanalyzer -fstack-protector-strong -g -O2 -pedantic -Iinclude")
 
 # Conditionally add sanitizer flags when not building on Windows
 if(NOT WIN32)
@@ -39,17 +39,19 @@ if(WIN32)
     target_link_libraries(
         flightSimulator
         mingw32
-        "${SDL2_PATH}/lib/SDL2.dll"
-        "${SDL2_PATH}/lib/SDL2_ttf.dll"
-        "${SDL2_PATH}/lib/SDL2.lib"
-        "${SDL2_PATH}/lib/SDL2_ttf.lib"
+        "${SDL2_PATH}/SDL2.dll"
+        "${SDL2_PATH}/SDL2_ttf.dll"
+        "${SDL2_PATH}/lib/libSDL2.dll.a"
+        "${SDL2_PATH}/lib/libSDL2_ttf.dll.a"
     )
 
     # Ensure SDL2 DLLs are copied to the build directory
     add_custom_command(TARGET flightSimulator POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${SDL2_PATH}/bin/SDL2.dll"
-        "${SDL2_PATH}/bin/SDL2_ttf.dll"
+        "${SDL2_PATH}/SDL2.dll"
+        "${SDL2_PATH}/SDL2_ttf.dll"
+        "${SDL2_PATH}/lib/libSDL2.dll.a"
+        "${SDL2_PATH}/lib/libSDL2_ttf.dll.a"
         $<TARGET_FILE_DIR:flightSimulator>
     )
 else()

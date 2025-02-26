@@ -21,16 +21,26 @@ Every update to this **Flight Simulator** will be documented in this file. Lates
         - [0.2.3.4](#version-0234---16022025)
             - [0.2.3.4.1](#version-02341---16022025)
     - [0.2.4](#version-024---16022025) - "Wind update"
-    - [0.2.5](#version-025---16022025) - "SDL Update"
-        - [0.2.5.1](#version-0251---26022025)
+- [0.3](#version-025---16022025) - "SDL Update"
+        - [0.3.0.1](#version-0251---26022025)
+        - [0.3.0.2](#version-0252---26022025)
+        - [0.3.0.3](#version-0253---26022025)
 
 ---
-## [Version 0.2.5.2] - 26.02.2025
+## [Version 0.3.0.3] - 26.02.2025
+
+## Changed
+- Instead of printing out the farewell message at the end of main, I made it into a destructor to print out AFTER main ends.
+
+### Fixed
+- Now should run flawlessly on Windows
+
+## [Version 0.3.0.2] - 26.02.2025
 
 ### Fixed
 - Cmake fix for Linux and Windows (Win attempt 2)
 
-## [Version 0.2.5.1] - 26.02.2025
+## [Version 0.3.0.1] - 26.02.2025
 
 ### Changed
 - SDL2 fix for windows (attempt 1)
@@ -39,7 +49,7 @@ Every update to this **Flight Simulator** will be documented in this file. Lates
 ### Fixed
 - DOCUMENTATION.md not showing equations properly
 
-## [Version 0.2.5] - 26.02.2025
+## [Version 0.3] - 26.02.2025
 
 ### Added
 - Reworked the text renderer to print out info into a window, rather than the console, for more control of the print out.

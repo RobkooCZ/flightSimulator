@@ -12,7 +12,27 @@
 
 #define FILE_PATH "data/aircraftData.txt"
 
-int main(void) {
+// prototype
+void message(void);
+
+// do this after main ends
+__attribute__((destructor))
+void message(void){
+    printf("\n\n");
+    printf("***********************************************\n");
+    printf("*                                             *\n");
+    printf("*             Thanks for playing!             *\n");
+    printf("*             See you next time!              *\n");
+    printf("*                                             *\n");
+    printf("***********************************************\n");
+    printf("\n\n");
+}
+
+int main(int argc, char* argv[]) {
+    // Ignore arguments (safer than letting them be)
+    (void)argc;
+    (void)argv;
+
     long startTime, elapsedTime, previousTime;
     float deltaTime;
     float fps;
@@ -100,14 +120,56 @@ int main(void) {
     // Cleanup
     destroyTextRenderer();
 
-    printf("\n\n");
-    printf("***********************************************\n");
-    printf("*                                             *\n");
-    printf("*             Thanks for playing!             *\n");
-    printf("*             See you next time!              *\n");
-    printf("*                                             *\n");
-    printf("***********************************************\n");
-    printf("\n\n");
-
     return 0;
 }
+
+#ifdef _WIN32
+    #include <windows.h>
+    
+    int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+        // Cast unused parameters to void
+        (void)hInstance;
+        (void)hPrevInstance;
+        (void)lpCmdLine;
+        (void)nCmdShow;
+
+        // Convert command-line string to argc/argv format
+        int argc;
+        LPWSTR* argvW = CommandLineToArgvW(GetCommandLineW(), &argc);
+        if (argvW == NULL) {
+            return 1;
+        }
+
+        char** argv = (char**)malloc((long long unsigned int)argc * sizeof(char*));
+        if (argv == NULL) {
+            LocalFree(argvW);
+            return 1;
+        }
+
+        for (int i = 0; i < argc; i++) {
+            size_t size = wcslen(argvW[i]) + 1;
+            argv[i] = (char*)malloc(size);
+            if (argv[i] == NULL) {
+                for (int j = 0; j < i; j++) {
+                    free(argv[j]);
+                }
+                free(argv);
+                LocalFree(argvW);
+                return 1;
+            }
+            wcstombs(argv[i], argvW[i], size);
+        }
+
+        // Call main()
+        int result = main(argc, argv);
+
+        // Free memory allocated by CommandLineToArgvW and conversion
+        for (int i = 0; i < argc; i++) {
+            free(argv[i]);
+        }
+        free(argv);
+        LocalFree(argvW);
+
+        return result;
+    }
+#endif
