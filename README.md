@@ -9,6 +9,7 @@ Created by Robkoo
 ## Table of Contents
 
 - [Changelog](#changelog)
+- [Documentation](#documentation)
 - [Requirements](#requirements)
     - [Linux (GCC) Requirements](#linux-gcc-requirements)
         - [Build Tool Requirements](#build-tool-requirements)
@@ -23,6 +24,10 @@ Created by Robkoo
 ## Changelog
 
 For a detailed list of changes, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
+
+## Documentation
+
+If you're curious about the physics and math behind this simulator, you can read the [documentation](DOCUMENTATION.md) file.
 
 ---
 

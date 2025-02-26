@@ -17,13 +17,24 @@ Every update to this **Flight Simulator** will be documented in this file. Lates
         - [0.2.3.1](#version-0231---16022025)
         - [0.2.3.2](#version-0232---16022025)
         - [0.2.3.3](#version-0233---16022025)
-        - [0.2.3.3.1](#version-02331---16022025)
+            - [0.2.3.3.1](#version-02331---16022025)
         - [0.2.3.4](#version-0234---16022025)
-        - [0.2.3.4.1](#version-02341---16022025)
+        -    [0.2.3.4.1](#version-02341---16022025)
     - [0.2.4](#version-024---16022025) - "Wind update"
     - [0.2.5](#version-025---16022025) - "SDL Update"
+        - [0.2.5.1](#version-0251---26022025)
 
 ---
+
+## [Version 0.2.5.1] - 26.02.2025
+
+### Changed
+- SDL2 fix for windows (attempt 1)
+- Modified README.md to have a link to the documentation file for the users to be able to read it.
+
+### Fixed
+- DOCUMENTATION.md not showing equations properly
+
 ## [Version 0.2.5] - 26.02.2025
 
 ### Added

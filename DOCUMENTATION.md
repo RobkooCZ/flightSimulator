@@ -229,7 +229,7 @@ If the Mach number exceeds the drag divergence value ($M_d$), wave drag is added
 $$
 D_{\omega} =
 \begin{cases}
-0, & \text{if } M < M_d \\[6pt]
+0, & \text{if } M < M_d \\
 C_{D0} \times k_\omega \times (M - M_d)^2, & \text{if } M \ge M_d
 \end{cases}
 $$
@@ -251,7 +251,7 @@ Alternatively, it can be expressed as:
 $$
 D_{\text{total}} =
 \begin{cases}
-0.5\,\rho\,V^2\,S\,\left(C_d + \frac{C_{\ell}^2}{\pi\,AR\,OEF}\right), & \text{if } M < M_d \\[8pt]
+0.5\,\rho\,V^2\,S\,\left(C_d + \frac{C_{\ell}^2}{\pi\,AR\,OEF}\right), & \text{if } M < M_d \\
 0.5\,\rho\,V^2\,S\,\left(C_d + \frac{C_{\ell}^2}{\pi\,AR\,OEF}\right) + C_{D0}\,k_\omega\,(M - M_d)^2, & \text{if } M \ge M_d
 \end{cases}
 $$
@@ -280,7 +280,7 @@ The temperature at an altitude $h$ (in m) is calculated as:
 $$
 T_h =
 \begin{cases}
-T_0 - 6.5 \times \left(\frac{h}{1000}\right), & \text{if } h < h_{top} \\[6pt]
+T_0 - 6.5 \times \left(\frac{h}{1000}\right), & \text{if } h < h_{top} \\
 T_{trop}, & \text{if } h \ge h_{top}
 \end{cases}
 $$
@@ -297,7 +297,7 @@ Air density ($\rho$) is computed as:
 $$
 \rho =
 \begin{cases}
-\rho_0 \times \left(\frac{T_h}{T_0}\right)^{-\left(\frac{g}{K_t \times R} + 1\right)}, & \text{if } h < h_{top} \\[10pt]
+\rho_0 \times \left(\frac{T_h}{T_0}\right)^{-\left(\frac{g}{K_t \times R} + 1\right)}, & \text{if } h < h_{top} \\
 \rho_{top} \times e^{\left(\frac{g}{R \times T_{top}} \times (h - h_{top}) \right)}, & \text{if } h \ge h_{top}
 \end{cases}
 $$
