@@ -1,5 +1,6 @@
 #include "controls.h"
 #include "textRenderer.h"
+#include <math.h>
 
 static AircraftControls controls;  // Global controls struct
 
@@ -43,7 +44,7 @@ void adjustValues(SDL_Keycode key) {
     if (controls.throttle < 0) controls.throttle = 0;
     if (controls.throttle > 1.01f) controls.throttle = 1.01f;
     float tolerance = 0.0001f;
-    controls.afterburner = (fabs(controls.throttle - 1.01f) < tolerance);
+    controls.afterburner = (fabsf(controls.throttle - 1.01f) < tolerance);
 }
 
 // Start controls thread (called once when initializing)

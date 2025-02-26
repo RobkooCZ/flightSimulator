@@ -6,6 +6,8 @@
 #include "menu.h"
 #include "aircraftData.h"
 #include <stdlib.h>
+
+#define SDL_MAIN_HANDLED // for windows so SDL doesnt need a separate main (HAS to be before including SDL2/SDL.h)
 #include <SDL2/SDL.h>
 
 #define FILE_PATH "data/aircraftData.txt"

@@ -29,14 +29,21 @@ add_executable(flightSimulator ${SOURCES})
 
 # ---- SDL2 Configuration for Windows ----
 if(WIN32)
-    set(SDL2_PATH "C:/SDL2")
+    set(SDL2_PATH "${CMAKE_SOURCE_DIR}/SDL2")
 
     # Include and library directories
     include_directories("${SDL2_PATH}/include")
-    link_directories("${SDL2_PATH}/lib")
+    link_directories("${SDL2_PATH}/lib" "${SDL2_PATH}/lib/x64" "${SDL2_PATH}/lib/i686")
 
     # Manually link SDL2
-    target_link_libraries(flightSimulator SDL2 SDL2_ttf)
+    target_link_libraries(
+        flightSimulator
+        mingw32
+        "${SDL2_PATH}/lib/SDL2.dll"
+        "${SDL2_PATH}/lib/SDL2_ttf.dll"
+        "${SDL2_PATH}/lib/SDL2.lib"
+        "${SDL2_PATH}/lib/SDL2_ttf.lib"
+    )
 
     # Ensure SDL2 DLLs are copied to the build directory
     add_custom_command(TARGET flightSimulator POST_BUILD
@@ -47,11 +54,16 @@ if(WIN32)
     )
 else()
     # ---- Linux/macOS ----
-    find_package(SDL2 REQUIRED)
-    find_package(SDL2_ttf REQUIRED)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(SDL2 REQUIRED sdl2)
+    pkg_check_modules(SDL2_ttf REQUIRED SDL2_ttf)
 
-    include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS})
-    target_link_libraries(flightSimulator m ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES})
+    # Include SDL2 and SDL2_ttf
+    include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_ttf_INCLUDE_DIRS})
+    target_link_libraries(flightSimulator m ${SDL2_LIBRARIES} ${SDL2_ttf_LIBRARIES})
+
+    # Optionally: You can link to SDL2_ttf explicitly for better clarity
+    target_link_libraries(flightSimulator ${SDL2_LIBRARIES} ${SDL2_ttf_LIBRARIES})
 endif()
 
 # Set the output directory to the build folder
@@ -65,7 +77,6 @@ add_custom_command(
         ${CMAKE_SOURCE_DIR}/fonts
         $<TARGET_FILE_DIR:flightSimulator>/fonts
 )
-
 
 # MAYBE IN THE FUTURE, NOT RN
 # enable_testing()
