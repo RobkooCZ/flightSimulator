@@ -10,6 +10,53 @@
     #define CLEAR "clear"
 #endif
 
+#ifndef _WIN32  // Linux Input Handling
+    void enableRawMode(void) {
+        struct termios term;
+        tcgetattr(STDIN_FILENO, &term);
+        term.c_lflag &= (tcflag_t)~(ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    }
+
+    void disableRawMode(void) {
+        struct termios term;
+        tcgetattr(STDIN_FILENO, &term);
+        term.c_lflag |= (ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    }
+
+    char getKeyPress(void) {
+        char key;
+        read(STDIN_FILENO, &key, 1);
+        return key;
+    }
+
+    int kbhit(void) {
+        struct termios oldt, newt;
+        int ch;
+        int oldf;
+
+        tcgetattr(STDIN_FILENO, &oldt);
+        newt = oldt;
+        newt.c_lflag &= (tcflag_t)~(ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+        oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+        ch = getchar();
+
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+        fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+        if (ch != EOF) {
+            ungetc(ch, stdin);
+            return 1;
+        }
+
+        return 0;
+    }
+#endif
+
 // Function to load aircraft names from a file
 int loadAircraftNames(const char *filename, Aircraft aircraftList[], int *aircraftCount) {
     // Open the file with a relative path. Ensure that the working directory is the project root.
@@ -53,7 +100,7 @@ int loadAircraftNames(const char *filename, Aircraft aircraftList[], int *aircra
 // Function to display the menu
 void displayMenu(Aircraft aircraftList[], int aircraftCount, int selectedIndex){
     system(CLEAR); // Clear the screen
-    printf("===== SELECTED YOUR AIRCRAFT =====\n");
+    printf("===== SELECT YOUR AIRCRAFT =====\n");
     printf("Use W, S keys to navigate and press Enter to select\n\n");
 
     for (int i = 0; i < aircraftCount; i++) { // Loop through each aircraft

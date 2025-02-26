@@ -6,99 +6,106 @@
 #include "menu.h"
 #include "aircraftData.h"
 #include <stdlib.h>
+#include <SDL2/SDL.h>
 
 #define FILE_PATH "data/aircraftData.txt"
 
-#ifdef _WIN32 // Windows
-    #define CLEAR "cls"
-    #include <windows.h>
-#else // Linux
-    #define CLEAR "clear"
-#endif
-
 int main(void) {
     long startTime, elapsedTime, previousTime;
-    float deltaTime; // for precision
+    float deltaTime;
     float fps;
     AircraftState aircraft;
-    float simulationTime = 0.0f; // to track how long the simulation has been running
-
-    #ifdef _WIN32 // for printing out "°" on windows
-        SetConsoleOutputCP(CP_UTF8);
-    #endif
+    float simulationTime = 0.0f;
 
     initAircraft(&aircraft);
 
     previousTime = getTimeMicroseconds();
 
-    system(CLEAR); // clear screen
-
     // ----- SELECT AIRCRAFT -----
-
     Aircraft aircraftList[MAX_AIRCRAFT];
     int aircraftCount;
 
     if (!loadAircraftNames(FILE_PATH, aircraftList, &aircraftCount)) {
-        return 1; // Exit if file could not be loaded
+        return 1;
     }
 
     int selectedIndex = selectAircraft(aircraftList, aircraftCount);
 
-    // Load the selected aircraft data
-
+    // Load selected aircraft data
     AircraftData aircraftData;
     getAircraftDataByName(FILE_PATH, aircraftList[selectedIndex].name, &aircraftData);
 
-    if (aircraftData.afterburnerThrust == 0){ // e.g. no afterburner
-        aircraft.hasAfterburner = false;
-    }
-    else{ // has afterburner
-        aircraft.hasAfterburner = true;
-    }
+    aircraft.hasAfterburner = (aircraftData.afterburnerThrust != 0);
 
-    system(CLEAR); // clear screen
+    // Initialize SDL2 Text Renderer
+    initTextRenderer();
 
-    startControls(); // initialize controls, start a thread for real time input
+    startControls(); // Start input thread
+
+    SDL_Event event;
+    int running = 1;
+
+    system("clear");
+    printf("Flight simulator debug console\n");
 
     // ----- MAIN GAME LOOP -----
-    while (1) {
+    while (running) {
         startTime = getTimeMicroseconds();
+
+        // Event handling (for input)
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                running = 0;
+            }
+            if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == SDLK_ESCAPE) {
+                    running = 0;
+                }
+                handleKeyEvents(&event); // Handles key events for controls
+            }
+        }
 
         // Calculate delta time
         deltaTime = (float)((double)(startTime - previousTime) / 1000000.0);
         simulationTime += deltaTime;
         previousTime = startTime;
 
-        // Calculate frames per second
+        // Calculate FPS
         fps = 1.0f / deltaTime;
 
-        // PSEUDOCODE
-        // // 1. Process input (e.g., throttle, controls)
-        AircraftControls *controls = getControls(); // get controls
+        // Get controls
+        AircraftControls *controls = getControls();
         aircraft.yaw = controls->yaw;
         aircraft.pitch = controls->pitch;
         aircraft.roll = controls->roll;
         aircraft.controls.throttle = controls->throttle;
-        if (aircraft.controls.throttle > 1) aircraft.controls.afterburner = true;
-        else aircraft.controls.afterburner = false;
+        aircraft.controls.afterburner = (aircraft.controls.throttle > 1);
 
-        // adjustValues(key, aircraft.controls, &aircraft);
-
-        // // 2. Update physics (velocity, acceleration, forces)
+        // Update physics
         updatePhysics(&aircraft, deltaTime, simulationTime, &aircraftData);
-        
-        // Update aircraft state (position, orientation)
         updateAircraftState(&aircraft, deltaTime);
 
-        // // 3. Render (text for now)
-        printInfo(&aircraft, &aircraftData, fps, simulationTime);
+        // Render aircraft data using SDL2
+        renderFlightInfo(&aircraft, &aircraftData, fps, simulationTime);
 
-        // 4. Frame rate control
+        // Frame rate control
         elapsedTime = getTimeMicroseconds() - startTime;
         if (elapsedTime < FRAME_TIME_MICROSECONDS) {
             sleepMicroseconds(FRAME_TIME_MICROSECONDS - elapsedTime);
         }
     }
+
+    // Cleanup
+    destroyTextRenderer();
+
+    printf("\n\n");
+    printf("***********************************************\n");
+    printf("*                                             *\n");
+    printf("*             Thanks for playing!             *\n");
+    printf("*             See you next time!              *\n");
+    printf("*                                             *\n");
+    printf("***********************************************\n");
+    printf("\n\n");
 
     return 0;
 }

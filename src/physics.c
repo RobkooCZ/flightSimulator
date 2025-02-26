@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+const int PHYSICS_DEBUG = 0; // change this to 1 for printing out physics debug info
+
 /*
     #########################################################
     #                                                       #
@@ -14,17 +16,35 @@
     #########################################################
 */
 
-// Function to get the air density at a given altitude
-float getAirDensity(float altitude) {
-    const float P = getPressureAtAltitude(altitude); // Pressure at the given altitude
-    const float R = 287.05f; // Specific gas constant for dry air in J/(kg·K)
-    const float T = getTemperatureKelvin(altitude); // Temperature at the given altitude
+float getTropopause(void){
+    float deltaT_isa = 0.0f; // for earth's atmosphere
+    float h_top = 11000.0f + 1000.0f * (deltaT_isa / 6.5f);
 
-    const float p = P / (R * T); // Calculate the air density at the given altitude
-
-    return p; // Return the calculated air density
+    return h_top; // earth atmosphere
 }
 
+// Function to get the air density at a given altitudecl
+float getAirDensity(float altitude) {
+    float tropopause = getTropopause();
+    const float R = 287.04f;
+
+    // If the plane is below or at the tropopause
+    if (altitude <= tropopause){
+        const float Kt = -0.0065f;
+        const float exponent = -((GRAVITY)/(Kt * R)) - 1;
+        const float T = getTemperatureKelvin(altitude);
+        const float T0 = 288.15f; // sea level temperature in Kelvin
+        const float rho_0 = 1.225f; // sea level air density in kg/m^3
+
+        return rho_0 * powf((T / T0), exponent);
+    }
+    // If the plane is above the tropopause
+    else {
+        const float rho_top = 0.3639f;
+        const float T_trop = 216.65f;
+        return rho_top * expf(-((GRAVITY)/(R * T_trop)) * (altitude - tropopause));
+    }
+}
 /*
     #########################################################
     #                                                       #
@@ -62,12 +82,17 @@ float calculateDotProduct(LAV lav, float vx, float vy, float vz) {
 
 // Function to calculate the Angle of Attack (AoA)
 float calculateAoA(AircraftState *aircraft) {
-    float horizontalSpeed = sqrtf(aircraft->vx * aircraft->vx + aircraft->vz * aircraft->vz);
-    if (horizontalSpeed < 1e-6f) { // avoid division by zero for very slow speeds
-        return 0.0f;
+    const float treshold = 1e-6f; // avoid division by zero
+
+    if (fabsf(aircraft->vx) < treshold) {
+        return 0.0f; // avoid division by zero
     }
 
-    return aircraft->pitch - atan2f(aircraft->vy, horizontalSpeed);
+    float gamma = atanf(aircraft->vy / aircraft->vx);
+
+    float aoa = aircraft->pitch - gamma;
+
+    return aoa;
 }
 
 /*
@@ -78,27 +103,43 @@ float calculateAoA(AircraftState *aircraft) {
     #########################################################
 */
 
-
-float calculateLiftCoefficient(float AoA) {
-    const float cl0 = 0.36f;      // Baseline lift coefficient for zero (relative) AoA (accounting for wing incidence)
-    const float cl_alpha = 2.0f * PI; // Lift curve slope (per radian)
-    return cl0 + cl_alpha * AoA;
+float getFlightPathAngle(AircraftState *aircraft){
+    float TAS = calculateTAS(aircraft);
+    return asinf(aircraft->vz/TAS);
 }
 
-float calculateLift(AircraftState *aircraft, float wingArea) {
+float calculateLiftCoefficient(float mass, AircraftState *aircraft, float wingArea){
+    const float airDensity = getAirDensity(aircraft->y);
+    float TAS = calculateTAS(aircraft);
+    float numerator = mass * GRAVITY;
+    float denumerator = 0.5f * airDensity * powf(TAS, 2) * wingArea;
+
+    if (convertRadiansToDeg(fabsf(aircraft->yaw)) > 5.0f && convertRadiansToDeg(fabsf(aircraft->pitch)) > 0.1f){ // plane is turning
+        denumerator *= cosf(convertRadiansToDeg(aircraft->roll));
+        return numerator / denumerator; // Cl
+    }
+    else{ // plane isnt turning
+        const float tolerance = 1e-6f;
+        if (fabs(aircraft->vy) < tolerance){ // aircraft isnt climbing or descending
+            return numerator / denumerator; // Cl
+        }
+        else { // aircraft is climbing or descending
+            numerator *= cosf(getFlightPathAngle(aircraft));
+            return numerator / denumerator; // Cl
+        }
+    }
+
+    return 0.0f;
+}
+
+float calculateLift(AircraftState *aircraft, float wingArea, float mass) {
     // L = 0.5 * rho * V^2 * S * C_L
-    float V = calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz);
+    float V = calculateTAS(aircraft);
     float rho = getAirDensity(aircraft->y);  // altitude in meters
     float S = wingArea; // wing area for the plane (in m^2)
-    // Use the new AoA directly from the aircraft state.
-    float AoA = calculateAoA(aircraft);
-    float C_L = calculateLiftCoefficient(AoA);
-    return 0.5f * rho * V * V * S * C_L;
-}
+    float C_L = calculateLiftCoefficient(mass, aircraft, wingArea);
 
-float calculateAy(float lift, float mass){
-    // A_y = L / m
-    return lift / mass;
+    return 0.5f * rho * V * V * S * C_L;
 }
 
 /*
@@ -172,8 +213,17 @@ Vector3 getLiftAxisVector(Vector3 wingRight, Vector3 unitVector){
 }
 
 Vector3 computeLiftForceComponents(AircraftState *aircraft, float wingArea, float coefficientLift) {
+    // TAS
+    float TAS = calculateTAS(aircraft);
+
+    // convert it into a vector
+    Vector3 velocity = {
+        TAS * cosf(aircraft->yaw) * cosf(aircraft->pitch),
+        TAS * sinf(aircraft->pitch),
+        TAS * cosf(aircraft->pitch) * sinf(aircraft->yaw)
+    };
+
     // Get the velocity vector and its magnitude.
-    Vector3 velocity = { aircraft->vx, aircraft->vy, aircraft->vz };
     float airSpeed = calculateMagnitude(velocity.x, velocity.y, velocity.z);
     
     // Get the aircraft's up vector.
@@ -189,9 +239,11 @@ Vector3 computeLiftForceComponents(AircraftState *aircraft, float wingArea, floa
     // Compute the lift direction as: cross(cross1, velocity) and normalize it.
     Vector3 liftDir = vectorCross(cross1, velocity);
     float liftDirMag = calculateMagnitude(liftDir.x, liftDir.y, liftDir.z);
+
     if (liftDirMag < 1e-6f) {
         liftDir = (Vector3){0, 1, 0};
-    } else {
+    }
+    else {
         liftDir.x /= liftDirMag;
         liftDir.y /= liftDirMag;
         liftDir.z /= liftDirMag;
@@ -206,7 +258,7 @@ Vector3 computeLiftForceComponents(AircraftState *aircraft, float wingArea, floa
         liftDir.y * liftForceMagnitude,
         liftDir.z * liftForceMagnitude
     };
-}
+}   
 
 /*
     #########################################################
@@ -216,23 +268,113 @@ Vector3 computeLiftForceComponents(AircraftState *aircraft, float wingArea, floa
     #########################################################
 */
 
-float calculateAspectRatio(float wingspan, float wingArea){
-    return wingspan * wingspan / wingArea;
+// Function to calculate the aspect ratio of the wing
+float calculateAspectRatio(float wingspan, float wingArea) {
+    return wingspan * wingspan / wingArea; // Aspect ratio formula: wingspan^2 / wingArea
 }
 
-float calculateInducedDrag(float liftCoefficient, float aspectRatio){
-    return liftCoefficient * liftCoefficient / (PI * OEF * aspectRatio);
+float calculateDragCoefficient(float speed, float maxSpeed, float altitude, float C_d0){
+    // Constants for the aircraft (can be adjusted based on the aircraft's characteristics)
+    const float alpha = 0.1f; // Constant for drag rise in transonic region
+    const float kw = 30.0f;   // Drag rise constant for supersonic region
+    const float Md = 0.89f;   // Drag divergence Mach number
+
+    // Calculate Mach number
+    float mach = speed / calculateSpeedOfSound(altitude); // Speed of sound based on altitude
+
+    // Subsonic flight (Mach < 0.8)
+    if (mach < 0.8f) {
+        return C_d0 + 0.05f * powf(speed / maxSpeed, 2); // Subsonic drag coefficient formula
+    }
+    // Transonic flight (Mach ~ 0.8 to 1.2)
+    else if (mach < 1.2f) {
+        return C_d0 + 0.05f * powf(speed / maxSpeed, 2) + alpha * powf((mach - 1), 2); // Transonic drag coefficient
+    }
+    // Supersonic flight (Mach > 1.2)
+    else {
+        return C_d0 + kw * powf((mach - Md), 2); // Supersonic drag coefficient
+    }
 }
 
-float calculateTotalDragCoefficient(float inducedDrag){
-    return C_D0 + inducedDrag;
+float calculateParasiticDrag(float C_d, float airDensity, float speed, float wingArea) {
+    return 0.5f * C_d * airDensity * powf(speed, 2) * wingArea; // Parasitic drag formula
 }
 
-float calculateDragForce(float dragCoefficient, float airDensity, float relativeSpeed, float wingArea) {
-    float speedSquared = relativeSpeed * relativeSpeed;
-    if (speedSquared < 0.0001f) return 0.0f; // Avoid division by zero
+// Function to calculate induced drag
+float calculateInducedDrag(float liftCoefficient, float aspectRatio, float airDensity, float wingArea, float speed) {
+    if (speed < 0.1f) return 0.0f; // Prevent divide-by-zero issues for very low speeds
 
-    return 0.5f * dragCoefficient * airDensity * wingArea * speedSquared;
+    return 0.5f * airDensity * powf(speed, 2) * wingArea * ((liftCoefficient * liftCoefficient) / (PI * aspectRatio * OEF)); // Induced drag formula
+}
+
+
+float calculateDragDivergenceAroundMach(float speed, AircraftState *aircraft){
+    // get current mach speed
+    float mach = speed / calculateSpeedOfSound(aircraft->y);
+
+    // set k_w and M_d 
+    const float kw = 30.0f; // rough estimate for nearly supersonic aircraft (j29f, j32b)
+    const float Md = 0.89f; // rough estimate for nearly supersonic aircraft (j29f, j32b)
+
+    // calculate the drag divergence 
+    float Cdw = 0;
+    if (mach > Md) Cdw = C_D0 * kw * powf((mach - Md), 2); // if mach > Md, calculate adidtional drag
+
+    return Cdw;
+}
+
+float calculateTotalDrag(float *parasiticDrag, float *inducedDrag, float *waveDrag, float *relativeSpeed, Vector3 *relativeVelocity, float simulationTime, AircraftState *aircraft, AircraftData *data){
+    // --- WIND & RELATIVE VELOCITY ---
+    Vector3 wind = getWindVector(aircraft->y, simulationTime);
+    float tas = calculateTAS(aircraft);
+
+    // convert TAS into a velocity vector
+    Vector3 tasVector = {
+        tas * cosf(aircraft->yaw) * cosf(aircraft->pitch),
+        tas * sinf(aircraft->pitch),
+        tas * cosf(aircraft->pitch) * sinf(aircraft->yaw)
+    };
+
+    if (relativeVelocity != NULL) {
+        relativeVelocity->x = tasVector.x - wind.x;
+        relativeVelocity->y = tasVector.y - wind.y;
+        relativeVelocity->z = tasVector.z - wind.z;
+    }
+
+    Vector3 relVelocity = {
+        tasVector.x - wind.x,
+        tasVector.y - wind.y,
+        tasVector.z - wind.z
+    };
+
+    // --- DRAG ---
+    float aspectRatio = calculateAspectRatio(data->wingSpan, data->wingArea);
+    float airDensity = getAirDensity(aircraft->y);
+    float relSpeed = calculateMagnitude(relVelocity.x, relVelocity.y, relVelocity.z);
+
+    if (relativeSpeed != NULL) {
+        *relativeSpeed = relSpeed;
+    }
+
+    float liftCoefficient = calculateLiftCoefficient(data->mass, aircraft, data->wingArea);
+
+    // Calculate parasitic and induced drag
+    float C_d = calculateDragCoefficient(relSpeed, convertKmhToMs(data->maxSpeed), aircraft->y, C_D0);
+    float parasiticDragValue = calculateParasiticDrag(C_d, airDensity, relSpeed, data->wingArea);
+    float inducedDragValue = calculateInducedDrag(liftCoefficient, aspectRatio, airDensity, data->wingArea, relSpeed);
+    float waveDragValue = calculateDragDivergenceAroundMach(tas, aircraft);
+
+    if (parasiticDrag != NULL) {
+        *parasiticDrag = parasiticDragValue;
+    }
+    if (inducedDrag != NULL) {
+        *inducedDrag = inducedDragValue;
+    }
+    if (waveDrag != NULL) {
+        *waveDrag = waveDragValue;
+    }
+
+    return parasiticDragValue + inducedDragValue + waveDragValue;
 }
 
 /*
@@ -243,34 +385,52 @@ float calculateDragForce(float dragCoefficient, float airDensity, float relative
     #########################################################
 */
 
-float calculateThrust(int thrust, int afterburnerThrust, AircraftState *aircraft, float maxSpeed, int percentControl){
+float calculateThrust(int thrust, int afterburnerThrust, AircraftState *aircraft, int percentControl) {
     int usedThrust;
     bool afterBurnerOn;
 
-    if (percentControl > 100){
+    if (percentControl > 100) {
         afterBurnerOn = true;
         percentControl = 100; // set to 100 so in later calculations its not > 100
-    }
-    else{
+    } else {
         afterBurnerOn = false;
     }
 
-    if (afterBurnerOn){ // if the afterburner is on, use the afterburner thrust, if not, use normal
+    if (afterBurnerOn) { // if the afterburner is on, use the afterburner thrust, if not, use normal
         usedThrust = afterburnerThrust;
-    }
-    else{
+    } else {
         usedThrust = thrust;
     }
 
+    // calculate thrust at altitude
     float airDensityAtCurrentAltitude = getAirDensity(aircraft->y);
     float airDensityAtSeaLevel = getAirDensity(0);
-    float currentSpeed = calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz);
 
-    float calculatedThrust = (float)usedThrust * (airDensityAtCurrentAltitude/airDensityAtSeaLevel) * (1.0f + 0.2f * (currentSpeed/maxSpeed));
+    // get derate factor
+    float derateFactor = (airDensityAtCurrentAltitude / airDensityAtSeaLevel);
 
-    calculatedThrust = ((float)percentControl/100.0f) * calculatedThrust; // apply the user control to the thrust
+    if (airDensityAtSeaLevel < 1e-6f) { // Prevent division by zero
+        return 0.0f;
+    }
+    
+    // calculate thrust
+    float calculatedThrust = (float)usedThrust * derateFactor;
 
-    return calculatedThrust;
+    // apply user control
+    calculatedThrust = ((float)percentControl / 100.0f) * calculatedThrust;
+
+    // modify thrust based on speed of the aircraft
+    float tas = calculateTAS(aircraft);
+    float mach = convertMsToMach(tas, aircraft->y);
+    const float ramRecoveryFactor = 0.3f; // estimate for turbojet 
+
+    float speedModifiedThrust = calculatedThrust * (1 + ramRecoveryFactor * mach);
+
+    // if the modified thrust exceeds the top thrust of the engine, cap it
+    speedModifiedThrust = (speedModifiedThrust > usedThrust) ? (float)usedThrust : speedModifiedThrust;
+
+    // return the calculated thrust
+    return speedModifiedThrust;
 }
 
 /*
@@ -304,26 +464,27 @@ Vector3 getDirectionVector(Orientation newOrientation){
     return directionVector;
 }
 
-void updateVelocity(AircraftState *aircraft, float deltaTime){
-    // Get the current speed
-    float speed = calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz);
+void updateVelocity(AircraftState *aircraft, float deltaTime, AircraftData *data, float simulationTime){    
+    // UPDATE VX
+    const float T = calculateThrust(data->thrust, data->afterburnerThrust, aircraft, (int)(aircraft->controls.throttle * 100));
+    const float D = calculateTotalDrag(NULL, NULL, NULL, NULL, NULL, simulationTime, aircraft, data);
+    
+    const float ax = (T - D) / data->mass;
+    aircraft->vx += ax * deltaTime;
 
-    // update movement direction
-    Vector3 direction;
-    direction.x = cosf(aircraft->pitch) * cosf(aircraft->yaw);
-    direction.y = sinf(aircraft->pitch);
-    direction.z = cosf(aircraft->pitch) * sinf(aircraft->yaw);
+    // UPDATE VY
+    const float L = calculateLift(aircraft, data->wingArea, data->mass);
+    const float W = GRAVITY * data->mass;
 
-    // apply speed to new direction
-    aircraft->vx = speed * direction.x;
-    aircraft->vy = speed * direction.y;
-    aircraft->vz = speed * direction.z;
+    const float ay = (L - W) / data->mass;
+    aircraft->vy += ay * deltaTime;
 
-    // apply roll effect
-    float rollTurningFactor = 0.5f;
-    aircraft->yaw += sinf(aircraft->roll) * rollTurningFactor * deltaTime;
+    // COMPUTE FLIGHT PATH ANGLE (γ)
+    const float gamma = atan2f(aircraft->vy, aircraft->vx);
+
+    // COMPUTE ANGLE OF ATTACK (AoA)
+    aircraft->AoA = aircraft->pitch - gamma;
 }
-
 
 /*
     #########################################################
@@ -334,33 +495,29 @@ void updateVelocity(AircraftState *aircraft, float deltaTime){
 */
 
 float getTemperatureKelvin(float altitudeMeters){
-    float T0 = 288.15f; // Standart temperature at sea level (in K)
-    float lapseRate = 0.0065f; // Standart lapse rate (in K/m)
+    float tropopause = getTropopause(); // get the altitude of the tropopause
 
-    // calculate temperature in Celsius
-    float TCelsius = T0 - (lapseRate * altitudeMeters);
+    if (altitudeMeters > tropopause) { // if the altitude is above the tropopause
+        return 216.65f; // return the constant temperature above tropopause
+    }
 
-    // Convert to kelvin and return
-    float TKelvin = TCelsius + 273.15f;
-    return TKelvin;
+    float T_0 = 288.15f;
+    return T_0 - 6.5f * altitudeMeters / 1000.0f;
 }
 
 // Function to calculate the pressure at a given altitude
 float getPressureAtAltitude(float altitudeMeters){
-    const float P0 = 101325; // Pressure at sea level in Pascals
-    const float L = 0.0065f; // Lapse rate in K/m
-    const float h = altitudeMeters; // meters above sea level
-    const float T0 = 288.15f; // Temperature at sea level in Kelvin
-    const float g0 = 9.80665f; // Gravity
-    const float M = 0.0289644f; // Molar mass of Earth's air in kg/mol
-    const float R = 8.3144598f; // Ideal gas constant in J/(mol·K)
+    const float R = 287.04f; // specific gas constant for dry air in J/(kg·K)
+    const float Kt = -0.0065f; // temperature gradient in the troposphere
+    const float T = getTemperatureKelvin(altitudeMeters);
+    const float P0 = 101325.0f; // sea level pressure in pascals
+    const float T0 = 288.15f; // sea level temperature in Kelvin
 
-    const float exponent = (g0 * M) / (R * L); // Calculate the exponent for the pressure equation
-    const float bracket = (1 - ((L * h)/T0)); // Calculate the bracketed term for the pressure equation
+    const float exponent = -(GRAVITY/(Kt * R));
 
-    const float P = P0 * powf(bracket, exponent); // Calculate the pressure at the given altitude
+    const float P = P0 * (powf((T / T0), exponent));
 
-    return P; // Return the calculated pressure
+    return P;
 }
 
 // Calculate True Air Speed (TAS) in m/s
@@ -432,11 +589,20 @@ float convertMsToKmh(float ms){
 }
 
 float calculateSpeedOfSound(float altitude){
+    float tropopause = getTropopause();
     float gamma = 1.4f; // ratio of specific heats for air, aprox 1.4 for dry hair
     float R = 287.05f; // specific gas constant for dry air in J/(kg·K)
+    float T0 = 288.15f; // sea level temperature in Kelvin
     float T = getTemperatureKelvin(altitude); // temperature in kelvin
 
-    return sqrtf(gamma * R * T);
+    if (altitude > tropopause){ // if the plane is above than the tropopause
+        return sqrtf(gamma * R * T); // 295.07 m/s (constant)
+    }
+    else{ // plane is below the tropopause
+        return 340.29f * sqrtf(T/T0); // speed of sound formula
+    }
+
+    return 19.0f; // shouldnt be reached but just in case
 }
 
 float convertMsToMach(float ms, float altitude){
@@ -467,44 +633,30 @@ void updatePhysics(AircraftState *aircraft, float deltaTime, float simulationTim
     Vector3 gravityForce = { 0, -GRAVITY * mass, 0 };
 
     // --- LIFT ---
-    float AoA = calculateAoA(aircraft);
-    float liftCoefficient = calculateLiftCoefficient(AoA);
+    float liftCoefficient = calculateLiftCoefficient(mass, aircraft, wingArea);
+
     Vector3 liftForce = computeLiftForceComponents(aircraft, wingArea, liftCoefficient);
 
-    // --- WIND & RELATIVE VELOCITY ---
-    // Calculate wind vector based on current altitude and simulation time
-    Vector3 wind = getWindVector(aircraft->y, simulationTime);
-    // Compute relative velocity (aircraft velocity relative to the moving air)
-    Vector3 relativeVelocity = {
-        aircraft->vx - wind.x,
-        aircraft->vy - wind.y,
-        aircraft->vz - wind.z
-    };
+    Vector3 relativeVelocity = {0, 0, 0};
+    float relativeSpeed = 0.0f;
+    
+    float totalDrag = calculateTotalDrag(NULL, NULL, NULL, &relativeSpeed, &relativeVelocity, simulationTime, aircraft, aircraftData);
 
-    // --- DRAG ---
-    // Calculate aspect ratio using wing span from aircraftData 
-    float aspectRatio = (aircraftData->wingSpan * aircraftData->wingSpan) / wingArea;
-    float inducedDrag = calculateInducedDrag(liftCoefficient, aspectRatio);
-    float dragCoefficient = calculateTotalDragCoefficient(inducedDrag);
-    // Use the magnitude of the relative velocity for drag force calculation
-    float relativeSpeed = calculateMagnitude(relativeVelocity.x, relativeVelocity.y, relativeVelocity.z);
-    float dragForceMag = calculateDragForce(dragCoefficient, getAirDensity(aircraft->y), relativeSpeed, wingArea);
-    // Compute unit vector from the relative velocity vector
-    Vector3 relativeVelocityUnit = getUnitVectorFromVector(relativeVelocity);
+    // Calculate drag force vector
     Vector3 dragForce = {
-        -relativeVelocityUnit.x * dragForceMag,
-        -relativeVelocityUnit.y * dragForceMag,
-        -relativeVelocityUnit.z * dragForceMag
+        -totalDrag * (relativeVelocity.x/relativeSpeed),
+        -totalDrag * (relativeVelocity.y/relativeSpeed),
+        -totalDrag * (relativeVelocity.z/relativeSpeed),    
     };
 
     // --- THRUST ---
     float thrustMagnitude = calculateThrust(
-        aircraftData->thrust, 
-        aircraftData->afterburnerThrust, 
-        aircraft, 
-        aircraftData->maxSpeed, 
+        aircraftData->thrust,
+        aircraftData->afterburnerThrust,
+        aircraft,
         (int)(aircraft->controls.throttle * 100)
     );
+
     Vector3 thrustForce = {
         thrustMagnitude * cosf(aircraft->pitch) * cosf(aircraft->yaw),
         thrustMagnitude * sinf(aircraft->pitch),
@@ -531,5 +683,22 @@ void updatePhysics(AircraftState *aircraft, float deltaTime, float simulationTim
     aircraft->vz += acceleration.z * deltaTime;
 
     // --- UPDATE ORIENTATION BASED ON CONTROLS ---
-    updateVelocity(aircraft, deltaTime);
+    updateVelocity(aircraft, deltaTime, aircraftData, simulationTime);
+
+    if (PHYSICS_DEBUG) {
+        printf("PHYSICS DEBUG: Mass: %f, Wing Area: %f\n", mass, wingArea);
+        printf("PHYSICS DEBUG: Gravity Force: x=%f, y=%f, z=%f\n", gravityForce.x, gravityForce.y, gravityForce.z);
+        printf("PHYSICS DEBUG: Lift Coefficient: %f\n", liftCoefficient);
+        printf("PHYSICS DEBUG: Lift Force: x=%f, y=%f, z=%f\n", liftForce.x, liftForce.y, liftForce.z);
+        printf("PHYSICS DEBUG: Total Drag: %f, Relative Speed: %f\n", totalDrag, relativeSpeed);
+        printf("PHYSICS DEBUG: Relative Velocity: x=%f, y=%f, z=%f\n", relativeVelocity.x, relativeVelocity.y, relativeVelocity.z);
+        printf("PHYSICS DEBUG: Drag Force: x=%f, y=%f, z=%f\n", dragForce.x, dragForce.y, dragForce.z);
+        printf("PHYSICS DEBUG: Thrust Arguments: thrust=%d, afterburnerThrust=%d, aircraft->y=%f, percentControl=%d\n",
+            aircraftData->thrust, aircraftData->afterburnerThrust, aircraft->y, (int)(aircraft->controls.throttle * 100));
+        printf("PHYSICS DEBUG: Thrust Magnitude: %f\n", thrustMagnitude);
+        printf("PHYSICS DEBUG: Thrust Force: x=%f, y=%f, z=%f\n", thrustForce.x, thrustForce.y, thrustForce.z);
+        printf("PHYSICS DEBUG: Net Force: x=%f, y=%f, z=%f\n", netForce.x, netForce.y, netForce.z);
+        printf("PHYSICS DEBUG: Acceleration: x=%f, y=%f, z=%f\n", acceleration.x, acceleration.y, acceleration.z);
+        printf("PHYSICS DEBUG: Updated Velocity: vx=%f, vy=%f, vz=%f\n", aircraft->vx, aircraft->vy, aircraft->vz);
+    }
 }

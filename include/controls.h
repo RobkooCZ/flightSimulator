@@ -2,6 +2,7 @@
 #define CONTROLS_H
 
 #include <stdbool.h>
+#include <SDL2/SDL.h>
 
 typedef struct AircraftState AircraftState;
 
@@ -28,34 +29,11 @@ typedef struct AircraftControls {
     float rollRate;  // Rate of roll change (deg/s)
 } AircraftControls;
 
-#ifdef _WIN32
-    #include <conio.h>
-    #include <windows.h>
-    #define CLEAR "cls"
-
-    // ----- INPUT HANDLING THREAD -----
-    DWORD WINAPI inputThread(LPVOID lpParam);
-#else
-    #include <termios.h>
-    #include <fcntl.h>
-    #include <unistd.h>
-    #include <pthread.h>
-    #define CLEAR "clear"
-
-    // ----- INPUT SYSTEM -----
-    void enableRawMode(void);
-    void disableRawMode(void);
-    char getKeyPress(void);
-
-    // ----- INPUT HANDLING THREAD -----
-    void *inputThread(void *arg);
-    int kbhit(void);
-#endif
-
 // ----- CONTROLS & ADJUSTEMENT -----
 void controlsInit(void);
-void adjustValues(char key);
+void adjustValues(SDL_Keycode key);
 void startControls(void);
+void handleKeyEvents(SDL_Event *event);
 AircraftControls *getControls(void);
 
 #endif // CONTROLS_H

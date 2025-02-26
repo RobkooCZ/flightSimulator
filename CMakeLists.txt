@@ -27,10 +27,36 @@ file(GLOB SOURCES "src/*.c")
 # Create the executable
 add_executable(flightSimulator ${SOURCES})
 
+# Find SDL2 and SDL2_ttf
+find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS})
+
 # Link math library on UNIX systems
 if(UNIX)
-    target_link_libraries(flightSimulator m)
+    target_link_libraries(
+        flightSimulator
+        m
+        ${SDL2_LIBRARIES}
+        ${SDL2_TTF_LIBRARIES}
+    )
 endif()
 
 # Set the output directory to the build folder
 set_target_properties(flightSimulator PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# Copy font files to the build directory
+add_custom_command(
+    TARGET flightSimulator POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:flightSimulator>/fonts
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/fonts
+        $<TARGET_FILE_DIR:flightSimulator>/fonts
+)
+
+# MAYBE IN THE FUTURE, NOT RN
+# enable_testing()
+# find_package(Criterion REQUIRED)
+# add_executable(test_main tests/test_main.c)
+# target_link_libraries(test_main Criterion::Criterion)
+# add_test(NAME test_main COMMAND test_main)

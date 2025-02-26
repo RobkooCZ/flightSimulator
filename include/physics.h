@@ -6,6 +6,8 @@
 #define C_D0 0.02f // estimation of the zero lift drag for a jet fighter
 #define OEF 0.8f // Oswald Efficiency Factor (~0.8 for a jet)
 
+extern const int PHYSICS_DEBUG;
+
 #include "aircraftData.h"
 #include "controls.h"
 #include "aircraft.h"
@@ -33,7 +35,8 @@ typedef struct {
     float yaw, pitch, roll;
 } Orientation;
 
-// air density
+// Atmospheric things
+float getTropopause(void); // returns the altitude of the tropopause
 float getAirDensity(float altitude);
 
 // AoA calculation functions
@@ -44,9 +47,9 @@ float calculateDotProduct(LAV lav, float x, float y, float z);
 float calculateAoA(AircraftState *aircraft);
 
 // Lift calculation functions 
-float calculateLiftCoefficient(float AoA); // simplified coefficient calculation
-float calculateLift(AircraftState *aircraft, float wingArea);
-float calculateAy(float lift, float mass);
+float getFlightPathAngle(AircraftState *aircraft);
+float calculateLiftCoefficient(float mass, AircraftState *aircraft, float wingArea); // simplified coefficient calculation
+float calculateLift(AircraftState *aircraft, float wingArea, float mass);
 
 // LIft direction functions
 Vector3 getUnitVector(AircraftState *aircraft);
@@ -57,18 +60,19 @@ Vector3 computeLiftForceComponents(AircraftState *aircraft, float wingArea, floa
 
 // Drag calculation functions
 float calculateAspectRatio(float wingspan, float wingArea);
-float calculateInducedDrag(float liftCoefficient, float aspectRatio);
-float calculateTotalDragCoefficient(float inducedDrag);
-float calculateDragForce(float dragCoefficient, float airDensity, float relativeSpeed, float wingArea);
+float calculateDragCoefficient(float speed, float maxSpeed, float altitude, float C_d0);
+float calculateParasiticDrag(float C_d, float airDensity, float speed, float wingArea);
+float calculateInducedDrag(float liftCoefficient, float aspectRatio, float airDensity, float wingArea, float speed);
+float calculateDragDivergenceAroundMach(float relativeSpeed, AircraftState *aircraft);
+float calculateTotalDrag(float *parasiticDrag, float *inducedDrag, float *waveDrag, float *relativeSpeed, Vector3 *relativeVelocity, float simulationTime, AircraftState *aircraft, AircraftData *data);
 
 // thrust calculation functions
-float calculateThrust(int thrust, int afterburnerThrust, AircraftState *aircraft, float maxSpeed, int percentControl);
+float calculateThrust(int thrust, int afterburnerThrust, AircraftState *aircraft, int percentControl);
 
 // Aircraft orientation functions
 Orientation calculateNewOrientation(float deltaTime);
 Vector3 getDirectionVector(Orientation newOrientation);
-void updateVelocity(AircraftState *aircraft, float deltaTime);
-
+void updateVelocity(AircraftState *aircraft, float deltaTime, AircraftData *data, float simulationTime);
 // TAS calculation functions (temp, pressure)
 float getTemperatureKelvin(float altitudeMeters);
 float getPressureAtAltitude(float altitudeMeters);

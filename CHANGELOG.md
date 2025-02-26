@@ -21,8 +21,25 @@ Every update to this **Flight Simulator** will be documented in this file. Lates
         - [0.2.3.4](#version-0234---16022025)
         - [0.2.3.4.1](#version-02341---16022025)
     - [0.2.4](#version-024---16022025) - "Wind update"
+    - [0.2.5](#version-025---16022025) - "SDL Update"
 
 ---
+## [Version 0.2.5] - 26.02.2025
+
+### Added
+- Reworked the text renderer to print out info into a window, rather than the console, for more control of the print out.
+- Debug mode to the text renderer to print more useful debugging info.
+- A documentation file ([DOCUMENTATION.md](DOCUMENTATION.md)) where I explain the physics (math) behind this aircraft simulator.
+- Oswald font(s) for the renderer.
+- Colorful output in the window.
+
+### Changed 
+- Improved thrust calculation, plane can't go above its top speed now
+- Improved drag calculation (induced + parasitic + shockwave drag)
+- Improved the textRenderer.c file, now calculations are a separate function to clear up the rendering function
+- Improved lift, AoA, vy changing based on pitch
+- Improved debug conditions and printing
+- Improved pressure calculations
 
 ## [Version 0.2.4] - 16.02.2025
 
