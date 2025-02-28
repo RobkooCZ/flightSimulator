@@ -21,12 +21,25 @@ Every update to this **Flight Simulator** will be documented in this file. Lates
         - [0.2.3.4](#version-0234---16022025)
             - [0.2.3.4.1](#version-02341---16022025)
     - [0.2.4](#version-024---16022025) - "Wind update"
-- [0.3](#version-025---16022025) - "SDL Update"
+- [0.3](#version-025---16022025) - "SDL update"
         - [0.3.0.1](#version-0251---26022025)
         - [0.3.0.2](#version-0252---26022025)
         - [0.3.0.3](#version-0253---26022025)
+    - [0.3.1](#version-031---28022025) - "Visual update"
 
 ---
+
+## [Version 0.3.1] - 28.02.2025
+
+## Added
+- Gauge for speed
+    - Heavily inspired from the Viggen speedometer
+    - Has the current mach number right above the needle center
+    - Functions for generating a gauge are expandable, you can modify the number of ticks, the biggest speed on the gauge
+- Changes to the layout in the application
+- You can change between the text and visual print out in the simulation.
+- Extensively commented header files and the code.
+
 ## [Version 0.3.0.3] - 26.02.2025
 
 ## Changed

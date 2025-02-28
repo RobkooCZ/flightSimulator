@@ -1,5 +1,16 @@
+/**
+ * @file menu.c
+ * This file contains the implementation of the menu system for the flight simulator.
+ * 
+ * It includes functions for displaying the menu, handling user input, and navigating
+ * through different menu options.
+ */
+
+// Include header files
 #include "menu.h"
 #include "controls.h" // for real time input
+
+// Include necessary libraries
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,50 +21,51 @@
     #define CLEAR "clear"
 #endif
 
+
 #ifndef _WIN32  // Linux Input Handling
     void enableRawMode(void) {
-        struct termios term;
-        tcgetattr(STDIN_FILENO, &term);
-        term.c_lflag &= (tcflag_t)~(ICANON | ECHO);
-        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+        struct termios term; // Declare a termios structure to hold terminal settings
+        tcgetattr(STDIN_FILENO, &term); // Get current terminal attributes
+        term.c_lflag &= (tcflag_t)~(ICANON | ECHO); // Disable canonical mode and echo
+        tcsetattr(STDIN_FILENO, TCSANOW, &term); // Set the new attributes immediately
     }
 
     void disableRawMode(void) {
-        struct termios term;
-        tcgetattr(STDIN_FILENO, &term);
-        term.c_lflag |= (ICANON | ECHO);
-        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+        struct termios term; // Declare a termios structure to hold terminal settings
+        tcgetattr(STDIN_FILENO, &term); // Get current terminal attributes
+        term.c_lflag |= (ICANON | ECHO); // Enable canonical mode and echo
+        tcsetattr(STDIN_FILENO, TCSANOW, &term); // Set the new attributes immediately
     }
 
     char getKeyPress(void) {
-        char key;
-        read(STDIN_FILENO, &key, 1);
-        return key;
+        char key; // Variable to store the key press
+        read(STDIN_FILENO, &key, 1); // Read one character from standard input
+        return key; // Return the key press
     }
 
     int kbhit(void) {
-        struct termios oldt, newt;
-        int ch;
-        int oldf;
+        struct termios oldt, newt; // Declare termios structures to hold terminal settings
+        int ch; // Variable to store the character
+        int oldf; // Variable to store the old file status flags
 
-        tcgetattr(STDIN_FILENO, &oldt);
-        newt = oldt;
-        newt.c_lflag &= (tcflag_t)~(ICANON | ECHO);
-        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-        oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
-        fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+        tcgetattr(STDIN_FILENO, &oldt); // Get current terminal attributes
+        newt = oldt; // Copy the current attributes to newt
+        newt.c_lflag &= (tcflag_t)~(ICANON | ECHO); // Disable canonical mode and echo
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt); // Set the new attributes immediately
+        oldf = fcntl(STDIN_FILENO, F_GETFL, 0); // Get the current file status flags
+        fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK); // Set the file status flags to non-blocking
 
-        ch = getchar();
+        ch = getchar(); // Get a character from standard input
 
-        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-        fcntl(STDIN_FILENO, F_SETFL, oldf);
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // Restore the old terminal attributes
+        fcntl(STDIN_FILENO, F_SETFL, oldf); // Restore the old file status flags
 
-        if (ch != EOF) {
-            ungetc(ch, stdin);
-            return 1;
+        if (ch != EOF) { // If a character was read
+            ungetc(ch, stdin); // Push the character back to the input stream
+            return 1; // Return 1 to indicate a key press
         }
 
-        return 0;
+        return 0; // Return 0 to indicate no key press
     }
 #endif
 
