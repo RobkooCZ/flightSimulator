@@ -111,12 +111,12 @@ Lift is the force acting perpendicular to the relative wind that supports the ai
 First, compute the flight path angle ($\gamma$):
 
 $$
-\gamma = \arcsin\left(\frac{v_z}{V}\right)
+\gamma = \arcsin\left(\frac{v_y}{V}\right)
 $$
 
 Where:
 - $\arcsin$ is the inverse sine function.
-- $v_z$ is the vertical component of the velocity.
+- $v_y$ is the vertical component of the velocity.
 - $V$ is the True Airspeed (TAS) in m/s.
 
 #### Step 2: Lift Coefficient ($C_{\ell}$)

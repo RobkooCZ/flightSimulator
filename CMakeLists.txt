@@ -80,6 +80,15 @@ add_custom_command(
         $<TARGET_FILE_DIR:flightSimulator>/fonts
 )
 
+# ---- COPY DATA FOLDER TO BUILD ----
+add_custom_command(
+    TARGET flightSimulator POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:flightSimulator>/data
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/data
+        $<TARGET_FILE_DIR:flightSimulator>/data
+)
+
 # MAYBE IN THE FUTURE, NOT RN
 # enable_testing()
 # find_package(Criterion REQUIRED)

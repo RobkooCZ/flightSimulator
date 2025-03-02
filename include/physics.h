@@ -52,6 +52,57 @@ typedef struct {
     float roll;  ///< Roll angle in degrees
 } Orientation;
 
+/**
+ * @brief Physics data structure.
+ * 
+ * This structure holds all the physics-related data for the aircraft for caching to avoid redundant computations.
+ */
+typedef struct {
+    // Atmosphere-related values (computed per frame)
+    float tropopauseAltitude;
+    float airDensity;
+    float temperatureKelvin;
+    float speedOfSound;
+    float pressure;
+    float flightPathAngle;
+
+    // Lift and drag coefficients
+    float liftCoefficient;
+    float aspectRatio;
+    float dragCoefficient;
+    float parasiticDrag;
+    float inducedDrag;
+    float totalDrag;
+    float dragDivergence;
+
+    // Aircraft state data
+    float thrust;
+    float trueAirspeed; // TAS
+    float machNumber;
+    float angleOfAttack;
+
+    // Vector-related computations
+    Vector3 windVector;
+    Vector3 upVector;
+    Vector3 rightWingDirection;
+    Vector3 liftAxisVector;
+    Vector3 liftForce;
+    Vector3 dragForce;
+
+    // Orientation
+    float pitchDegrees;
+    float yawDegrees;
+    float rollDegrees;
+
+    // speed
+    float velocityMagnitude;
+
+    // Last simulation time 
+    float lastSimulationTime;
+} PhysicsData;
+
+extern PhysicsData globalPhysicsData;
+
 /*
     #########################################################
     #                                                       #
@@ -71,9 +122,10 @@ float getTropopause(void);
  * @brief Get the air density at a given altitude.
  * 
  * @param altitude The altitude in meters.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The air density at the given altitude in kg/m^3.
  */
-float getAirDensity(float altitude);
+float getAirDensity(float altitude, PhysicsData *physicsData);
 
 /**
  * @brief Convert degrees to radians.
@@ -140,9 +192,10 @@ float calculateAoA(AircraftState *aircraft);
  * @brief Get the flight path angle for the aircraft.
  * 
  * @param aircraft Pointer to the AircraftState structure.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The flight path angle in degrees.
  */
-float getFlightPathAngle(AircraftState *aircraft);
+float getFlightPathAngle(AircraftState *aircraft, PhysicsData *physicsData);
 
 /**
  * @brief Calculate the lift coefficient for the aircraft.
@@ -150,19 +203,19 @@ float getFlightPathAngle(AircraftState *aircraft);
  * @param mass The mass of the aircraft in kg.
  * @param aircraft Pointer to the AircraftState structure.
  * @param wingArea The wing area of the aircraft in m^2.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The lift coefficient.
  */
-float calculateLiftCoefficient(float mass, AircraftState *aircraft, float wingArea);
+float calculateLiftCoefficient(float mass, AircraftState *aircraft, float wingArea, PhysicsData *physicsData);
 
 /**
  * @brief Calculate the lift force for the aircraft.
  * 
- * @param aircraft Pointer to the AircraftState structure.
  * @param wingArea The wing area of the aircraft in m^2.
- * @param mass The mass of the aircraft in kg.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The lift force in Newtons.
  */
-float calculateLift(AircraftState *aircraft, float wingArea, float mass);
+float calculateLift(float wingArea, PhysicsData *physicsData);
 
 /*
     #########################################################
@@ -176,9 +229,10 @@ float calculateLift(AircraftState *aircraft, float wingArea, float mass);
  * @brief Get the unit vector for the aircraft.
  * 
  * @param aircraft Pointer to the AircraftState structure.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The unit vector.
  */
-Vector3 getUnitVector(AircraftState *aircraft);
+Vector3 getUnitVector(AircraftState *aircraft, PhysicsData *physicsData);
 
 /**
  * @brief Rotate a vector around another vector by a given angle.
@@ -194,9 +248,10 @@ Vector3 rotateAroundVector(Vector3 V, Vector3 K, float theta);
  * @brief Get the direction vector of the right wing of the aircraft.
  * 
  * @param aircraft Pointer to the AircraftState structure.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The direction vector of the right wing.
  */
-Vector3 getRightWingDirection(AircraftState *aircraft);
+Vector3 getRightWingDirection(AircraftState *aircraft, PhysicsData *physicsData);
 
 /**
  * @brief Get the lift axis vector for the aircraft.
@@ -213,9 +268,10 @@ Vector3 getLiftAxisVector(Vector3 wingRight, Vector3 unitVector);
  * @param aircraft Pointer to the AircraftState structure.
  * @param wingArea The wing area of the aircraft in m^2.
  * @param coefficientLift The lift coefficient.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The components of the lift force as a Vector3.
  */
-Vector3 computeLiftForceComponents(AircraftState *aircraft, float wingArea, float coefficientLift);
+Vector3 computeLiftForceComponents(AircraftState *aircraft, float wingArea, float coefficientLift, PhysicsData *physicsData);
 
 /*
     #########################################################
@@ -239,11 +295,11 @@ float calculateAspectRatio(float wingspan, float wingArea);
  * 
  * @param speed The speed of the aircraft in m/s.
  * @param maxSpeed The maximum speed of the aircraft in m/s.
- * @param altitude The altitude of the aircraft in meters.
  * @param C_d0 The zero-lift drag coefficient.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The drag coefficient.
  */
-float calculateDragCoefficient(float speed, float maxSpeed, float altitude, float C_d0);
+float calculateDragCoefficient(float speed, float maxSpeed, float C_d0, PhysicsData *physicsData);
 
 /**
  * @brief Calculate the parasitic drag for the aircraft.
@@ -271,11 +327,11 @@ float calculateInducedDrag(float liftCoefficient, float aspectRatio, float airDe
 /**
  * @brief Calculate the drag divergence around Mach for the aircraft.
  * 
- * @param relativeSpeed The relative speed of the aircraft in m/s.
- * @param aircraft Pointer to the AircraftState structure.
+ * @param speed The relative speed of the aircraft in m/s.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The drag divergence around Mach.
  */
-float calculateDragDivergenceAroundMach(float relativeSpeed, AircraftState *aircraft);
+float calculateDragDivergenceAroundMach(float speed, PhysicsData *physicsData);
 
 /**
  * @brief Calculate the total drag for the aircraft.
@@ -285,12 +341,11 @@ float calculateDragDivergenceAroundMach(float relativeSpeed, AircraftState *airc
  * @param waveDrag Pointer to store the wave drag.
  * @param relativeSpeed Pointer to store the relative speed.
  * @param relativeVelocity Pointer to store the relative velocity.
- * @param simulationTime The simulation time in seconds.
  * @param aircraft Pointer to the AircraftState structure.
- * @param data Pointer to the AircraftData structure.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The total drag in Newtons.
  */
-float calculateTotalDrag(float *parasiticDrag, float *inducedDrag, float *waveDrag, float *relativeSpeed, Vector3 *relativeVelocity, float simulationTime, AircraftState *aircraft, AircraftData *data);
+float calculateTotalDrag(float *parasiticDrag, float *inducedDrag, float *waveDrag, float *relativeSpeed, Vector3 *relativeVelocity, AircraftState *aircraft, PhysicsData *physicsData);
 
 /*
     #########################################################
@@ -305,11 +360,11 @@ float calculateTotalDrag(float *parasiticDrag, float *inducedDrag, float *waveDr
  * 
  * @param thrust The thrust value.
  * @param afterburnerThrust The afterburner thrust value.
- * @param aircraft Pointer to the AircraftState structure.
  * @param percentControl The throttle control percentage.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The thrust in Newtons.
  */
-float calculateThrust(int thrust, int afterburnerThrust, AircraftState *aircraft, int percentControl);
+float calculateThrust(int thrust, int afterburnerThrust, int percentControl, PhysicsData *physicsData);
 
 /*
     #########################################################
@@ -341,9 +396,9 @@ Vector3 getDirectionVector(Orientation newOrientation);
  * @param aircraft Pointer to the AircraftState structure.
  * @param deltaTime The time step in seconds.
  * @param data Pointer to the AircraftData structure.
- * @param simulationTime The simulation time in seconds.
+ * @param physicsData Pointer to the PhysicsData structure.
  */
-void updateVelocity(AircraftState *aircraft, float deltaTime, AircraftData *data, float simulationTime);
+void updateVelocity(AircraftState *aircraft, float deltaTime, AircraftData *data, PhysicsData *physicsData);
 
 /*
     #########################################################
@@ -357,25 +412,26 @@ void updateVelocity(AircraftState *aircraft, float deltaTime, AircraftData *data
  * @brief Get the temperature in Kelvin at a given altitude.
  * 
  * @param altitudeMeters The altitude in meters.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The temperature in Kelvin.
  */
-float getTemperatureKelvin(float altitudeMeters);
+float getTemperatureKelvin(float altitudeMeters, PhysicsData *physicsData);
 
 /**
  * @brief Get the pressure at a given altitude.
  * 
- * @param altitudeMeters The altitude in meters.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The pressure in Pascals.
  */
-float getPressureAtAltitude(float altitudeMeters);
+float getPressureAtAltitude(PhysicsData *physicsData);
 
 /**
  * @brief Calculate the True Airspeed (TAS) for the aircraft.
  * 
- * @param aircraft Pointer to the AircraftState structure.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The True Airspeed (TAS) in m/s.
  */
-float calculateTAS(AircraftState *aircraft);
+float calculateTAS(PhysicsData *physicsData);
 
 /*
     #########################################################
@@ -438,18 +494,19 @@ float convertMsToKmh(float ms);
  * @brief Calculate the speed of sound at a given altitude.
  * 
  * @param altitude The altitude in meters.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The speed of sound in m/s.
  */
-float calculateSpeedOfSound(float altitude);
+float calculateSpeedOfSound(float altitude, PhysicsData *physicsData);
 
 /**
  * @brief Convert speed from m/s to Mach number.
  * 
  * @param ms The speed in m/s.
- * @param altitude The altitude in meters.
+ * @param physicsData Pointer to the PhysicsData structure.
  * @return The Mach number.
  */
-float convertMsToMach(float ms, float altitude);
+float convertMsToMach(float ms, PhysicsData *physicsData);
 
 /**
  * @brief Interpolate air density between two altitudes.
@@ -471,13 +528,26 @@ float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float uppe
     #########################################################
 */
 
+void updatePhysicsData(PhysicsData *physics, float altitude, AircraftState *aircraft, AircraftData *data, float simulationTime);
+
 /**
- * @brief Update the physics state of the aircraft.
- * 
- * @param aircraft Pointer to the AircraftState structure.
- * @param deltaTime The time step in seconds.
- * @param simulationTime The simulation time in seconds.
- * @param aircraftData Pointer to the AircraftData structure.
+ * @brief Computes the acceleration of the aircraft based on its current velocity and state.
+ *
+ * @param velocity The current velocity of the aircraft.
+ * @param aircraft A pointer to the current state of the aircraft.
+ * @param aircraftData A pointer to the data specific to the aircraft model.
+ * @param physicsData A pointer to the physics data structure.
+ * @return The computed acceleration as a Vector3.
+ */
+Vector3 computeAcceleration(Vector3 velocity, AircraftState *aircraft, AircraftData *aircraftData, PhysicsData *physicsData);
+
+/**
+ * @brief Updates the physics state of the aircraft.
+ *
+ * @param aircraft A pointer to the current state of the aircraft.
+ * @param deltaTime The time step for the update.
+ * @param simulationTime The current time in the simulation.
+ * @param aircraftData A pointer to the data specific to the aircraft model.
  */
 void updatePhysics(AircraftState *aircraft, float deltaTime, float simulationTime, AircraftData *aircraftData);
 #endif // PHYSICS_H

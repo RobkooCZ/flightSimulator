@@ -26,8 +26,33 @@ Every update to this **Flight Simulator** will be documented in this file. Lates
         - [0.3.0.2](#version-0252---26022025)
         - [0.3.0.3](#version-0253---26022025)
     - [0.3.1](#version-031---28022025) - "Visual update"
+    - [0.3.2](#version-032---232025) - "Optimization update"
 
 ---
+
+## [Version 0.3.2] - 2.3.2025
+
+## Added
+- Logger.c (/.h) for easier debugging and logging of values
+
+## Changed
+- Now using RK4 (Runge-Kutta 4th Order) for updating the aircraft's physics, instead of Euler's integration. Some of the improvements of RK4 over Euler's integration include:
+    - Higher precision if FPS goes down,
+    - Higher precision during manouvers (such as changes in pitch, yaw, etc.),
+    - Higher precision if the simulation exhibits non-linear behaviour.
+- Optimized the physics.c file in ways like:
+    - Made a global structure "globalPhysicsData" which holds all physics data that was calculated multiple times in code.
+    - Function to fill this structure with values to avoid unnecessary calculations in functions and sub-functions.
+    - This struct is also used in printing out to the screen, as it has all the data it needs.
+    - Made constants for the whole physics.c file for things like:
+        - Air density at sea level,
+        - Temperature at sea level,
+        - Lapse rate,
+        - etc.
+
+## Fixed
+- Fixed some errors in the formulas I've been using (Lift coefficient, flight path angle)
+- Fixed not being able to run executable from just the build folder (it wouldn't find data/aircraftSimulator.txt)
 
 ## [Version 0.3.1] - 28.02.2025
 

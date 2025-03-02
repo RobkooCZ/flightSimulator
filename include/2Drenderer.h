@@ -135,11 +135,8 @@ void drawNeedle(SDL_Renderer *localRenderer, int centerX, int centerY, int radiu
  * @param localRenderer The SDL renderer.
  * @param cx The x-coordinate of the counter center.
  * @param cy The y-coordinate of the counter center.
- * @param radius The radius of the counter.
- * @param speed The current speed.
- * @param alt The current altitude.
  */
-void machCounter(SDL_Renderer* localRenderer, int cx, int cy, float speed, int alt);
+void machCounter(SDL_Renderer* localRenderer, int cx, int cy);
 
 /**
  * @brief Render the speed gauge.
@@ -151,9 +148,8 @@ void machCounter(SDL_Renderer* localRenderer, int cx, int cy, float speed, int a
  * @param radius The radius of the gauge.
  * @param speed The current speed.
  * @param maxSpeed The maximum speed.
- * @param alt The current altitude.
  */
-void renderSpeedGauge(SDL_Renderer* renderer, TTF_Font* localFont, int cx, int cy, int radius, float speed, float maxSpeed, int alt);
+void renderSpeedGauge(SDL_Renderer* renderer, TTF_Font* localFont, int cx, int cy, int radius, float speed, float maxSpeed);
 
 /*
     #########################################################

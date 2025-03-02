@@ -59,28 +59,28 @@ static int textMode = 1; // Toggle mode (1 = text, 0 = visual)
     #########################################################
 */
 
-void calculateFlightParameters(AircraftState *aircraft, AircraftData *aircraftData, 
-                               float *engineOutput, float *totalDrag, float *netForce, 
-                               float *relativeSpeed, Vector3 *relativeVelocity,
-                               float *parasiticDrag, float *inducedDrag, float *shockwaveDrag,
-                               float *dragCoefficient, float simulationTime){
-    // Calculate engine output based on throttle and afterburner status
-    *engineOutput = calculateThrust(
-        aircraftData->thrust, 
-        aircraftData->afterburnerThrust, 
-        aircraft, 
-        (int)(aircraft->controls.throttle * 100)
-    );
+// void calculateFlightParameters(AircraftState *aircraft, AircraftData *aircraftData, 
+//                                float *engineOutput, float *totalDrag, float *netForce, 
+//                                float *relativeSpeed, Vector3 *relativeVelocity,
+//                                float *parasiticDrag, float *inducedDrag, float *shockwaveDrag,
+//                                float *dragCoefficient, float simulationTime){
+//     // Calculate engine output based on throttle and afterburner status
+//     *engineOutput = calculateThrust(
+//         aircraftData->thrust, 
+//         aircraftData->afterburnerThrust, 
+//         aircraft, 
+//         (int)(aircraft->controls.throttle * 100)
+//     );
 
-    // Calculate total drag, including parasitic, induced, and shockwave drag
-    *totalDrag = calculateTotalDrag(parasiticDrag, inducedDrag, shockwaveDrag, relativeSpeed, relativeVelocity, simulationTime, aircraft, aircraftData);
+//     // Calculate total drag, including parasitic, induced, and shockwave drag
+//     *totalDrag = calculateTotalDrag(parasiticDrag, inducedDrag, shockwaveDrag, relativeSpeed, relativeVelocity, aircraft, aircraftData);
 
-    // Calculate drag coefficient based on relative speed, max speed, altitude, and a constant C_D0
-    *dragCoefficient = calculateDragCoefficient(*relativeSpeed, convertKmhToMs(aircraftData->maxSpeed), aircraft->y, C_D0);
+//     // Calculate drag coefficient based on relative speed, max speed, altitude, and a constant C_D0
+//     *dragCoefficient = calculateDragCoefficient(*relativeSpeed, convertKmhToMs(aircraftData->maxSpeed), aircraft->y, C_D0);
 
-    // Calculate net force as the difference between engine output and total drag
-    *netForce = *engineOutput - *totalDrag;
-}
+//     // Calculate net force as the difference between engine output and total drag
+//     *netForce = *engineOutput - *totalDrag;
+// }
 
 void initTextRenderer(void) {
     SDL_Init(SDL_INIT_VIDEO); // Initialize SDL2 video subsystem
@@ -298,9 +298,9 @@ void drawNeedle(SDL_Renderer *localRenderer, int centerX, int centerY, int radiu
     SDL_RenderDrawLine(localRenderer, centerX, centerY, needleEndX, needleEndY);
 }
 
-void machCounter(SDL_Renderer* localRenderer, int cx, int cy, float speed, int alt){
+void machCounter(SDL_Renderer* localRenderer, int cx, int cy){
     // Convert speed from km/h to Mach number based on altitude
-    float mach = convertMsToMach(convertKmhToMs(speed), (float)alt);
+    float mach = globalPhysicsData.machNumber;
 
     // Create a string to hold the Mach number text
     char machText[20];
@@ -335,7 +335,7 @@ void machCounter(SDL_Renderer* localRenderer, int cx, int cy, float speed, int a
     TTF_CloseFont(localFont);
 }
 
-void renderSpeedGauge(SDL_Renderer* localRenderer, TTF_Font* localFont, int cx, int cy, int radius, float speed, float maxSpeed, int alt) {    
+void renderSpeedGauge(SDL_Renderer* localRenderer, TTF_Font* localFont, int cx, int cy, int radius, float speed, float maxSpeed) {    
     // Draw the circle for the gauge
     drawCircle(localRenderer, cx, cy, radius);
 
@@ -351,7 +351,7 @@ void renderSpeedGauge(SDL_Renderer* localRenderer, TTF_Font* localFont, int cx, 
     drawNeedle(localRenderer, cx, cy, radius, speed, maxSpeed);
 
     // Print the Mach number on the gauge
-    machCounter(localRenderer, cx, cy, speed, alt);
+    machCounter(localRenderer, cx, cy);
 
     // Draw "km/h" text slightly above the needle center
     char unitText[] = "km/h"; // Unit text
@@ -469,16 +469,22 @@ void renderFlightInfo(AircraftState *aircraft, AircraftData *aircraftData, float
     SDL_Color color; // Color for text rendering
 
     // Flight parameter calculations
-    float engineOutput, totalDrag, netForce, relativeSpeed, dragCoefficient;
-    float parasiticDrag, inducedDrag, shockwaveDrag;
-    Vector3 relativeVelocity;
+    float engineOutput = globalPhysicsData.thrust;
+    float totalDrag = globalPhysicsData.totalDrag;
+    float netForce = globalPhysicsData.thrust - globalPhysicsData.totalDrag;
+    float relativeSpeed = globalPhysicsData.velocityMagnitude;
+    float dragCoefficient = globalPhysicsData.dragCoefficient;
+    float parasiticDrag = globalPhysicsData.parasiticDrag;
+    float inducedDrag = globalPhysicsData.inducedDrag;
+    float shockwaveDrag = globalPhysicsData.dragDivergence;
+    Vector3 relativeVelocity = globalPhysicsData.windVector;
 
-    // Calculate flight parameters
-    calculateFlightParameters(aircraft, aircraftData, 
-                            &engineOutput, &totalDrag, &netForce, 
-                            &relativeSpeed, &relativeVelocity, 
-                            &parasiticDrag, &inducedDrag, &shockwaveDrag, 
-                            &dragCoefficient, simulationTime);
+    // // Calculate flight parameters
+    // calculateFlightParameters(aircraft, aircraftData, 
+    //                         &engineOutput, &totalDrag, &netForce, 
+    //                         &relativeSpeed, &relativeVelocity, 
+    //                         &parasiticDrag, &inducedDrag, &shockwaveDrag, 
+    //                         &dragCoefficient, simulationTime);
 
     color = (SDL_Color){WHITE}; // Set text color to white
     sprintf(buffer, "FPS: %.2f", fps); // Format FPS text
@@ -511,13 +517,13 @@ void renderFlightInfo(AircraftState *aircraft, AircraftData *aircraftData, float
         renderText(buffer, LEFT_GAP, y, color); y += GAP; // Render speed header text and update y position
 
         color = (SDL_Color){CYAN}; // Set text color to cyan
-        sprintf(buffer, "IAS: %.2f km/h", convertMsToKmh(calculateMagnitude(aircraft->vx, aircraft->vy, aircraft->vz))); // Format IAS text
+        sprintf(buffer, "IAS: %.2f km/h", convertMsToKmh(globalPhysicsData.velocityMagnitude)); // Format IAS text
         renderText(buffer, LEFT_GAP, y, color); y += GAP; // Render IAS text and update y position
 
-        sprintf(buffer, "TAS: %.2f km/h", convertMsToKmh(calculateTAS(aircraft))); // Format TAS text
+        sprintf(buffer, "TAS: %.2f km/h", convertMsToKmh(globalPhysicsData.trueAirspeed)); // Format TAS text
         renderText(buffer, LEFT_GAP, y, color); y += GAP; // Render TAS text and update y position
 
-        sprintf(buffer, "Mach: %.2f", convertMsToMach(calculateTAS(aircraft), aircraft->y)); // Format Mach text
+        sprintf(buffer, "Mach: %.2f", convertMsToMach(globalPhysicsData.trueAirspeed, &globalPhysicsData)); // Format Mach text
         renderText(buffer, LEFT_GAP, y, color); y += GAP; // Render Mach text and update y position
 
         // Wind Info
@@ -574,7 +580,7 @@ void renderFlightInfo(AircraftState *aircraft, AircraftData *aircraftData, float
         sprintf(buffer, "Roll: %.2f°", convertRadiansToDeg(aircraft->roll)); // Format roll text
         renderText(buffer, LEFT_GAP, y, color); y += GAP; // Render roll text and update y position
     } else { // Visual mode
-        renderSpeedGauge(renderer, font, 200, SCREEN_HEIGHT - 200, 175, convertMsToKmh(calculateTAS(aircraft)), aircraftData->maxSpeed, (int)aircraft->y); // Render speed gauge
+        renderSpeedGauge(renderer, font, 200, SCREEN_HEIGHT - 200, 175, convertMsToKmh(globalPhysicsData.trueAirspeed), aircraftData->maxSpeed); // Render speed gauge
         throttleBar(renderer, aircraft->controls.throttle, 200 + 200, SCREEN_HEIGHT - 375); // Render throttle bar
     }
 

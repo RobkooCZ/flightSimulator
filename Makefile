@@ -14,6 +14,7 @@ LDFLAGS = -lm $(shell pkg-config --libs sdl2 SDL2_ttf)  # Link math and SDL2 lib
 SRC_DIR = src
 BUILD_DIR = build
 FONTS_DIR = fonts
+DATA_DIR = data
 
 # Source files
 SRC = $(wildcard $(SRC_DIR)/*.c)
@@ -23,12 +24,13 @@ BIN = $(BUILD_DIR)/flightSimulator
 # Default target
 all: $(BIN)
 
-# Create build folder if it doesn't exist, copy fonts folder, then compile
+# Create build folder if it doesn't exist, copy fonts and data folders, then compile
 $(BIN): $(OBJ)
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $(BIN) $(OBJ) $(LDFLAGS)
-	# Copy the fonts folder into the build directory
+	# Copy the fonts and data folders into the build directory
 	cp -r $(FONTS_DIR) $(BUILD_DIR)/
+	cp -r $(DATA_DIR) $(BUILD_DIR)/
 
 # Compile each .c file into .o in the build folder
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
