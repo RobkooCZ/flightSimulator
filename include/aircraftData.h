@@ -69,6 +69,9 @@ typedef struct {
     float maxAoA; // deg
     float fuelBurn; // kg/s
     float afterburnerFuelBurn; // kg/s
+    float alpha;
+    float kw;
+    float Md;
 } AircraftData;
 
 /**

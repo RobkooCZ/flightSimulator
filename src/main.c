@@ -32,17 +32,25 @@
     #define CLEAR "clear" // Define clear command for Unix-based systems
 #endif
 
+// global var to check if the plane is crashed
+static int crashed = 0;
+
 // Prototype for message function
 void message(void);
 
 // Destructor attribute to call message function after main ends
 __attribute__((destructor))
-void message(void){
+void message(void) {
     printf("\n\n");
     printf("***********************************************\n");
     printf("*                                             *\n");
-    printf("*             Thanks for playing!             *\n");
-    printf("*             See you next time!              *\n");
+    if (crashed) {
+        printf("*           GAME OVER, PLANE CRASHED          *\n");
+    }
+    else {
+        printf("*             Thanks for playing!             *\n");
+        printf("*             See you next time!              *\n");
+    }
     printf("*                                             *\n");
     printf("***********************************************\n");
     printf("\n\n");
@@ -53,46 +61,53 @@ int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
-    long startTime, elapsedTime, previousTime; // Variables for time tracking
-    float deltaTime; // Variable for delta time calculation
-    float fps; // Variable for frames per second calculation
-    AircraftState aircraft; // Variable for aircraft state
-    float simulationTime = 0.0f; // Variable for simulation time
-
-    initAircraft(&aircraft); // Initialize aircraft state
-
-    previousTime = getTimeMicroseconds(); // Get initial time
+    long startTime, elapsedTime, previousTime; // Time tracking variables
+    float deltaTime; // Delta time calculation
+    float fps; // Frames per second calculation
+    AircraftState aircraft;
+    float simulationTime = 0.0f; // Simulation time
 
     // ----- SELECT AIRCRAFT -----
-    Aircraft aircraftList[MAX_AIRCRAFT]; // Array to hold list of aircraft
-    int aircraftCount; // Variable to hold count of aircraft
+    Aircraft aircraftList[MAX_AIRCRAFT]; // Array for aircraft names
+    int aircraftCount; // Count of aircraft
 
-    if (!loadAircraftNames(FILE_PATH, aircraftList, &aircraftCount)) { // Load aircraft names from file
+    if (!loadAircraftNames(FILE_PATH, aircraftList, &aircraftCount)) { // Load names from file
         return 1; // Return error if loading fails
     }
 
-    int selectedIndex = selectAircraft(aircraftList, aircraftCount); // Select aircraft from list
+    int selectedIndex = selectAircraft(aircraftList, aircraftCount); // User selects an aircraft
 
     // Load selected aircraft data
-    AircraftData aircraftData; // Variable to hold aircraft data
-    getAircraftDataByName(FILE_PATH, aircraftList[selectedIndex].name, &aircraftData); // Get data for selected aircraft
+    AircraftData aircraftData; // Structure for aircraft data
+    getAircraftDataByName(FILE_PATH, aircraftList[selectedIndex].name, &aircraftData); // Populate aircraftData
+    maxFuelKgs = (float)aircraftData.fuelCapacity; // kgs
 
-    aircraft.hasAfterburner = (aircraftData.afterburnerThrust != 0); // Set afterburner flag based on aircraft data
+    // Initialize aircraft state using data from file
+    initAircraft(&aircraft, &aircraftData); 
+    aircraft.fuel = 150.0f; // test
+    aircraft.hasAfterburner = (aircraftData.afterburnerThrust != 0); // Update afterburner flag
 
-    // Initialize SDL2 Text Renderer
+    previousTime = getTimeMicroseconds(); // Get initial time
+
+    // Initialize SDL2 Text Renderer and input system
     initTextRenderer(); // Initialize text renderer
-
     startControls(); // Start input thread
 
     SDL_Event event; // Variable for SDL events
-    int running = 1; // Variable to control main loop
+    int running = 1; // Main loop control
 
     system(CLEAR); // Clear console
-    printf("===== Robkoo's Flight simulator debug console =====\n"); // Print debug console message
+    printf("===== Robkoo's Flight simulator debug console =====\n"); // Debug message
 
     // ----- MAIN GAME LOOP -----
     while (running) {
         startTime = getTimeMicroseconds(); // Get start time
+
+        // if the plane is crashed, exit the loop
+        if (aircraft.y <= 0.0f){
+            running = 0; // crashed
+            crashed = 1;
+        }
 
         // Event handling (for input)
         while (SDL_PollEvent(&event)) { // Poll for SDL events

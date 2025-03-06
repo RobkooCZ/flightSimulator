@@ -192,10 +192,7 @@ void drawCircle(SDL_Renderer *localRenderer, int32_t centreX, int32_t centreY, i
     }
 }
 
-void drawTicks(SDL_Renderer *localRenderer, int centerX, int centerY, int radius, int numTicks) {
-    float startAngle = -70.0f;  // Starting angle for 0 km/h (= 20 deg from the top)
-    float endAngle = 250.0f;   // Ending angle for maxSpeed km/h (= -20 deg from the top)
-
+void drawTicks(SDL_Renderer *localRenderer, int centerX, int centerY, int radius, int numTicks, float startAngle, float endAngle) {
     // Calculate the angle step
     float angleStep = (endAngle - startAngle) / (float)(numTicks - 1);
 
@@ -220,10 +217,7 @@ void drawTicks(SDL_Renderer *localRenderer, int centerX, int centerY, int radius
     }
 }
 
-void drawNumbers(SDL_Renderer *localRenderer, int centerX, int centerY, int radius, int numTicks, int maxSpeed) {
-    float startAngle = -70.0f;  // Starting angle for 0 km/h (= 20 deg from the top)
-    float endAngle = 250.0f;    // Ending angle for maxSpeed km/h (= -20 deg from the top)
-
+void drawNumbers(SDL_Renderer *localRenderer, int centerX, int centerY, int radius, int numTicks, float maxValue, float startAngle, float endAngle) {
     TTF_Font *localFont = TTF_OpenFont("fonts/Oswald/Oswald-Medium.ttf", 12);
 
     // Calculate the angle step
@@ -243,7 +237,7 @@ void drawNumbers(SDL_Renderer *localRenderer, int centerX, int centerY, int radi
 
         // Convert the number to a string
         char numberStr[10];
-        sprintf(numberStr, "%d", i * maxSpeed/(numTicks-1)); // Display 0, maxSpeed/26, ...
+        sprintf(numberStr, "%.0f", (float)i * maxValue/(float)(numTicks-1)); // Display 0, maxValue/26, ...
 
         // Render the text
         SDL_Color textColor = {GREEN};  // Text color 
@@ -275,27 +269,23 @@ void drawNumbers(SDL_Renderer *localRenderer, int centerX, int centerY, int radi
     TTF_CloseFont(localFont);
 }
 
-void drawNeedle(SDL_Renderer *localRenderer, int centerX, int centerY, int radius, float speed, float maxSpeed) {
-    // Map speed (0-maxSpeed) to angle (-70° to 250°)
-    float startAngle = -70.0f;  // Starting angle for 0 km/h (= 20 deg from the top)
-    float endAngle = 250.0f;    // Ending angle for maxSpeed km/h (= -20 deg from the top)
-    
-    // Calculate the angle for the given speed
-    float angle = startAngle + ((speed / maxSpeed) * (endAngle - startAngle));
+void drawNeedle(SDL_Renderer *localRenderer, int cx, int cy, int radius, float val, float maxVal, float startAngle, float endAngle){
+    // Calculate the angle for the given val
+    float angle = startAngle + ((val / maxVal) * (endAngle - startAngle));
 
     // Convert the angle to radians
-    float rad = angle * (PI / 180.0f);
+    float rad = convertDegToRadians(angle);
 
     // Needle length
     int needleLength = radius - 30; // The needle will be a bit shorter than the ticks
     
     // Calculate the end position of the needle
-    int needleEndX = (int)((float)centerX + (float)needleLength * cosf(rad));
-    int needleEndY = (int)((float)centerY + (float)needleLength * sinf(rad));
+    int needleEndX = (int)((float)cx + (float)needleLength * cosf(rad));
+    int needleEndY = (int)((float)cy + (float)needleLength * sinf(rad));
 
     // Draw the needle (line from the center to the calculated end point)
     SDL_SetRenderDrawColor(localRenderer, RED);  // Red color for the needle
-    SDL_RenderDrawLine(localRenderer, centerX, centerY, needleEndX, needleEndY);
+    SDL_RenderDrawLine(localRenderer, cx, cy, needleEndX, needleEndY);
 }
 
 void machCounter(SDL_Renderer* localRenderer, int cx, int cy){
@@ -341,14 +331,17 @@ void renderSpeedGauge(SDL_Renderer* localRenderer, TTF_Font* localFont, int cx, 
 
     const int numTicks = 26; // Number of ticks on the gauge
 
+    const float startAngle = -70.0f;
+    const float endAngle = 250.0f;
+
     // Draw the ticks on the gauge
-    drawTicks(localRenderer, cx, cy, radius, numTicks);
+    drawTicks(localRenderer, cx, cy, radius, numTicks, startAngle, endAngle);
 
     // Draw the numbers on the gauge
-    drawNumbers(localRenderer, cx, cy, radius, numTicks, (int)maxSpeed);
+    drawNumbers(localRenderer, cx, cy, radius, numTicks, maxSpeed, startAngle, endAngle);
 
     // Draw the needle indicating the current speed
-    drawNeedle(localRenderer, cx, cy, radius, speed, maxSpeed);
+    drawNeedle(localRenderer, cx, cy, radius, speed, maxSpeed, startAngle, endAngle);
 
     // Print the Mach number on the gauge
     machCounter(localRenderer, cx, cy);
@@ -454,6 +447,92 @@ void throttleBar(SDL_Renderer *localRenderer, float throttle, int x, int y){
 /*
     #########################################################
     #                                                       #
+    #                       FUEL GAUGE                      #
+    #                                                       #
+    #########################################################
+*/
+
+void renderFuelGauge(SDL_Renderer* localRenderer, TTF_Font* localFont, int cx, int cy, int radius, float fuel, float maxFuel){
+    // consts for the drawing
+    const float startAngle = -190.0f;
+    const float endAngle = 10.0f;
+    const int tickCount = 5;
+    
+    drawCircle(localRenderer, cx, cy, radius); // Draw the outer circle
+
+    // draw the ticks for the fuel gauge
+    drawTicks(localRenderer, cx, cy, radius, tickCount, startAngle, endAngle);
+
+    // draw numbers
+    drawNumbers(localRenderer, cx, cy, radius, tickCount, maxFuel/100.0f, startAngle, endAngle);
+
+    // draw the needle
+    drawNeedle(localRenderer, cx, cy, radius, fuel/100.0f, maxFuel/100.0f, startAngle, endAngle);
+
+    TTF_Font *bigFont = TTF_OpenFont("fonts/Oswald/Oswald-Medium.ttf", 50);
+
+    // print the current fuel amount
+    char fuelText[20]; // Buffer for fuel text
+    sprintf(fuelText, "%.1f", fuel/100.0f); // Format the fuel text
+    SDL_Color textColor = {WHITE}; // Set text color to white
+    SDL_Surface* fuelSurface = TTF_RenderText_Solid(bigFont, fuelText, textColor); // Render the fuel text to a surface
+    SDL_Texture* fuelTexture = SDL_CreateTextureFromSurface(localRenderer, fuelSurface); // Create a texture from the surface
+
+    // Get the width and height of the rendered text
+    int fuelWidth = fuelSurface->w;
+    int fuelHeight = fuelSurface->h;
+    // Calculate the position to center the text
+    int fuelX = cx - fuelWidth / 2;
+    int fuelY = cy - fuelHeight + 100;  // Slightly below the center
+
+    // Define the rectangle where the text will be rendered
+    SDL_Rect fuelRect = {fuelX, fuelY, fuelWidth, fuelHeight};
+    // Copy the texture to the renderer at the specified rectangle
+    SDL_RenderCopy(localRenderer, fuelTexture, NULL, &fuelRect);
+
+    // draw FUEL text slightly below the top of the gauge
+    char fuelText2[] = "FUEL"; // text to display
+    SDL_Surface* fuelTextSurface = TTF_RenderText_Solid(localFont, fuelText2, textColor); // Render the unit text to a surface
+    SDL_Texture* fuelTexture2 = SDL_CreateTextureFromSurface(localRenderer, fuelTextSurface); // Create a texture from the surface
+
+    int fuel2Width = fuelTextSurface->w; // Get the width of the unit text
+    int fuel2Height = fuelTextSurface->h; // Get the height of the unit text
+    int fuel2X = cx - fuel2Width / 2; // Calculate the x position to center the text
+    int fuel2Y = cy - radius - fuel2Height + 75; // Calculate the y position slightly above the needle center
+
+    // Define the rectangle where the unit text will be rendered
+    SDL_Rect fuel2Rect = {fuel2X, fuel2Y, fuel2Width, fuel2Height};
+    // Copy the texture to the renderer at the specified rectangle
+    SDL_RenderCopy(localRenderer, fuelTexture2, NULL, &fuel2Rect);
+
+    // draw KGS x 100 text slightly below FUEL
+    char kgsText[] = "KGS x 100"; // Unit text
+    SDL_Surface* kgsTextSurface = TTF_RenderText_Solid(localFont, kgsText, textColor); // Render the unit text to a surface
+    SDL_Texture* kgsTextTexture = SDL_CreateTextureFromSurface(localRenderer, kgsTextSurface); // Create a texture from the surface
+
+    int kgsWidth = kgsTextSurface->w; // Get the width of the unit text
+    int kgsHeight = kgsTextSurface->h; // Get the height of the unit text
+    int kgsX = cx - kgsWidth / 2; // Calculate the x position to center the text
+    int kgsY = cy - radius - kgsHeight + 100; // Calculate the y position slightly above the needle center
+
+    // Define the rectangle where the unit text will be rendered
+    SDL_Rect kgsRect = {kgsX, kgsY, kgsWidth, kgsHeight};
+    // Copy the texture to the renderer at the specified rectangle
+    SDL_RenderCopy(localRenderer, kgsTextTexture, NULL, &kgsRect);
+
+    // Free the textures and surfaces
+    SDL_DestroyTexture(fuelTexture2);
+    SDL_FreeSurface(fuelSurface);
+    SDL_DestroyTexture(fuelTexture);
+    SDL_FreeSurface(fuelTextSurface);
+    SDL_DestroyTexture(kgsTextTexture);
+    SDL_FreeSurface(kgsTextSurface);
+    TTF_CloseFont(bigFont);
+}
+
+/*
+    #########################################################
+    #                                                       #
     #                        RENDERER                       #
     #                                                       #
     #########################################################
@@ -543,7 +622,7 @@ void renderFlightInfo(AircraftState *aircraft, AircraftData *aircraftData, float
 
         if (!aircraft->controls.afterburner) { // Check if afterburner is not active
             color = (SDL_Color){CYAN}; // Set text color to cyan
-            sprintf(buffer, "Throttle: %.0f%%", aircraft->controls.throttle * 100); // Format throttle percentage text
+            sprintf(buffer, "Throttle: %.0d%%", (int)(aircraft->controls.throttle * 100.0f)); // Format throttle percentage text
         } else { // Afterburner is active
             color = (SDL_Color){RED}; // Set text color to red
             sprintf(buffer, "Throttle: WEP"); // Format throttle WEP text
@@ -582,6 +661,7 @@ void renderFlightInfo(AircraftState *aircraft, AircraftData *aircraftData, float
     } else { // Visual mode
         renderSpeedGauge(renderer, font, 200, SCREEN_HEIGHT - 200, 175, convertMsToKmh(globalPhysicsData.trueAirspeed), aircraftData->maxSpeed); // Render speed gauge
         throttleBar(renderer, aircraft->controls.throttle, 200 + 200, SCREEN_HEIGHT - 375); // Render throttle bar
+        renderFuelGauge(renderer, font, SCREEN_WIDTH - 200, SCREEN_HEIGHT - 200, 175, aircraft->fuel, maxFuelKgs); // Render fuel gauge
     }
 
     const int controlsX = RIGHT_GAP; // X position for controls text

@@ -8,6 +8,7 @@
 
 // Include controls.h for the aircraft controls structure
 #include "controls.h"
+#include "aircraftData.h"
 
 // Include stdbool for AircraftState boolean value
 #include <stdbool.h>
@@ -84,12 +85,25 @@ typedef struct AircraftState {
     float thrust; // N
     bool hasAfterburner;
 
-    // Fuel level (updated as fuel burns) [TODO]
-    // float fuel;
+    // Fuel level (updated as fuel burns) (in kg)
+    float fuel;
+
+    float currentMass; //(in kg) = empty mass + fuel
 
     // controls
     AircraftControls controls;
 } AircraftState;
+
+/**
+ * @brief Get empty mass and max fuel of the selected aircraft.
+ * 
+ * This function gets the empty mass and max fuel of the selected aircraft.
+ * 
+ * @param aircraftData Pointer to the AircraftData structure.
+ * @param emptyMass Pointer to the empty mass of the aircraft.
+ * @param maxFuel Pointer to the max fuel of the aircraft.
+ */
+void getEmptyMassAndMaxFuel(AircraftData *aircraftData, float *emptyMass, float *maxFuel);
 
 /**
  * @brief Initializes the aircraft state.
@@ -97,8 +111,9 @@ typedef struct AircraftState {
  * This function sets the initial values for the aircraft state.
  * 
  * @param aircraft Pointer to the AircraftState structure to initialize.
+ * @param data Pointer to the AircraftData structure for the aircraft.
  */
-void initAircraft(AircraftState *aircraft);
+void initAircraft(AircraftState *aircraft, AircraftData *data);
 
 /**
  * @brief Updates the aircraft state based on the elapsed time.

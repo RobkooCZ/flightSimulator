@@ -102,13 +102,21 @@ typedef struct {
 } PhysicsData;
 
 extern PhysicsData globalPhysicsData;
+extern float maxFuelKgs;
+
+/**
+ * @brief Fill constants for the aircraft.
+ * 
+ * @param data Pointer to the AircraftData structure.
+ */
+void fillConstants(AircraftData *data);
 
 /*
     #########################################################
     #                                                       #
     #                      AIR DENSITY                      #
     #                                                       #
-    #########################################################
+    #########################################################   
 */
 
 /**
@@ -519,6 +527,42 @@ float convertMsToMach(float ms, PhysicsData *physicsData);
  * @return The interpolated air density in kg/m^3.
  */
 float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float upperDensity, float targetAltitude);
+
+/*
+    #########################################################
+    #                                                       #
+    #                        FUEL                           #
+    #                                                       #
+    #########################################################
+*/
+
+/**
+ * @brief Get the current fuel consumption rate for the aircraft.
+ * 
+ * @param data Pointer to the AircraftData structure.
+ * @param throttle The throttle control (0.00 - 1.01)
+ * @returns The fuel consumption rate in kg/s.
+ */
+float getFuelBurnRate(AircraftData *data, float throttle);
+
+/**
+ * @brief Update the fuel level for the aircraft.
+ * 
+ * @param fuelKG Pointer to the fuel level.
+ * @param deltaTime The time step in seconds.
+ * @param fuelBurnRate The fuel burn rate in kg/s.
+ */
+void updateFuelLevel(float *fuelKg, float deltaTime, float fuelBurnRate);
+
+/**
+ * @brief Update the mass of the aircraft.
+ * 
+ * @param aircraft Pointer to the AircraftState structure.
+ * @param data Pointer to the AircraftData structure.
+ * @param fuelBurnRate The fuel burn rate in kg/s.
+ * @param deltaTime The time step in seconds.
+ */
+void updateAircraftMass(AircraftState *aircraft, AircraftData *data, float fuelBurnRate, float deltaTime);
 
 /*
     #########################################################

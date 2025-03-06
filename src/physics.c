@@ -12,6 +12,7 @@
 // Include header files
 #include "controls.h"
 #include "weather.h"
+#include "aircraftData.h"
 #include "logger.h"
 
 // Include libraries
@@ -21,6 +22,9 @@
 
 // Declare a global struct for the physics data
 PhysicsData globalPhysicsData;
+
+// global max fuel var
+float maxFuelKgs = 0; // 0 base value
 
 /* Atmospheric Constants */
 const float airDensityAtSeaLevel = 1.225f;        // Sea-level air density in kg/m³
@@ -38,12 +42,74 @@ const float Kt = -0.0065f;                        // Temperature lapse rate in t
 const float baseSpeedOfSoundFactor = 340.29f;     // Factor to compute speed of sound below tropopause
 
 /* Drag Coefficient Constants */
-const float alpha = 0.1f;                         // Drag rise constant for transonic speeds
-const float kw = 30.0f;                           // Drag rise constant for supersonic speeds
-const float Md = 0.89f;                           // Drag divergence Mach number
+float alpha, kw, Md;
+
+void fillConstants(AircraftData *data){
+    alpha = data->alpha;
+    kw = data->kw;
+    Md = data->Md;
+}
 
 /* Pressure Calculation */
 const float P0 = 101325.0f;                       // Sea-level atmospheric pressure in Pascals
+
+// if values at any time go above these defined limits, raise a warning
+#define SPEED_LIMIT 4096
+#define ALT_LIMIT 32767
+#define THROTTLE_LIMIT 1.01f
+
+// if values go below these defined limits, raise a warning
+#define BOTTOM_SPEED_LIMIT 0 // will be changed later when planes can go in reverse (such as viggen having reverse thrust)
+#define BOTTOM_ALT_LIMIT 0
+#define BOTTOM_THROTTLE_LIMIT 0
+
+// define some made up coefficients to tweak physics to be more arcade-ish (M stands for made up)
+#define M_DRAG_COEFFICIENT 0.8f;
+
+// Define macros to check if values are within limits
+
+#define CHECK_ALT_LIMIT(alt, fn) \
+    if (alt < BOTTOM_ALT_LIMIT) { \
+        logMessage(LOG_WARNING, "Altitude at function %s is below the defined limit. (%dm)", fn, BOTTOM_ALT_LIMIT); \
+    }  \
+    else if (alt > ALT_LIMIT) { \
+        logMessage(LOG_WARNING, "Altitude at function %s is above the defined limit. (%dm)", fn, ALT_LIMIT); \
+    }
+
+#define CHECK_SPEED_LIMIT(speed, fn) \
+    if (speed < BOTTOM_SPEED_LIMIT) { \
+        logMessage(LOG_WARNING, "Speed at function %s is below the defined limit. (%dkm/h)", fn, BOTTOM_SPEED_LIMIT); \
+    } \
+    else if (speed > SPEED_LIMIT) { \
+        logMessage(LOG_WARNING, "Speed at function %s is above the defined limit. (%dkm/h)", fn, SPEED_LIMIT); \
+    }
+
+#define CHECK_THROTTLE_LIMIT(throttle, fn) \
+    if (throttle < BOTTOM_THROTTLE_LIMIT) { \
+        logMessage(LOG_WARNING, "Throttle at function %s is below the defined limit. (%.2f)", fn, BOTTOM_THROTTLE_LIMIT); \
+    } \
+    else if (throttle > THROTTLE_LIMIT) { \
+        logMessage(LOG_WARNING, "Throttle at function %s is above the defined limit. (%.2f)", fn, THROTTLE_LIMIT); \
+    }
+
+// Define a macro to check if a pointer is null.
+#define CHECK_PTR(ptr, ptrName, fn, retVal)\
+    do { \
+        if (ptr == NULL) { \
+            logMessage(LOG_ERROR, "Pointer %s in function %s is NULL.", ptrName, fn); \
+            return retVal; \
+        } \
+    }while(0);
+
+// Define a macro to check if a var is NaN.
+#define CHECK_VAR(var, varName, fn, retVal)\
+    do { \
+        if (isnan(var)) { \
+        logMessage(LOG_ERROR, "Variable %s in function %s is NaN.", varName, fn); \
+        return retVal; \
+        } \
+    }while(0);
+
 /*
     #########################################################
     #                                                       #
@@ -60,6 +126,10 @@ float getTropopause(void){
 }
 
 float getAirDensity(float altitude, PhysicsData *physicsData){
+    // Check for errors or warnings
+    CHECK_ALT_LIMIT(altitude, "getAirDensity");
+    CHECK_PTR(physicsData, "physicsData", "getAirDensity", 0.0f);
+
     float tropopause = physicsData->tropopauseAltitude; // the altitude of the tropopause
 
     // If the plane is below or at the tropopause
@@ -84,14 +154,21 @@ float getAirDensity(float altitude, PhysicsData *physicsData){
 */
 
 float convertDegToRadians(float degrees){
+    // Check for errors or warnings
+    CHECK_VAR(degrees, "degrees", "convertDegToRadians", 0.0f);
+
     return degrees * (PI / 180.0f); // convert degrees to radians
 }
 
 LAV calculateLAV(AircraftState *aircraft){
+    LAV lav = {0.0f, 0.0f, 0.0f};
+    
+    // Check for errors or warnings
+    CHECK_PTR(aircraft, "aircraft", "calculateLAV", lav);
+
     float pitchRad = aircraft->pitch;
     float yawRad = aircraft->yaw;
 
-    LAV lav;
     lav.lx = cosf(pitchRad) * cosf(yawRad);  // X component of LAV
     lav.ly = cosf(pitchRad) * sinf(yawRad);  // Y component of LAV
     lav.lz = sinf(pitchRad);                 // Z component of LAV
@@ -99,25 +176,37 @@ LAV calculateLAV(AircraftState *aircraft){
 }
 
 float calculateMagnitude(float x, float y, float z) {
+    // check all vars to make sure none are NaN
+    CHECK_VAR(x, "x", "calculateMagnitude", 0.0f);
+    CHECK_VAR(y, "y", "calculateMagnitude", 0.0f);
+    CHECK_VAR(z, "z", "calculateMagnitude", 0.0f);
+
     return sqrtf(x * x + y * y + z * z); // calculate the magnitude of a vector
 }
 
 float calculateDotProduct(LAV lav, float vx, float vy, float vz) {
+    // check all vars to make sure none are NaN
+    CHECK_VAR(vx, "vx", "calculateDotProduct", 0.0f);
+    CHECK_VAR(vy, "vy", "calculateDotProduct", 0.0f);
+    CHECK_VAR(vz, "vz", "calculateDotProduct", 0.0f);
+
     return vx * lav.lx + vy * lav.ly + vz * lav.lz; // calculate the dot product
 }
 
 float calculateAoA(AircraftState *aircraft) {
-    const float treshold = 1e-6f; // avoid division by zero
+    // Check for errors or warnings
+    CHECK_PTR(aircraft, "aircraft", "calculateAoA", 0.0f);
 
-    if (fabsf(aircraft->vx) < treshold) {
-        return 0.0f; // avoid division by zero
+    if (aircraft->vx < 1e-6f) { // Prevent division by zero
+        if (aircraft->vz > 0.0f){
+            return 90.0f;
+        }
+        else{
+            return -90.0f;
+        }
     }
 
-    float gamma = atanf(aircraft->vy / aircraft->vx); // calculate flight path angle
-
-    float aoa = aircraft->pitch - gamma; // calculate angle of attack
-
-    return aoa;
+    return atanf(aircraft->vz / aircraft->vx); // calculate the angle of attack
 }
 
 /*
@@ -129,13 +218,32 @@ float calculateAoA(AircraftState *aircraft) {
 */
 
 float getFlightPathAngle(AircraftState *aircraft, PhysicsData *physicsData){
+    // Check for errors or warnings
+    CHECK_PTR(aircraft, "aircraft", "getFlightPathAngle", 0.0f);
+    CHECK_PTR(physicsData, "physicsData", "getFlightPathAngle", 0.0f);
+
     float TAS = physicsData->trueAirspeed; // calculate true airspeed
-    return asinf(aircraft->vy / TAS);      // use vy (vertical component) for flight path angle
+    float ratio = aircraft->vy / TAS;
+
+    if (ratio > 1.0f) {
+        ratio = 1.0f;
+    }
+    else if (ratio < -1.0f) {
+        ratio = -1.0f;
+    }
+
+    return asinf(ratio);  
 }
 
 float calculateLiftCoefficient(float mass, AircraftState *aircraft, float wingArea, PhysicsData *physicsData){
-    const float airDensity = physicsData->airDensity; // get air density at current altitude
-    float TAS = physicsData->trueAirspeed; // calculate true airspeed
+    // Check for errors or warnings
+    CHECK_PTR(aircraft, "aircraft", "calculateLiftCoefficient", 0.0f);
+    CHECK_PTR(physicsData, "physicsData", "calculateLiftCoefficient", 0.0f);
+    CHECK_VAR(mass, "mass", "calculateLiftCoefficient", 0.0f);
+    CHECK_VAR(wingArea, "wingArea", "calculateLiftCoefficient", 0.0f);
+
+    const float airDensity = physicsData->airDensity; // air density at current altitude
+    float TAS = physicsData->trueAirspeed; // true airspeed
     float numerator = mass * GRAVITY; // calculate lift force numerator
     float denumerator = 0.5f * airDensity * powf(TAS, 2) * wingArea; // calculate lift force denominator
 
@@ -158,6 +266,10 @@ float calculateLiftCoefficient(float mass, AircraftState *aircraft, float wingAr
 }
 
 float calculateLift(float wingArea, PhysicsData *physicsData) {
+    // check for errors or warnings
+    CHECK_VAR(wingArea, "wingArea", "calculateLift", 0.0f);
+    CHECK_PTR(physicsData, "physicsData", "calculateLift", 0.0f);
+
     float V = physicsData->trueAirspeed; // calculate true airspeed
     float rho = physicsData->airDensity;  // get air density at current altitude
     float S = wingArea; // wing area for the plane (in m^2)
@@ -175,6 +287,12 @@ float calculateLift(float wingArea, PhysicsData *physicsData) {
 */
 
 Vector3 getUnitVector(AircraftState *aircraft, PhysicsData *physicsData){
+    Vector3 vector = {0.0f, 0.0f, 0.0f};
+
+    // Check for errors or warnings
+    CHECK_PTR(aircraft, "aircraft", "getUnitVector", vector);
+    CHECK_PTR(physicsData, "physicsData", "getUnitVector", vector);
+
     float magnitude = physicsData->velocityMagnitude;
     if (magnitude < 0.0001f) { // Prevent division by zero
         return (Vector3){0.0f, 0.0f, 0.0f}; 
@@ -185,7 +303,10 @@ Vector3 getUnitVector(AircraftState *aircraft, PhysicsData *physicsData){
 }
 
 Vector3 rotateAroundVector(Vector3 V, Vector3 K, float theta) {
-    Vector3 rotated;
+    Vector3 rotated = {0.0f, 0.0f, 0.0f};
+
+    // check if theta isnt NaN
+    CHECK_VAR(theta, "theta", "rotateAroundVector", rotated);
 
     // Compute cross product (K × V)
     Vector3 cross = vectorCross(K, V);
@@ -202,11 +323,15 @@ Vector3 rotateAroundVector(Vector3 V, Vector3 K, float theta) {
 }
 
 Vector3 getRightWingDirection(AircraftState *aircraft, PhysicsData *physicsData){
-    Vector3 wingRight;
+    Vector3 wingRight = {0.0f, 0.0f, 0.0f};
+
+    // Check for errors or warnings
+    CHECK_PTR(aircraft, "aircraft", "getRightWingDirection", wingRight);
+    CHECK_PTR(physicsData, "physicsData", "getRightWingDirection", wingRight);
 
     // Base right-wing direction (ignoring roll)
     wingRight.x = cosf(aircraft->yaw);
-    wingRight.y = 0;
+    wingRight.y = 0.0f;
     wingRight.z = -sinf(aircraft->yaw);
 
     // Get unit velocity vector (Vunit)
@@ -235,6 +360,14 @@ Vector3 getLiftAxisVector(Vector3 wingRight, Vector3 unitVector){
 }
 
 Vector3 computeLiftForceComponents(AircraftState *aircraft, float wingArea, float coefficientLift, PhysicsData *physicsData) {
+    Vector3 returnVector = {0.0f, 0.0f, 0.0f};
+
+    // check for errors or warnings
+    CHECK_PTR(aircraft, "aircraft", "computeLiftForceComponents", returnVector);
+    CHECK_PTR(physicsData, "physicsData", "computeLiftForceComponents", returnVector);
+    CHECK_VAR(wingArea, "wingArea", "computeLiftForceComponents", returnVector);
+    CHECK_VAR(coefficientLift, "coefficientLift", "computeLiftForceComponents", returnVector);
+    
     // TAS
     float TAS = physicsData->trueAirspeed;
 
@@ -291,10 +424,24 @@ Vector3 computeLiftForceComponents(AircraftState *aircraft, float wingArea, floa
 */
 
 float calculateAspectRatio(float wingspan, float wingArea) {
+    if (wingArea < 1e-6f) { // Prevent division by zero
+        return 0.0f;
+    }
+
+    // check for errors or warnings
+    CHECK_VAR(wingspan, "wingspan", "calculateAspectRatio", 0.0f);
+    CHECK_VAR(wingArea, "wingArea", "calculateAspectRatio", 0.0f);
+
     return wingspan * wingspan / wingArea; // calculate and return aspect ratio
 }
 
 float calculateDragCoefficient(float speed, float maxSpeed, float C_d0, PhysicsData *physicsData){
+    // check for errors or warnings
+    CHECK_VAR(convertMsToKmh(speed), "speed", "calculateDragCoefficient", 0.0f);
+    CHECK_VAR(maxSpeed, "maxSpeed", "calculateDragCoefficient", 0.0f);
+    CHECK_VAR(C_d0, "C_d0", "calculateDragCoefficient", 0.0f);
+    CHECK_PTR(physicsData, "physicsData", "calculateDragCoefficient", 0.0f);
+
     float mach = speed / physicsData->speedOfSound; // calculate Mach number
 
     if (mach < 0.8f) { // Subsonic flight (Mach < 0.8)
@@ -309,25 +456,55 @@ float calculateDragCoefficient(float speed, float maxSpeed, float C_d0, PhysicsD
 }
 
 float calculateParasiticDrag(float C_d, float airDensity, float speed, float wingArea) {
-    return 0.5f * C_d * airDensity * powf(speed, 2) * wingArea; // calculate and return parasitic drag
+    // check for errors or warnings
+    CHECK_VAR(C_d, "C_d", "calculateParasiticDrag", 0.0f);
+    CHECK_VAR(airDensity, "airDensity", "calculateParasiticDrag", 0.0f);
+    CHECK_SPEED_LIMIT(convertMsToKmh(speed), "calculateParasiticDrag");
+    CHECK_VAR(convertMsToKmh(speed), "speed", "calculateParasiticDrag", 0.0f);
+    CHECK_VAR(wingArea, "wingArea", "calculateParasiticDrag", 0.0f);
+
+    return (0.5f * C_d * airDensity * powf(speed, 2) * wingArea) * M_DRAG_COEFFICIENT; // calculate and return parasitic drag
 }
 
 float calculateInducedDrag(float liftCoefficient, float aspectRatio, float airDensity, float wingArea, float speed) {
+    // check for errors or warnings
+    CHECK_VAR(liftCoefficient, "liftCoefficient", "calculateInducedDrag", 0.0f);
+    CHECK_VAR(aspectRatio, "aspectRatio", "calculateInducedDrag", 0.0f);
+    CHECK_VAR(airDensity, "airDensity", "calculateInducedDrag", 0.0f);
+    CHECK_VAR(wingArea, "wingArea", "calculateInducedDrag", 0.0f);
+    CHECK_SPEED_LIMIT(convertMsToKmh(speed), "calculateInducedDrag");
+    CHECK_VAR(convertMsToKmh(speed), "speed", "calculateInducedDrag", 0.0f);
+
     if (speed < 0.1f) return 0.0f; // Prevent divide-by-zero issues for very low speeds
 
-    return 0.5f * airDensity * powf(speed, 2) * wingArea * ((liftCoefficient * liftCoefficient) / (PI * aspectRatio * OEF)); // calculate and return induced drag
+    return (0.5f * airDensity * powf(speed, 2) * wingArea * ((liftCoefficient * liftCoefficient) / (PI * aspectRatio * OEF))) * M_DRAG_COEFFICIENT; // calculate and return induced drag
 }
 
 float calculateDragDivergenceAroundMach(float speed, PhysicsData *physicsData){
+    // check for errors or warnings
+    CHECK_SPEED_LIMIT(convertMsToKmh(speed), "calculateDragDivergenceAroundMach");
+    CHECK_VAR(convertMsToKmh(speed), "speed", "calculateDragDivergenceAroundMach", 0.0f);
+    CHECK_PTR(physicsData, "physicsData", "calculateDragDivergenceAroundMach", 0.0f);
+
     float mach = speed / physicsData->speedOfSound; // get current Mach speed
 
     float Cdw = 0;
     if (mach > Md) Cdw = C_D0 * kw * powf((mach - Md), 2); // if Mach > Md, calculate additional drag
 
-    return Cdw; // return drag divergence
+    return Cdw * M_DRAG_COEFFICIENT; // return drag divergence
 }
 
 float calculateTotalDrag(float *parasiticDrag, float *inducedDrag, float *waveDrag, float *relativeSpeed, Vector3 *relativeVelocity, AircraftState *aircraft, PhysicsData *physicsData){
+    // check for errors or warnings
+    // in some cases, i pass null intentionally as to ignore the pointers.
+    // CHECK_PTR(parasiticDrag, "parasiticDrag", "calculateTotalDrag", 0.0f);
+    // CHECK_PTR(inducedDrag, "inducedDrag", "calculateTotalDrag", 0.0f);
+    // CHECK_PTR(waveDrag, "waveDrag", "calculateTotalDrag", 0.0f);
+    // CHECK_PTR(relativeSpeed, "relativeSpeed", "calculateTotalDrag", 0.0f);
+    // CHECK_PTR(relativeVelocity, "relativeVelocity", "calculateTotalDrag", 0.0f);
+    CHECK_PTR(aircraft, "aircraft", "calculateTotalDrag", 0.0f);
+    CHECK_PTR(physicsData, "physicsData", "calculateTotalDrag", 0.0f);
+
     Vector3 wind = physicsData->windVector; // get wind vector
     float tas = physicsData->trueAirspeed; // get true airspeed
 
@@ -382,6 +559,9 @@ float calculateTotalDrag(float *parasiticDrag, float *inducedDrag, float *waveDr
 */
 
 float calculateThrust(int thrust, int afterburnerThrust, int percentControl, PhysicsData *physicsData){
+    // check for errors or warnings
+    CHECK_PTR(physicsData, "physicsData", "calculateThrust", 0.0f);
+
     int usedThrust;
     bool afterBurnerOn;
 
@@ -458,7 +638,12 @@ Vector3 getDirectionVector(Orientation newOrientation){
     return directionVector; // Return the direction vector
 }
 
-void updateVelocity(AircraftState *aircraft, float deltaTime, AircraftData *data, PhysicsData *physicsData){    
+void updateVelocity(AircraftState *aircraft, float deltaTime, AircraftData *data, PhysicsData *physicsData){   
+    // Check for errors or warnings
+    CHECK_PTR(aircraft, "aircraft", "updateVelocity", );
+    CHECK_PTR(data, "data", "updateVelocity", );
+    CHECK_PTR(physicsData, "physicsData", "updateVelocity", );
+
     // UPDATE VX
     const float T = physicsData->thrust;
     const float D = physicsData->totalDrag;
@@ -473,11 +658,11 @@ void updateVelocity(AircraftState *aircraft, float deltaTime, AircraftData *data
     const float ay = (L - W) / data->mass; // Calculate acceleration in y direction
     aircraft->vy += ay * deltaTime; // Update velocity in y direction
 
-    // COMPUTE FLIGHT PATH ANGLE (γ)
-    const float gamma = atan2f(aircraft->vy, aircraft->vx); // Calculate flight path angle
+    // // COMPUTE FLIGHT PATH ANGLE (γ)
+    // const float gamma = atan2f(aircraft->vy, aircraft->vx); // Calculate flight path angle
 
-    // COMPUTE ANGLE OF ATTACK (AoA)
-    aircraft->AoA = aircraft->pitch - gamma; // Calculate angle of attack
+    // // GET AOA
+    // const float aoa = physicsData->angleOfAttack; // Get angle of attack
 }
 
 /*
@@ -489,6 +674,11 @@ void updateVelocity(AircraftState *aircraft, float deltaTime, AircraftData *data
 */
 
 float getTemperatureKelvin(float altitudeMeters, PhysicsData *physicsData){
+    // Check for errors or warnings
+    CHECK_ALT_LIMIT(altitudeMeters, "getTemperatureKelvin");
+    CHECK_VAR(altitudeMeters, "altitudeMeters", "getTemperatureKelvin", 0.0f);
+    CHECK_PTR(physicsData, "physicsData", "getTemperatureKelvin", 0.0f);
+
     float tropopause = physicsData->tropopauseAltitude; // get the altitude of the tropopause
 
     if (altitudeMeters > tropopause) { // if the altitude is above the tropopause
@@ -499,6 +689,9 @@ float getTemperatureKelvin(float altitudeMeters, PhysicsData *physicsData){
 }
 
 float getPressureAtAltitude(PhysicsData *physicsData){
+    // Check for errors or warnings
+    CHECK_PTR(physicsData, "physicsData", "getPressureAtAltitude", 0.0f);
+
     const float T = physicsData->temperatureKelvin; // temperature in kelvin
 
     const float exponent = -(GRAVITY/(Kt * R));
@@ -509,6 +702,9 @@ float getPressureAtAltitude(PhysicsData *physicsData){
 }
 
 float calculateTAS(PhysicsData *physicsData){
+    // Check for errors or warnings
+    CHECK_PTR(physicsData, "physicsData", "calculateTAS", 0.0f);
+
     // Get the IAS 
     float IAS = physicsData->velocityMagnitude;
     
@@ -536,7 +732,11 @@ Vector3 vectorCross(Vector3 a, Vector3 b) {
     };
 }
 
-Vector3 getUpVector(AircraftState *aircraft) {    
+Vector3 getUpVector(AircraftState *aircraft) {  
+    Vector3 retV = {0.0f, 0.0f, 0.0f};  
+    // Check for errors or warnings
+    CHECK_PTR(aircraft, "aircraft", "getUpVector", retV);
+
     float cosYaw   = cosf(aircraft->yaw),   sinYaw   = sinf(aircraft->yaw);   // Calculate cosine and sine of yaw
     float cosPitch = cosf(aircraft->pitch), sinPitch = sinf(aircraft->pitch); // Calculate cosine and sine of pitch
     float cosRoll  = cosf(aircraft->roll),  sinRoll  = sinf(aircraft->roll);  // Calculate cosine and sine of roll
@@ -559,18 +759,34 @@ Vector3 getUnitVectorFromVector(Vector3 vector) {
 }
 
 float convertRadiansToDeg(float radians){
+    // Check for errors or warnings
+    CHECK_VAR(radians, "radians", "convertRadiansToDeg", 0.0f);
+
     return radians * (180.0f / PI); // Convert radians to degrees
 }
 
 float convertKmhToMs(float kmh){
+    // Check for errors or warnings
+    CHECK_VAR(kmh, "kmh", "convertKmhToMs", 0.0f);
+    CHECK_SPEED_LIMIT(kmh, "convertKmhToMs");
+    
     return kmh / 3.6f; // Convert km/h to m/s
 }
 
 float convertMsToKmh(float ms){
+    // Check for errors or warnings
+    CHECK_VAR(ms*3.6f, "ms", "convertMsToKmh", 0.0f);
+    CHECK_SPEED_LIMIT(ms*3.6f, "convertMsToKmh");
+
     return ms * 3.6f; // Convert m/s to km/h
 }
 
 float calculateSpeedOfSound(float altitude, PhysicsData *physicsData){
+    // Check for errors or warnings
+    CHECK_PTR(physicsData, "physicsData", "calculateSpeedOfSound", 0.0f);
+    CHECK_ALT_LIMIT(altitude, "calculateSpeedOfSound");
+    CHECK_VAR(altitude, "altitude", "calculateSpeedOfSound", 0.0f);
+
     float tropopause = physicsData->tropopauseAltitude; // get the altitude of the tropopause
     float T = physicsData->temperatureKelvin; // temperature in kelvin
 
@@ -585,12 +801,84 @@ float calculateSpeedOfSound(float altitude, PhysicsData *physicsData){
 }
 
 float convertMsToMach(float ms, PhysicsData *physicsData){
+    // Check for errors or warnings
+    CHECK_PTR(physicsData, "physicsData", "convertMsToMach", 0.0f);
+    CHECK_SPEED_LIMIT(convertMsToKmh(ms), "convertMsToMach");
+    CHECK_VAR(convertMsToKmh(ms), "ms", "convertMsToMach", 0.0f);
+
     return ms / physicsData->speedOfSound;
 }
 
 float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float upperDensity, float targetAltitude) {
+    // Check for errors or warnings
+    CHECK_VAR(lowerAlt, "lowerAlt", "interpolate", 0.0f);
+    CHECK_VAR(upperAlt, "upperAlt", "interpolate", 0.0f);
+    CHECK_VAR(lowerDensity, "lowerDensity", "interpolate", 0.0f);
+    CHECK_VAR(upperDensity, "upperDensity", "interpolate", 0.0f);
+    CHECK_VAR(targetAltitude, "targetAltitude", "interpolate", 0.0f);
+
     float fraction = (targetAltitude - lowerAlt) / (upperAlt - lowerAlt);
     return lowerDensity + fraction * (upperDensity - lowerDensity);
+}
+
+/*
+    #########################################################
+    #                                                       #
+    #                        FUEL                           #
+    #                                                       #
+    #########################################################
+*/
+
+float getFuelBurnRate(AircraftData *data, float throttle){
+    // Check for errors or warnings
+    CHECK_PTR(data, "data", "getFuelBurnRate", 0.0f);
+    CHECK_VAR(throttle, "throttle", "getFuelBurnRate", 0.0f);
+
+    int afterburner = (throttle > 1.0f) ? 1 : 0;
+
+    if (afterburner){
+        if (data->afterburnerFuelBurn < 0.0f) {
+            logMessage(LOG_ERROR, "Invalid afterburner fuel burn rate");
+            return 0.0f;
+        }
+        return data->afterburnerFuelBurn;
+    }
+    else{
+        if (data->fuelBurn < 0.0f) {
+            logMessage(LOG_ERROR, "Invalid fuel burn rate");
+            return 0.0f;
+        }
+        return data->fuelBurn * throttle; // simple linear scaling
+    }
+}
+
+void updateFuelLevel(float *fuelKg, float deltaTime, float fuelBurnRate){
+    // Check for errors or warnings
+    CHECK_PTR(fuelKg, "fuelKg", "updateFuelLevel", );
+    CHECK_VAR(deltaTime, "deltaTime", "updateFuelLevel", );
+    CHECK_VAR(fuelBurnRate, "fuelBurnRate", "updateFuelLevel", );
+
+    *fuelKg -= fuelBurnRate * deltaTime; // Update fuel level
+
+    if (*fuelKg < 0.0f){
+        *fuelKg = 0.0f; // Prevent negative fuel levels
+        logMessage(LOG_WARNING, "Out of fuel!");
+    }
+}
+
+void updateAircraftMass(AircraftState *aircraft, AircraftData *data, float fuelBurnRate, float deltaTime){
+    // Check for errors or warnings
+    CHECK_PTR(aircraft, "aircraft", "updateAircraftMass", );
+    CHECK_PTR(data, "data", "updateAircraftMass", );
+    CHECK_VAR(fuelBurnRate, "fuelBurnRate", "updateAircraftMass", );
+    CHECK_VAR(deltaTime, "deltaTime", "updateAircraftMass", );
+
+    float fuelBurned = fuelBurnRate * deltaTime; // Calculate fuel burned
+    (aircraft->currentMass) -= fuelBurned; // Update aircraft mass
+
+    if (aircraft->currentMass < data->mass){
+        aircraft->currentMass = data->mass; // Prevent lower mass than min mass of aircraft
+    }
 }
 
 /*
@@ -602,6 +890,14 @@ float interpolate(float lowerAlt, float upperAlt, float lowerDensity, float uppe
 */
 
 void updatePhysicsData(PhysicsData *physics, float altitude, AircraftState *aircraft, AircraftData *data, float simulationTime) {
+    // Check for errors or warnings
+    CHECK_PTR(physics, "physics", "updatePhysicsData", );
+    CHECK_ALT_LIMIT(altitude, "updatePhysicsData");
+    CHECK_VAR(altitude, "altitude", "updatePhysicsData", );
+    CHECK_PTR(aircraft, "aircraft", "updatePhysicsData", );
+    CHECK_PTR(data, "data", "updatePhysicsData", );
+    CHECK_VAR(simulationTime, "simulationTime", "updatePhysicsData", );
+
     // 1. Atmosphere: update tropopause, temperature, air density, and speed of sound
     physics->tropopauseAltitude = getTropopause();
     physics->temperatureKelvin   = getTemperatureKelvin(altitude, physics);
@@ -634,14 +930,14 @@ void updatePhysicsData(PhysicsData *physics, float altitude, AircraftState *airc
     physics->liftCoefficient = calculateLiftCoefficient(data->mass, aircraft, data->wingArea, physics);
     physics->aspectRatio     = calculateAspectRatio(data->wingSpan, data->wingArea);
     physics->liftForce       = computeLiftForceComponents(aircraft, data->wingArea, physics->liftCoefficient, physics);
-    
+
     // 6. Aerodynamics: compute drag coefficients and forces
     float maxSpeedMs = convertKmhToMs(data->maxSpeed);
     physics->dragCoefficient = calculateDragCoefficient(physics->trueAirspeed, maxSpeedMs, C_D0, physics);
     physics->parasiticDrag   = calculateParasiticDrag(physics->dragCoefficient, physics->airDensity, physics->trueAirspeed, data->wingArea);
     physics->inducedDrag     = calculateInducedDrag(physics->liftCoefficient, physics->aspectRatio, physics->airDensity, data->wingArea, physics->trueAirspeed);
     physics->dragDivergence  = calculateDragDivergenceAroundMach(physics->trueAirspeed, physics);
-    physics->totalDrag       = calculateTotalDrag(NULL, NULL, NULL, NULL, NULL, aircraft, physics);
+    physics->totalDrag       = physics->parasiticDrag + physics->inducedDrag + physics->dragDivergence;
     
     // 7. Engine: update thrust
     physics->thrust = calculateThrust(data->thrust, data->afterburnerThrust, (int)(aircraft->controls.throttle * 100), physics);
@@ -684,11 +980,18 @@ Vector3 computeAcceleration(Vector3 velocity, AircraftState *aircraft, AircraftD
     // Compute thrust with updated aircraft state
     float thrustMagnitude = physicsData->thrust;
 
-    Vector3 thrustForce = {
-        thrustMagnitude * cosf(aircraft->pitch) * cosf(aircraft->yaw),
-        thrustMagnitude * sinf(aircraft->pitch),
-        thrustMagnitude * cosf(aircraft->pitch) * sinf(aircraft->yaw)
-    };
+    Vector3 thrustForce;
+    if (aircraft->fuel <= 0.0f) { // for now simply: if youre out of fuel, engine instantly stops producing thrust. irl it'd slowly go down to zero (i think)
+        thrustForce = (Vector3){0, 0, 0};
+        globalPhysicsData.thrust = 0; // 0N
+    } 
+    else { // engine not out of fuel
+        thrustForce = (Vector3){
+            thrustMagnitude * cosf(aircraft->pitch) * cosf(aircraft->yaw),
+            thrustMagnitude * sinf(aircraft->pitch),
+            thrustMagnitude * cosf(aircraft->pitch) * sinf(aircraft->yaw)
+        };
+    }
 
     // Compute net force
     Vector3 netForce = {
@@ -752,4 +1055,9 @@ void updatePhysics(AircraftState *aircraft, float deltaTime, float simulationTim
 
     // Update aircraft orientation with the new velocity
     updateVelocity(aircraft, deltaTime, aircraftData, &globalPhysicsData);
+
+    // Update aircraft fuel level and mass
+    float fuelBurnRate = getFuelBurnRate(aircraftData, aircraft->controls.throttle);
+    updateFuelLevel(&aircraft->fuel, deltaTime, fuelBurnRate);
+    updateAircraftMass(aircraft, aircraftData, fuelBurnRate, deltaTime);
 }

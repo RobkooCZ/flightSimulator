@@ -102,8 +102,10 @@ void drawCircle(SDL_Renderer *localRenderer, int32_t centreX, int32_t centreY, i
  * @param centerY The y-coordinate of the gauge center.
  * @param radius The radius of the gauge.
  * @param numTicks The number of ticks to draw.
+ * @param startAngle The starting angle of the ticks.
+ * @param endAngle The ending angle of the ticks.
  */
-void drawTicks(SDL_Renderer *localRenderer, int centerX, int centerY, int radius, int numTicks);
+void drawTicks(SDL_Renderer *localRenderer, int centerX, int centerY, int radius, int numTicks, float startAngle, float endAngle);
 
 /**
  * @brief Draw numbers on the gauge.
@@ -113,21 +115,25 @@ void drawTicks(SDL_Renderer *localRenderer, int centerX, int centerY, int radius
  * @param centerY The y-coordinate of the gauge center.
  * @param radius The radius of the gauge.
  * @param numTicks The number of ticks.
- * @param maxSpeed The maximum speed to display.
+ * @param maxValue The maximum value to display.
+ * @param startAngle The starting angle of the ticks.
+ * @param endAngle The ending angle of the ticks.
  */
-void drawNumbers(SDL_Renderer *localRenderer, int centerX, int centerY, int radius, int numTicks, int maxSpeed);
+void drawNumbers(SDL_Renderer *localRenderer, int centerX, int centerY, int radius, int numTicks, float maxValue, float startAngle, float endAngle);
 
 /**
  * @brief Draw the needle on the gauge.
  *
  * @param localRenderer The SDL renderer.
- * @param centerX The x-coordinate of the gauge center.
- * @param centerY The y-coordinate of the gauge center.
+ * @param cx The x-coordinate of the gauge center.
+ * @param cy The y-coordinate of the gauge center.
  * @param radius The radius of the gauge.
- * @param speed The current speed.
- * @param maxSpeed The maximum speed.
+ * @param val The current value to draw.
+ * @param maxVal The maximum value.
+ * @param startAngle The starting angle of the needle.
+ * @param endAngle The ending angle of the needle.
  */
-void drawNeedle(SDL_Renderer *localRenderer, int centerX, int centerY, int radius, float speed, float maxSpeed);
+void drawNeedle(SDL_Renderer *localRenderer, int cx, int cy, int radius, float val, float maxVal, float startAngle, float endAngle);
 
 /**
  * @brief Render the Mach counter.
@@ -168,6 +174,37 @@ void renderSpeedGauge(SDL_Renderer* renderer, TTF_Font* localFont, int cx, int c
  * @param y The y-coordinate of the throttle bar.
  */
 void throttleBar(SDL_Renderer *localRenderer, float throttle, int x, int y);
+
+/*
+    #########################################################
+    #                                                       #
+    #                       FUEL GAUGE                      #
+    #                                                       #
+    #########################################################
+*/
+
+/**
+ * @brief Render the half circle for the fuel gauge.
+ * 
+ * @param localRenderer The SDL renderer.
+ * @param cx The x-coordinate of the gauge center.
+ * @param cy The y-coordinate of the gauge center.
+ * @param radius The radius of the gauge.
+ */
+void renderHalfCircle(SDL_Renderer *localRenderer, int cx, int cy, int radius);
+
+/**
+ * @brief Render the fuel gauge.
+ *
+ * @param localRenderer The SDL renderer.
+ * @param localFont The font to use for rendering text.
+ * @param cx The x-coordinate of the gauge center.
+ * @param cy The y-coordinate of the gauge center.
+ * @param radius The radius of the gauge.
+ * @param fuel The current fuel level.
+ * @param maxFuel The maximum fuel level.
+ */
+void renderFuelGauge(SDL_Renderer* localRenderer, TTF_Font* localFont, int cx, int cy, int radius, float fuel, float maxFuel);
 
 /*
     #########################################################

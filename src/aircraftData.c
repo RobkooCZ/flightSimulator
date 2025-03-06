@@ -88,6 +88,16 @@ void getAircraftDataByName(const char *filename, const char *aircraftName, Aircr
             token = strtok(NULL, DELIMITER); // Get the next token (afterburner fuel burn)
             if (token) aircraftData->afterburnerFuelBurn = (float)atof(token); // Convert the token to a float and assign it to afterburner fuel burn
             
+            token = strtok(NULL, DELIMITER); // Get the next token (lpha)
+            if (token) aircraftData->alpha = (float)atof(token); // Convert the token to a float and assign it to alpha
+            
+            token = strtok(NULL, DELIMITER); // Get the next token (kw)
+            if (token) aircraftData->kw = (float)atof(token); // Convert the token to a float and assign it to kw
+            
+            token = strtok(NULL, DELIMITER); // Get the next token (Md)
+            if (token) aircraftData->Md = (float)atof(token); // Convert the token to a float and assign it to Md
+            
+
             break; // Break out of the loop as the matching aircraft data has been found
         }
     }

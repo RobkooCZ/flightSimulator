@@ -21,16 +21,36 @@ Every update to this **Flight Simulator** will be documented in this file. Lates
         - [0.2.3.4](#version-0234---16022025)
             - [0.2.3.4.1](#version-02341---16022025)
     - [0.2.4](#version-024---16022025) - "Wind update"
-- [0.3](#version-025---16022025) - "SDL update"
-        - [0.3.0.1](#version-0251---26022025)
-        - [0.3.0.2](#version-0252---26022025)
-        - [0.3.0.3](#version-0253---26022025)
+- [0.3](#version-030---16022025) - "SDL update"
+    - [0.3.0](#version-030---16022025)
+        - [0.3.0.1](#version-0301---26022025)
+        - [0.3.0.2](#version-0302---26022025)
+        - [0.3.0.3](#version-0303---26022025)
     - [0.3.1](#version-031---28022025) - "Visual update"
     - [0.3.2](#version-032---232025) - "Optimization update"
+    - [0.3.3](#version-033---xx32025) - "Finite flying update"
 
 ---
 
-## [Version 0.3.2] - 2.3.2025
+## [Version 0.3.3] - 06.03.2025
+
+## Added
+- Fuel capacity, fuel burn, mass lowering when fuel burns
+- Visual fuel display
+- A made up "coefficient" to make the physics more arcade-ish in some regards (as of right now, only drag)
+- Engine stops working (0N thrust) if it's out of fuel
+- New aircraft to choose - JA37C "Jaktviggen", added because I'm testing supersonic planes and physics
+
+## Changed
+- Improved the debug by adding logging messages to everything, every function is tested if the passed vars or pointers are NaN or NULL, respectively
+- Logging messages have the [] part colored accordingly:
+    - Red: ERROR
+    - Yellow: WARNING
+    - Green: DEBUG
+    - Blue: INFO
+- Some constants now vary based on whether the plane is subsonic or supersonic
+
+## [Version 0.3.2] - 02.03.2025
 
 ## Added
 - Logger.c (/.h) for easier debugging and logging of values

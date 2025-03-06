@@ -93,5 +93,5 @@ add_custom_command(
 # enable_testing()
 # find_package(Criterion REQUIRED)
 # add_executable(test_main tests/test_main.c)
-# target_link_libraries(test_main Criterion::Criterion)
+# target_link_libraries(test_main Criterion::Criterion)     
 # add_test(NAME test_main COMMAND test_main)
