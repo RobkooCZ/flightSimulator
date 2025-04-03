@@ -1,0 +1,219 @@
+/* Default Theme (Light Theme) */
+:root {
+    /* Header */
+    --header-bg-color: #f0f0f0;
+    --header-border-color: #ccc;
+    --header-text-color: #333;
+    --header-height: 5vh;
+
+    /* Body */
+    --body-bg-color: #f0f0f0;
+    --text-color: #333;
+    --link-color: #333;
+
+    /* Borders and Shadows */
+    --border-radius: 0.5rem;
+    --border: 0.1rem solid black;
+    --border-color: #ccc;
+    --box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.3);
+
+    /* Spacing */
+    --gap-size: 1.25rem;
+    --vertical-gap-size: 2vh;
+    --padding-size: 1rem;
+
+    /* Hover Effects */
+    --transition-time: 0.3s;
+    --button-hover-color: #fff;
+    --button-hover-bg-color: #555;
+    --link-hover-color: #fff;
+    --link-hover-bg-color: #555;
+
+    /* Modal */
+    --modal-padding: 2vh;
+
+    /* Status Colors */
+    --success-color: #28a745;
+    --failure-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+
+    /* Navbar */
+    --navbar-active-color: #007bff;
+    --navbar-active-bg-color: #e9ecef;
+
+    /* Table */
+    --primary-color: #007bff;
+    --text-on-primary: #fff;
+    --secondary-color: #f8f9fa;
+    --background-color: #ffffff;
+    --hover-color: #e9ecef;
+}
+
+/* Dark Theme */
+body.dark-theme {
+    --header-bg-color: #333;
+    --header-border-color: #444;
+    --header-text-color: #fff;
+    --body-bg-color: #444;
+    --text-color: #f0f0f0;
+    --link-color: #ddd;
+    --border: 0.1rem solid white;
+    --border-color: #555;
+    
+    /* Hover Effects */
+    --button-hover-color: #444;
+    --button-hover-bg-color: #ddd;
+    --link-hover-color: #444;
+    --link-hover-bg-color: #ddd;
+
+    /* Navbar */
+    --navbar-active-color: #ddd;
+    --navbar-active-bg-color: #555;
+
+    /* Table */
+    --primary-color: #555;
+    --text-on-primary: #fff;
+    --secondary-color: #666;
+    --background-color: #444;
+    --hover-color: #333;
+}
+
+/* Custom Theme (For Girlfriend) */
+body.custom-theme {
+    --header-bg-color: #ffcccb;
+    --header-border-color: #ff6666;
+    --header-text-color: #ff6666;
+    --body-bg-color: #ffcccb;
+    --text-color: #ff6666;
+    --link-color: #ff6666;
+    --link-hover-color: #ffcccb;
+    --link-hover-bg-color: #ff6666;
+    --border: 0.1rem solid #ff6666;
+    --border-color: #ff9999;
+
+    /* Navbar */
+    --navbar-active-color: #ff6666;
+    --navbar-active-bg-color: #fdb3b3;
+
+    /* Table */
+    --primary-color: #ff6666;
+    --text-on-primary: #ffcccb;
+    --secondary-color: #ffe6e6;
+    --background-color: #ffcccb;
+    --hover-color: #ffb3b3;
+}
+
+/* General Styles */
+body {
+    background-color: var(--body-bg-color);
+    color: var(--text-color);
+    transition: background-color var(--transition-time), color var(--transition-time);
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color var(--transition-time), background-color var(--transition-time);
+}
+
+a:hover {
+    color: var(--link-hover-color);
+    background-color: var(--link-hover-bg-color);
+}
+
+.content {
+    overflow: hidden;
+    max-width: 100%;
+    max-height: 100%;
+    position: relative;
+}
+
+.content table {
+    width: 100%; /* Ensure the table spans the full width of its container */
+    table-layout: fixed; /* Ensures consistent column widths */
+    box-sizing: border-box; /* Include padding and borders in width calculation */
+}
+
+.content table td, 
+.content table th {
+    white-space: nowrap; /* Allow text to wrap */
+    overflow: hidden; /* Prevent content from overflowing */
+    text-overflow: ellipsis;
+}
+
+.noBorder {
+    border: none;
+}
+
+/* Buttons */
+button {
+    border-radius: var(--border-radius);
+    transition: background-color var(--transition-time), color var(--transition-time);
+}
+
+button:hover {
+    color: var(--button-hover-color);
+    background-color: var(--button-hover-bg-color);
+}
+
+/* Status Messages */
+.status-success {
+    color: var(--success-color);
+}
+
+.status-failure {
+    color: var(--failure-color);
+}
+
+.status-warning {
+    color: var(--warning-color);
+}
+
+.status-info {
+    color: var(--info-color);
+}
+
+/* GENERAL TABLE STYLING */
+
+.tableForm, .tablePrintout {
+    width: 95%;
+    max-width: 95%;
+
+}
+
+& th, & td {
+    padding: var(--padding-size);
+    border: 1px solid var(--border-color);
+}
+
+& th {
+    background-color: var(--primary-color);
+    color: var(--text-on-primary);
+    font-weight: bold;
+}
+
+& tr:nth-child(even) {
+    background-color: var(--secondary-color);
+}
+
+& tr:nth-child(odd) {
+    background-color: var(--background-color);
+}
+
+& tr:hover {
+    background-color: var(--hover-color);
+
+    /* make the inputs the same color as background when on hover */
+    & input{
+        background-color: var(--hover-color) !important;
+    }
+
+    /* same with select */
+    & select{
+        background-color: var(--hover-color) !important;
+    }
+
+    cursor: pointer;
+}

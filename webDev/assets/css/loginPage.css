@@ -1,0 +1,67 @@
+body {
+    background-color: var(--body-bg-color);
+    color: var(--text-color);
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+    
+.loginModal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: auto;
+    height: auto;
+    position: fixed;
+    padding: var(--modal-padding);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: var(--border);
+    border-radius: var(--border-radius);
+}
+
+.loginModal form{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 1vh;
+    width: 100%;
+}
+
+.loginModal input[type="text"], .loginModal input[type="password"] {
+    width: 90%;
+}
+
+.rememberMeContainer {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    width: 100%;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+
+.rememberMeContainer input[type="checkbox"] {
+    margin-right: 0.2vw;
+}
+
+.loginModal input {
+    background-color: var(--body-bg-color);
+    color: var(--text-color);
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: var(--padding-size);
+}
+
+.loginModal input[type="submit"] {
+    width: 100%;
+    transition: all var(--transition-time);
+}
+
+.loginModal input[type="submit"]:hover {
+    background-color: var(--button-hover-bg-color);
+    color: var(--button-hover-color);
+    transition: all var(--transition-time);
+    cursor: pointer;
+}

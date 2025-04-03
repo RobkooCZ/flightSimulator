@@ -1,0 +1,108 @@
+/* school adming page specific styling */
+
+/* Content div styles */
+
+body {
+    /* content and header is centered horizontally */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* everything in content is centered fully */
+.content {
+    margin-top: 1vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    /* table printout styles */
+    & .tablePrintout {
+        margin-bottom: 1vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        /* line to separate the two main divs */
+        padding-bottom: 5vh;
+        border-bottom: 1px solid var(--text-color);
+
+        & .tableDropdown{
+            /* margin-bottom: 1vh; */
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+
+            & select {
+                margin-right: 1vw;
+            }
+        }
+        
+        & .tableData {
+            margin-top: 5vh;
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 1rem;
+            color: var(--text-color);
+
+            /* TABLE STYLINGS ARE IN THEME.CSS */
+        }
+    }
+
+    /* table modification form styles */
+    & .tableForm{
+        margin-top: 5vh;
+        padding-bottom: 5vh;
+
+        & .tableFormDropdown {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            
+            & select {
+                margin-right: 1vw;
+            }
+        }
+
+        & .actionForm {
+            margin-top: 5vh;
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 1rem;
+            color: var(--text-color);
+
+            /* TABLE STYLINGS ARE IN THEME.CSS */
+
+            /* Style the inputs */
+            & .addInputs {
+                background-color: var(--background-color);
+                border: none;
+                border-bottom: var(--border);
+                color: var(--text-color);
+                outline: none; /* Removes the border when selected */
+                width: 100%;
+                box-sizing: border-box;
+                max-width: 100%;
+            }
+
+            & .noBorder {
+                border: none;
+                cursor: pointer;
+            }
+
+            & tr:nth-child(even) .addInputs {
+                background-color: var(--secondary-color);
+            }
+
+            & tr:nth-child(odd) .addInputs {
+                background-color: var(--background-color);
+            }
+        }
+    }
+}   

@@ -1,0 +1,10 @@
+footer {
+    background-color: var(--header-bg-color);
+    color: var(--text-color);
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: var(--padding-size);
+    box-shadow: var(--box-shadow);
+    text-align: center;
+    font-size: 14px;
+}
