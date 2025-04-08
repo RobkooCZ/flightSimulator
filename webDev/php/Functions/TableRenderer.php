@@ -153,7 +153,11 @@ class TableRenderer {
                         echo '<td><input class="addInputs noBorder" type="text" pattern="[0-9]*" name="' . $fieldName . '" value="' . $id . '" disabled></td>';
                         break;
     
-                    case "password":
+                    case "profilePicture":
+                    case "lastActivityAt":
+                    case "createdAt":
+                    case "lastLoginAt":
+                    case "updatedAt":
                     case "salt":
                         echo '<td><input class="addInputs noBorder" type="text" name="' . $fieldName . '" value="---------" disabled></td>';
                         break;
@@ -172,6 +176,10 @@ class TableRenderer {
                         echo '<td><input class="addInputs noBorder" type="text" name="status" value="active" disabled></td>';
                         break;
     
+                    case "failedLoginAttempts":
+                        echo '<td><input class="addInputs noBorder" type="text" name="failedLoginAttempts" value="0" disabled></td>';
+                        break;
+
                     default:
                         echo '<td><input class="addInputs" id="' . $fieldName . '" name="' . $fieldName . '"></td>';
                         break;

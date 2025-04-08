@@ -96,8 +96,8 @@ class Table {
                 throw new Exception("No AUTO_INCREMENT value found for table '{$this->tableName}'.");
             }
     
-            // Return the next availible ID (AUTO_INCREMENT + 1)
-            return (int)($result[0]['AUTO_INCREMENT']) + 1;
+            // Return the next availible ID
+            return (int)($result[0]['AUTO_INCREMENT']);
         } 
         catch (Exception $e) {
             // Log the error and return false

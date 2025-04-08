@@ -61,7 +61,7 @@ function handleRequest($uri): void{
 
         // scripts
         case '/actionScript':
-            include __DIR__ . '/php/functions/actionScript.php';
+            include __DIR__ . '/php/Functions/actionScript.php';
             break;
         
         // static files
