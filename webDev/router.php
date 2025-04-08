@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 // function to serve static files
 function serveStaticFile($filePath): void{ // no return
     if (file_exists($filePath)){ // check if the file exists
@@ -56,12 +58,6 @@ function handleRequest($uri): void{
         case '/adminSchool':
             include __DIR__ . '/public/adminSchoolPage.php';
             break;
-
-        // random
-        case '/bla':
-            include __DIR__ . '/php/blablabla.php';
-            break;
-
 
         // scripts
         case '/actionScript':

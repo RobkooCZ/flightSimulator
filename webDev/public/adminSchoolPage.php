@@ -2,18 +2,23 @@
 
 session_start();
 
-if (!($_SESSION['id'] === '1') || !isset($_SESSION['id'])){
-    header('Location: /');
-    exit;
-}
+require_once __DIR__ . '/../vendor/autoload.php';
 
-// include table functions file only ONCE
-include_once __DIR__ . './../php/functions/tableFunctions.php';
+use WebDev\config\Database;
+use WebDev\Functions\TableRenderer;
+use WebDev\Functions\Table;
+
+// todo: fix
+// if (!($_SESSION['id'] === '1') || !isset($_SESSION['id'])){
+//     header('Location: /');
+//     exit;
+// }
 
 // generate a CSRF token to prevent CSRF attacks
-if (!isset($_SESSION['csrfToken'])) {
-    $_SESSION['csrfToken'] = bin2hex(random_bytes(32)); // Generate a new RANDOM CSRF token
-}
+// todo: put this across all files
+// if (!isset($_SESSION['csrfToken'])) {
+//     $_SESSION['csrfToken'] = bin2hex(random_bytes(32)); // Generate a new RANDOM CSRF token
+// }
 
 /*
     #######################################
@@ -24,28 +29,41 @@ if (!isset($_SESSION['csrfToken'])) {
 */
 
 // some ajax request caught
-if ($_POST['action']){
+if (isset($_POST['action'])){    
     switch ($_POST['action']){
         case 'getValue':
-            // get the table name
-            $tableName = $_POST['value'];
+            // get passed tablename
+            $tableName = urldecode($_POST['value']);
 
-            // include the table functions file
-            include_once __DIR__ . './../php/functions/tableFunctions.php';
+            // get table object based on name
+            $table = Table::getInstance($tableName);
+
+            // get table renderer for the table
+            $tableRenderer = TableRenderer::getInstance($table);
+
+            // get result
+            $result = $table->selectAll();
 
             // display the form based on the action
-            displayFullTable($tableName);
+            $tableRenderer->displayTable($result, true);
 
             break;
         case 'tableActionChoice':
             // get the table name and the action
-            $tableName = $_POST['tableName'];
-            $action = $_POST['value'];
+            $action = urldecode($_POST['value']);
+            $tableName = urldecode($_POST['tableName']);
 
-            // include the table functions file
-            include_once __DIR__ . './../php/functions/tableFunctions.php';
+            // get table object based on name
+            $table = Table::getInstance($tableName);
 
-            displayTableForm($tableName, $action);
+            // get table renderer for the table
+            $tableRenderer = TableRenderer::getInstance($table);
+            
+            // get result
+            $result = $table->selectAll();
+
+            // display table form
+            $tableRenderer->displayTableForm($result, $action, $_SESSION['id'] ?? 0);
 
             break;
     }
@@ -53,13 +71,8 @@ if ($_POST['action']){
     exit;
 }
 
-// include database connection
-use Dom\Mysql;
-
 // start session and set a variable to not start it in header.php
 $startSession = false;
-
-include_once __DIR__ . './../config/db.php'; 
 
 // DO show the header and footer
 $showHeader = true;
@@ -84,9 +97,21 @@ include __DIR__ . './../php/includes/header.php';
             <form method="POST">
                 <label for="tableName">Table: </label>
                 <select name="tableName" id="tableName">
-                    <?php // php script to get the tables names and put them as options
-                        displayTableNamesDropdown();
-                    ?>
+                <?php
+                    // Fetch table names from the database
+                    $tableNames = Database::getInstance()->getTableNames();
+
+                    // Render the dropdown options
+                    $dropdownHtml = TableRenderer::getTableNamesDropdown($tableNames);
+
+                    // Echo the dropdown HTML if it was successfully generated
+                    if ($dropdownHtml !== false) {
+                        echo $dropdownHtml;
+                    } 
+                    else {
+                        echo "<option value='' disabled>Error loading table names</option>";
+                    }
+                ?>
                 </select>
             </form>
         </div>
@@ -194,8 +219,6 @@ function sanitizeInput(input) {
 }
 
 document.getElementById("actionFormSubmitButton").addEventListener("click", function (){
-    console.log("IS IT HERE");
-
     // get all of the inputted data (username, password, role)
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;

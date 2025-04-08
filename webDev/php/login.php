@@ -3,11 +3,6 @@
 session_start();
 $startSession = false;
 
-// make sure all errors are displayed
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 // title for the site
 $title = 'Login';
 
@@ -20,9 +15,9 @@ $showFooter = false;
 $stylesheet = 'loginPage';
 include __DIR__ . './../php/includes/header.php';
 
-// get the database connection (include db.php too)
-include_once __DIR__ . './../config/db.php';
-$conn = getDatabaseAndTableConnection('users'); // get the connection to the users table (to login)
+use WebDev\config\Database;
+
+$db = Database::getInstance();
 
 ?>
 
@@ -54,56 +49,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             $username = $_POST['username']; // no need for null, required in form
             $password = $_POST['password']; // no need for null, required in form
 
-            // prepare the query (SAFELY)
-            $stmt = $conn->prepare("SELECT id, username, password, salt FROM users WHERE username = ?");
-            if (!$stmt) {
-                throw new Exception("Prepare statement failed: " . $conn->error);
-            }
+            $result = $db->query("SELECT id, username, password, salt FROM users WHERE username = :username", ["username" => $username]);
 
-            $stmt->bind_param('s', $username); // s = string
-            if (!$stmt->execute()) {
-                throw new Exception("Execute statement failed: " . $stmt->error);
-            }
+            $hashedPassword = $result[0]['password'];
+            $salt = $result[0]['salt'];
 
-            if (!$stmt->store_result()) {
-                throw new Exception("Store result failed: " . $stmt->error);
-            }
-
-            $stmt->bind_result($id, $usernameDb, $passwordHash, $salt);
-            if (!$stmt->fetch()) {
-                throw new Exception("Fetch result failed: " . $stmt->error);
-            }
-
-            // if the user exists
-            if ($stmt->num_rows > 0){
-                // check if the password is correct
-                if (password_verify($password . $salt, $passwordHash)){ 
-                    // login the user
-                    $_SESSION['username'] = $username;
-                    $_SESSION['id'] = $id;
+            if ($result) {
+                // Verify the password using password_verify
+                if (password_verify($password . $salt, $hashedPassword)) {
+                    // Regenerate session ID to prevent session fixation
+                    session_regenerate_id(true);
+            
+                    // Store user information in the session
+                    $_SESSION['username'] = $result[0]['username'];
+                    $_SESSION['id'] = $result[0]['id'];
+            
                     echo "You are logged in!";
-                }
-                else{
-                    echo "Password is incorrect!";
-                }
-            }
-            else{
-                echo "User not found!";
-            }
 
-            // make sure you dont send multiple queries
-            header('Location: /');
-            exit();
+                    // redirect if the login was successful
+                    header('Location: /');
+                } else {
+                    // Generic error message to avoid leaking information
+                    echo "Invalid username or password!";
+                }
+            } else {
+                // Generic error message to avoid leaking information
+                echo "Invalid username or password!";
+            }
         }
         catch (Exception $e){
             error_log($e->getMessage());
             $_SESSION['message'] = "Internal Error! Failed to login!";
         }
     }
-
-    // close the statement and the connection
-    $stmt->close();
-    $conn->close();
 }
 
 ?>

@@ -1,3 +1,16 @@
-Robkoo's Flight Simulator Web Dev Branch
+### Configuration Instructions
 
-    TLDR: In this branch, all the code for the website and communication between C and the site goes here. This includes, but is not limited to, front-end websites, stylesheets, back-end (PHP, JS) and a PHP "middleman" that ensures communication between the C code and the website.
+To make the website work, create a `.env` file in the root directory of `webDev` and define the following variables:
+
+```plaintext
+DB_HOST=
+DB_NAME=
+DB_USER=
+DB_USER_TABLE=
+DB_USER_PREFERENCES_TABLE=
+DB_USER_LOGS_TABLE=
+DB_LEADERBOARD_TABLE=
+DB_PASS=
+```
+
+Ensure each variable is correctly set according to your database configuration.

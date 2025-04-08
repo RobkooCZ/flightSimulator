@@ -59,15 +59,16 @@ $activeVal = matchHeader($title);
                             <a href="/home" ' . ($activeVal === 2 ? 'class="active"' : '') . '>Home</a>
                         </div>
                         ';
-                        // if the user is logged in, show the logout button, if the user has perms show admin page
-                        $adminPage = '';
+                        
                         if (!empty($_SESSION['id']) && in_array($_SESSION['id'], [1, 2])) {
                             $adminPage = '<a href="/admin" ' . ($activeVal === 3 ? 'class="active"' : '') . '>Admin Page</a>';
-
-                            // if the user is robkoo, show the school admin page (to meet final project requirements)
-                            if ($_SESSION['id'] == 1) {
-                                $adminPage .= '<a href="/adminSchool" ' . ($activeVal === 4 ? 'class="active"' : '') . '>School Admin Page</a>';
-                            }
+                        } else {
+                            $adminPage = ''; // Ensure $adminPage is always defined
+                        }
+                        
+                        // Append the "School Admin Page" link if the user is id = 1
+                        if (!empty($_SESSION['id']) && $_SESSION['id'] == 1) {
+                            $adminPage .= '<a href="/adminSchool" ' . ($activeVal === 4 ? 'class="active"' : '') . '>School Admin Page</a>';
                         }
                         
 
