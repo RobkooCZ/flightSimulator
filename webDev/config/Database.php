@@ -17,7 +17,7 @@ class Database {
     }
 
     // Prevent cloning
-    private function __clone() {
+    private function __clone(): void {
         throw new Exception(message: "Cannot clone singleton");
     }
 
@@ -97,7 +97,7 @@ class Database {
      * 
      * This method ensures that only one instance of the Database class
      * is created during the application's lifecycle. If the instance
-     * does not already exist, it initializes a new one.    
+     * does not already exist, it initializes a new one.
      * 
      * @return Database The singleton instance of the Database class.
      */

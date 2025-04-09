@@ -15,6 +15,7 @@ $stylesheet = 'registerPage';
 include __DIR__ . '/../php/includes/header.php';
 
 use WebDev\config\Database;
+use WebDev\Functions\CSRF;
 
 $db = Database::getInstance();
 
@@ -25,6 +26,22 @@ $message = ""; // Empty string
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // If the submit button was clicked
     if (isset($_POST['submit'])) { // Button is clicked, register
+        // validate CSRF token
+        $csrf = CSRF::getInstance();
+
+        // get the token from the form
+        $formToken = $_POST['csrf_token'] ?? ''; // either get the token or null
+
+        if (!$csrf->validateToken($formToken)){
+            // not valid, do NOT proceed
+            error_log("CSRF validation failed.");
+
+            // Redirect back to the register page with an error message
+            $_SESSION['message'] = "Session expired. Please try again.";
+            header('Location: /register');
+            exit; // stop continuing script
+        }
+
         // Sanitize user input
         $username = trim($_POST['username']);
         $password = $_POST['password'];
@@ -96,11 +113,14 @@ if (isset($_SESSION['message'])) {
 <div class="registerModal">
     <h2>REGISTER</h2>
     <form method="post">
+        <!-- include CSRF -->
+        <?= CSRF::getInstance()->getCSRFField(); ?>
+
         <input name="username" type="text" placeholder="Username" required>
         <input name="password" type="password" placeholder="Password" required>
         <input name="passwordRepeat" type="password" placeholder="Repeat Password" required>    
 
-        <p><?php echo htmlspecialchars($message); ?></p>
+        <p><?= htmlspecialchars($message); ?></p>
 
         <input type="submit" name="submit" value="Register">
         <label for="register">Already have an account? <a href="/login">Login</a></label>

@@ -16,6 +16,7 @@ $stylesheet = 'loginPage';
 include __DIR__ . './../php/includes/header.php';
 
 use WebDev\config\Database;
+use WebDev\Functions\CSRF;
 
 $db = Database::getInstance();
 
@@ -25,6 +26,9 @@ $db = Database::getInstance();
 <div class="loginModal">
     <h2>LOGIN</h2> 
     <form method="post">
+        <!-- put hidden csrf field -->
+        <?= CSRF::getInstance()->getCSRFField(); ?>
+
         <input name="username" type="text" placeholder="Username" required>
         <input name="password" type="password" placeholder="Password" required>
 
@@ -46,15 +50,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     // if the submit button was clicked
     if (isset($_POST['submit'])){ // button is clicked, login
         try {
+            // validate CSRF token
+            $csrf = CSRF::getInstance();
+
+            // get the token from the form
+            $formToken = $_POST['csrf_token'] ?? ''; // either get the token or null
+
+            if (!$csrf->validateToken($formToken)){
+                // not valid, do NOT proceed
+                error_log("CSRF validation failed.");
+
+                // Redirect back to the login page with an error message
+                $_SESSION['message'] = "Session expired. Please try again.";
+                header('Location: /login');
+                exit; // stop continuing script
+            }
+
+            // valid, you can proceed
+
             $username = $_POST['username']; // no need for null, required in form
             $password = $_POST['password']; // no need for null, required in form
 
             $result = $db->query("SELECT id, username, password, salt FROM users WHERE username = :username", ["username" => $username]);
 
-            $hashedPassword = $result[0]['password'];
-            $salt = $result[0]['salt'];
+            // if it exists and isnt empty
+            if ($result && count($result) > 0) {
+                $hashedPassword = $result[0]['password'];
+                $salt = $result[0]['salt'];
 
-            if ($result) {
                 // Verify the password using password_verify
                 if (password_verify($password . $salt, $hashedPassword)) {
                     // Regenerate session ID to prevent session fixation
@@ -70,11 +93,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                     header('Location: /');
                 } else {
                     // Generic error message to avoid leaking information
-                    echo "Invalid username or password!";
+                    echo htmlspecialchars("Invalid username or password!");
                 }
             } else {
                 // Generic error message to avoid leaking information
-                echo "Invalid username or password!";
+                echo htmlspecialchars("Invalid username or password!");
             }
         }
         catch (Exception $e){
