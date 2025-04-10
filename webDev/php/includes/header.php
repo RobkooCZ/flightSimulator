@@ -5,6 +5,8 @@ if ($startSession === true){
     session_start();
 }
 
+use WebDev\Functions\CSRF;
+
 // function to check for header to set correct active class
 
 function matchHeader(string $title): int{
@@ -76,10 +78,8 @@ $activeVal = matchHeader($title);
                             echo '
                                 <div class="rightSide">
                                     <p id="loggedInAs">Logged in as <b>' . $_SESSION['username'] . '</b></p>'
-                                    .
-                                        $adminPage
-                                    .
-                                    '<a href="/logout">Logout</a>
+                                    . $adminPage .
+                                    '<a href="/auth?action=logout&csrf_token=' . CSRF::getInstance()->getToken() . '">Logout</a>
                                 </div>
                             ';
                         } 

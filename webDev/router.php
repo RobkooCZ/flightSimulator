@@ -30,15 +30,12 @@ function serveStaticFile($filePath): void{ // no return
 // function to handle the routing
 function handleRequest($uri): void{
     switch ($uri){
+        // Serve the homepage (index.php)
         case '/':
-            // Serve the homepage (index.php)
             include __DIR__ . '/public/index.php';
             break;
-        case '/db':
-            include __DIR__ . '/config/db.php';
-            break;
 
-        // login, register, logout
+        // login, register, logout forms
         case '/login':
             include __DIR__ . '/php/login.php';
             break;
@@ -62,6 +59,11 @@ function handleRequest($uri): void{
         // scripts
         case '/actionScript':
             include __DIR__ . '/php/Functions/actionScript.php';
+            break;
+
+        // auth (register, login, and logout functionality)
+        case '/auth':
+            include __DIR__ . '/php/auth.php';
             break;
         
         // static files

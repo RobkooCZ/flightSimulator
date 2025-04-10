@@ -15,22 +15,26 @@ $showFooter = false;
 $stylesheet = 'loginPage';
 include __DIR__ . './../php/includes/header.php';
 
-use WebDev\config\Database;
+// for CSRF hidden field
 use WebDev\Functions\CSRF;
-use WebDev\Functions\Auth;
-
-$db = Database::getInstance();
 
 $message = '';
+
+// Display the message if it exists
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    unset($_SESSION['message']);
+}
 ?>
 
 <!-- the login modal -->
 <div class="loginModal">
     <h2>LOGIN</h2> 
-    <form method="post">
+    <form method="post" action="/auth?action=login">
         <!-- put hidden csrf field -->
         <?= CSRF::getInstance()->getCSRFField(); ?>
 
+        <!-- rest of the form -->
         <input name="username" type="text" placeholder="Username" required>
         <input name="password" type="password" placeholder="Password" required>
 
@@ -47,61 +51,6 @@ $message = '';
         <label for="register">Don't have an account? <a href="/register">Register</a></label>
     </form>
 </div>
-
-<!-- The script to login the user -->
-<?php
-// Display the message if it exists
-if (isset($_SESSION['message'])) {
-    $message = $_SESSION['message'];
-    unset($_SESSION['message']);
-}
-
-// if the request method is POST
-if ($_SERVER['REQUEST_METHOD'] == 'POST'){
-    // if the submit button was clicked
-    if (isset($_POST['submit'])){ // button is clicked, login
-        try {
-            // validate CSRF token
-            $csrf = CSRF::getInstance();
-
-            // get the token from the form
-            $formToken = $_POST['csrf_token'] ?? ''; // either get the token or null
-
-            if (!$csrf->validateToken($formToken)){
-                // not valid, do NOT proceed
-                error_log("CSRF validation failed.");
-
-                // Redirect back to the login page with an error message
-                $_SESSION['message'] = "Session expired. Please try again.";
-                header('Location: /login');
-                exit; // stop continuing script
-            }
-
-            // valid, you can proceed
-
-            $username = $_POST['username']; // no need for null, required in form
-
-            Auth::validateUser($username); // validate the username
-
-            $password = $_POST['password']; // no need for null, required in form
-
-            // login the user
-            $infoArr = Auth::getInstance()->login($username, $password);
-
-            // set the session data
-            $_SESSION['id'] = $infoArr['id'];
-            $_SESSION['username'] = $infoArr['username'];
-
-            // if it suceeds, redirect user to homepage
-            header('Location: /');
-        }
-        catch (Exception $e){
-            error_log($e->getMessage());
-        }
-    }
-}
-
-?>
 
 <?php // include footer
 include __DIR__ . './../php/includes/footer.php';

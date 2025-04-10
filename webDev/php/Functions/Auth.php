@@ -88,7 +88,7 @@ class Auth {
      */
     final public static function validateUser(string $user): bool {
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $user)){
-            throw new Exception("Invalid username.");
+            throw new Exception("Invalid characters in username.");
         }
         return true;
     }
