@@ -3,6 +3,22 @@
 namespace WebDev\Functions;
 
 class RoleManager {
+    /**
+     * Returns a list of roles that are available for the current user based on their role.
+     *
+     * @param array $enumValues List of all possible roles.
+     * @param string $currentUserRole The role of the current user.
+     * @return array Filtered list of roles available for the current user.
+     * @throws \Exception If the current user's role is invalid.
+     *
+     * Example:
+     * ```php
+     * $roles = ['owner', 'coOwner', 'admin', 'user', 'deleted'];
+     * $currentUserRole = 'admin';
+     * $availableRoles = RoleManager::returnAvailibleRoles($roles, $currentUserRole);
+     * // $availableRoles will be ['user', 'deleted']
+     * ```
+     */
     public static function returnAvailibleRoles(array $enumValues, string $currentUserRole): array {
         // Define the role hierarchy
         $roleHierarchy = [

@@ -11,13 +11,27 @@ class Database {
     private static ?Database $instance = null;
     private ?PDO $conn = null;
 
-    // Prevent unserialize attacks
-    private function __wakeup(): never {
+    /**
+     * Prevent unserialize attacks.
+     * 
+     * This method prevents the unserialization of the singleton instance,
+     * ensuring that the class cannot be instantiated through unserialization.
+     * 
+     * @throws Exception Always throws an exception when called.
+     */
+    public function __wakeup(): never {
         throw new Exception(message: "Cannot unserialize singleton");
     }
 
-    // Prevent cloning
-    private function __clone(): void {
+    /**
+     * Prevent cloning of the singleton instance.
+     * 
+     * This method ensures that the singleton instance cannot be cloned,
+     * maintaining the integrity of the singleton pattern.
+     * 
+     * @throws Exception Always throws an exception when called.
+     */
+    public function __clone(): void {
         throw new Exception(message: "Cannot clone singleton");
     }
 

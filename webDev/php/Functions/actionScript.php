@@ -23,9 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $password = htmlspecialchars(urldecode($_POST['password']));
                     $role = htmlspecialchars(urldecode($_POST['role']));
 
-                    // get connection to db
-                    include_once __DIR__ . './../../config/db.php';
-
                     // check if table exists, if it doesnt, throw expection
                     if (!$db->tableExists($tableIdentifier)){
                         throw new Exception("Table {$tableIdentifier} doesn't exist.");
@@ -44,10 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     // prepare param array
                     $parameters = [
-                        ':username' => "$username",
-                        ':password' => "$passwordHash",
-                        ':salt' => "$salt",
-                        ':role' => "$role",
+                        ':username' => $username,
+                        ':password' => $passwordHash,
+                        ':salt' => $salt,
+                        ':role' => $role,
                         ':status' => "active" // default active
                     ];
 

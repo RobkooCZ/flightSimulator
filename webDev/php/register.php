@@ -16,6 +16,7 @@ include __DIR__ . '/../php/includes/header.php';
 
 use WebDev\config\Database;
 use WebDev\Functions\CSRF;
+use WebDev\Functions\Auth;
 
 $db = Database::getInstance();
 
@@ -44,6 +45,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // Sanitize user input
         $username = trim($_POST['username']);
+
+        // make sure username is valid and doesn't contain bad characters
+        try {
+            Auth::validateUser($username);
+        }  
+        catch (Exception $e){
+            $_SESSION['message'] = "Invalid characters in username.";
+            header('Location: /register');
+            exit; // stop continuing script
+        }
+
+        // get password
         $password = $_POST['password'];
         $passwordRepeat = $_POST['passwordRepeat'];
 
@@ -57,36 +70,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Check if the passwords match
             if ($password !== $passwordRepeat) {
                 $_SESSION['message'] = "Passwords do not match!";
-            } 
-            else { // Passwords match, insert the user into the database
+            }
+            else { // Passwords match
+                // check if password is valid
                 try {
-                    // Generate a salt
-                    $salt = bin2hex(random_bytes(16)); // 128-bit random salt (32 bytes)
-
-                    // Combine the password with the salt and hash it
-                    $combinedPassword = $password . $salt; // Combine the password with the salt
-                    $hashedPassword = password_hash($combinedPassword, PASSWORD_BCRYPT); // Hash the password
-
-                    // Check if the password was hashed successfully
-                    if (!$hashedPassword) { // If the password fails to hash, throw an exception
-                        throw new Exception("Failed to hash password.");
-                    }
-
-                    // make a parameters array
-                    $parameters = [
-                        "username" => $username,
-                        "password" => $hashedPassword,
-                        "salt" => $salt,
-                    ];
-
-                    // execute the query using safe execute method
-                    if (!$db->execute("INSERT INTO users (username, password, salt, lastActivityAt, createdAt, updatedAt) VALUES (:username, :password, :salt, NOW(), NOW(), NOW())", $parameters)){
-                        throw new Exception("Failed to execute INSERT INTO.");
-                    }
+                    Auth::validatePass($password);
+                }
+                catch (Exception $e){
+                    $_SESSION['message'] = $e->getMessage();
+                }
                 
-                    // Redirect to the login page after successful registration
-                    header('Location: /login');
-                    exit();
+                // everything is good, register the user
+                try {
+                    Auth::getInstance()->register($username, $password);
                 } 
                 catch (Exception $e) {
                     // Handle errors

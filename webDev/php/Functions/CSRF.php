@@ -27,7 +27,7 @@ class CSRF {
      * 
      * @throws Exception Always throws an exception when called.
      */
-    private function __wakeup(): never {
+    public function __wakeup(): never {
         throw new Exception(message: "Cannot unserialize singleton");
     }
 
@@ -39,7 +39,7 @@ class CSRF {
      * 
      * @throws Exception Always throws an exception when called.
      */
-    private function __clone(): void {
+    public function __clone(): void {
         throw new Exception(message: "Cannot clone singleton");
     }
 
@@ -49,7 +49,7 @@ class CSRF {
      * This method ensures that the session is started if it hasn't already been started.
      */
     private function __construct(){
-        if (session_status() == PHP_SESSION_NONE){
+        if (session_status() === PHP_SESSION_NONE){
             session_start();
         }
     }
@@ -106,14 +106,19 @@ class CSRF {
     public function validateToken(string $token): bool {
         if (isset($_SESSION[self::SESSION_CSRF_KEY]['token']) &&
             $_SESSION[self::SESSION_CSRF_KEY]['token'] === $token &&
-            $_SESSION[self::SESSION_CSRF_KEY]['expires'] > time()) {
+            $_SESSION[self::SESSION_CSRF_KEY]['expires'] > time()){
     
-            if (isset($_COOKIE[self::COOKIE_NAME]) && $_COOKIE[self::COOKIE_NAME] === $token) {
+            if (isset($_COOKIE[self::COOKIE_NAME]) && $_COOKIE[self::COOKIE_NAME] === $token){
                 $this->regenerateToken(); // Regenerate the token after successful validation
                 return true;
             }
     
             error_log("CSRF validation failed: Cookie data doesn't match.");
+        } 
+        else{
+            // Token expired or mismatch
+            error_log("CSRF validation failed: Token mismatch or expired.");
+            $this->generateToken(); // Regenerate a new token
         }
     
         return false; // Validation failed
@@ -143,7 +148,7 @@ class CSRF {
      *
      * @return void
      */
-    public function clearToken(): void{
+    public function clearToken(): void {
         unset($_SESSION[self::SESSION_CSRF_KEY]);
         setcookie(self::COOKIE_NAME, '', [
             self::SESSION_EXPIRY_KEY => time() - self::COOKIE_EXPIRY_TIME, // immediatelly invalidates token
@@ -198,7 +203,7 @@ class CSRF {
      * This method creates a hidden input field with the CSRF token, which can be
      * included in forms to provide CSRF protection.
      * 
-     * @return string The HTML for the hidden input field.
+     * @return string The HTML for the hidden input field.`
      */
     public function getCSRFField(): string {
         $token = htmlspecialchars($this->getToken(), ENT_QUOTES, 'UTF-8');

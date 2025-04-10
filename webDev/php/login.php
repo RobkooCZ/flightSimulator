@@ -17,9 +17,11 @@ include __DIR__ . './../php/includes/header.php';
 
 use WebDev\config\Database;
 use WebDev\Functions\CSRF;
+use WebDev\Functions\Auth;
 
 $db = Database::getInstance();
 
+$message = '';
 ?>
 
 <!-- the login modal -->
@@ -37,6 +39,10 @@ $db = Database::getInstance();
             <input name="rememberMe" type="checkbox" id="rememberMe">
             <label for="rememberMe">Remember me</label>
         </div>
+
+        <!-- message -->
+        <p><?= htmlspecialchars($message); ?></p>
+
         <input type="submit" name="submit" value="Login">
         <label for="register">Don't have an account? <a href="/register">Register</a></label>
     </form>
@@ -44,6 +50,11 @@ $db = Database::getInstance();
 
 <!-- The script to login the user -->
 <?php
+// Display the message if it exists
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    unset($_SESSION['message']);
+}
 
 // if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
@@ -69,40 +80,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             // valid, you can proceed
 
             $username = $_POST['username']; // no need for null, required in form
+
+            Auth::validateUser($username); // validate the username
+
             $password = $_POST['password']; // no need for null, required in form
 
-            $result = $db->query("SELECT id, username, password, salt FROM users WHERE username = :username", ["username" => $username]);
+            // login the user
+            $infoArr = Auth::getInstance()->login($username, $password);
 
-            // if it exists and isnt empty
-            if ($result && count($result) > 0) {
-                $hashedPassword = $result[0]['password'];
-                $salt = $result[0]['salt'];
+            // set the session data
+            $_SESSION['id'] = $infoArr['id'];
+            $_SESSION['username'] = $infoArr['username'];
 
-                // Verify the password using password_verify
-                if (password_verify($password . $salt, $hashedPassword)) {
-                    // Regenerate session ID to prevent session fixation
-                    session_regenerate_id(true);
-            
-                    // Store user information in the session
-                    $_SESSION['username'] = $result[0]['username'];
-                    $_SESSION['id'] = $result[0]['id'];
-            
-                    echo "You are logged in!";
-
-                    // redirect if the login was successful
-                    header('Location: /');
-                } else {
-                    // Generic error message to avoid leaking information
-                    echo htmlspecialchars("Invalid username or password!");
-                }
-            } else {
-                // Generic error message to avoid leaking information
-                echo htmlspecialchars("Invalid username or password!");
-            }
+            // if it suceeds, redirect user to homepage
+            header('Location: /');
         }
         catch (Exception $e){
             error_log($e->getMessage());
-            $_SESSION['message'] = "Internal Error! Failed to login!";
         }
     }
 }

@@ -1,11 +1,8 @@
 <?php
-// get the session
-session_start();
+use WebDev\Functions\Auth;
 
-// wipe all session data, logging out the user
-session_unset();
-
-session_destroy();
+// logout
+Auth::getInstance()->logout();
 
 // redirect to the main page
 header('Location: /');
