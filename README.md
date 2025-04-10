@@ -33,6 +33,15 @@ If you're curious about the physics and math behind this simulator, you can read
 
 ## Requirements
 
+Before proceeding, clone this repository and navigate to the `gameDev` directory:
+
+```sh
+git pull https://github.com/RobkooCZ/flightSimulator
+cd gameDev
+```
+
+---
+
 ### Linux (GCC) Requirements
 
 Ensure you have **GCC** installed. Install it as shown below:
@@ -144,7 +153,10 @@ cmake --version
 
 #### Using Make
 
-1. Navigate to the project directory.
+1. Navigate to the project directory:
+```sh
+cd gameDev
+```
 2. Compile the project:
 ```sh
 make
@@ -156,7 +168,10 @@ make
 
 #### Using CMake
 
-1. Navigate to the project directory.
+1. Navigate to the project directory:
+```sh
+cd gameDev
+```
 2. Compile the project:
 ```sh
 cmake -B build && cmake --build build
@@ -172,7 +187,10 @@ cmake -B build && cmake --build build
 
 #### Command Prompt (CMD)
 
-1. Navigate to the project directory.
+1. Navigate to the project directory:
+```sh
+cd gameDev
+```
 2. Compile the project:
 ```sh
 cmake -G "MinGW Makefiles" -B build && cmake --build build
@@ -184,7 +202,10 @@ build\flightSimulator.exe
 
 #### PowerShell
 
-1. Navigate to the project directory.
+1. Navigate to the project directory:
+```sh
+cd gameDev
+```
 2. Compile the project:
 ```sh
 cmake -G "MinGW Makefiles" -B build ; cmake --build build
