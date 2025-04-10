@@ -1,0 +1,65 @@
+header {
+    background-color: var(--header-bg-color);
+    border-bottom: 2px solid var(--header-border-color);
+    border-radius: var(--border-radius);
+    color: var(--header-text-color);
+    padding: 0;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: var(--header-height);
+}
+
+header nav {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    gap: var(--gap-size);
+}
+
+header nav .leftSide {
+    display: flex;  
+    height: 100%;
+}
+
+header nav .rightSide {
+    margin-left: auto;
+    display: flex;
+    height: 100%;
+
+    & #loggedInAs {
+        margin-right: var(--gap-size);
+    }
+}
+
+nav a.active {
+    color: var(--navbar-active-color);
+    background-color: var(--navbar-active-bg-color);
+}
+
+header a {
+    color: var(--link-color);
+    text-decoration: none;
+    padding: 0 var(--padding-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    height: 100%;
+}
+
+header a:first-child {
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+}
+
+header a:last-child {
+    border-top-right-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+header a:hover {
+    color: var(--link-hover-color);
+    background-color: var(--link-hover-bg-color);
+}
