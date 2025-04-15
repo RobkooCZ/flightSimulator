@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 // only start session if its requested
 if ($startSession === true){
@@ -18,7 +19,7 @@ function matchHeader(string $title): int{
 
     $returnVal = 0; // default not found
     
-    $returnVal = match($title) {
+    $returnVal = match($title){
         'Landing Page' => 1,
         'Home' => 2,
         'Admin Page' => 3,
@@ -62,14 +63,15 @@ $activeVal = matchHeader($title);
                         </div>
                         ';
                         
-                        if (!empty($_SESSION['id']) && in_array($_SESSION['id'], [1, 2])) {
+                        if (!empty($_SESSION['id']) && in_array($_SESSION['id'], [1, 2])){
                             $adminPage = '<a href="/admin" ' . ($activeVal === 3 ? 'class="active"' : '') . '>Admin Page</a>';
-                        } else {
+                        } 
+                        else {
                             $adminPage = ''; // Ensure $adminPage is always defined
                         }
                         
                         // Append the "School Admin Page" link if the user is id = 1
-                        if (!empty($_SESSION['id']) && $_SESSION['id'] == 1) {
+                        if (!empty($_SESSION['id']) && $_SESSION['id'] == 1){
                             $adminPage .= '<a href="/adminSchool" ' . ($activeVal === 4 ? 'class="active"' : '') . '>School Admin Page</a>';
                         }
                         

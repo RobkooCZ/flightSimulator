@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace WebDev\Functions;
+
+use WebDev\Functions\LogicException;
 
 class RoleManager {
     /**
@@ -9,7 +12,7 @@ class RoleManager {
      * @param array $enumValues List of all possible roles.
      * @param string $currentUserRole The role of the current user.
      * @return array Filtered list of roles available for the current user.
-     * @throws \Exception If the current user's role is invalid.
+     * @throws LogicException If the current user's role is invalid.
      *
      * Example:
      * ```php
@@ -30,8 +33,13 @@ class RoleManager {
         ];
 
         // Check if the current user's role exists in the hierarchy
-        if (!isset($roleHierarchy[$currentUserRole])) {
-            throw new \Exception("Invalid current user role: $currentUserRole");
+        if (!isset($roleHierarchy[$currentUserRole])){
+            throw new LogicException(
+                message: "Invalid current user role.",
+                reason: "Role $currentUserRole doesn't exist in the hierarchy,",
+                expectedState: implode(', ', $roleHierarchy),
+                actualState: $currentUserRole
+            );
         }
 
         // Filter roles based on the current user's role

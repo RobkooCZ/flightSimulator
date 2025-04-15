@@ -1,11 +1,28 @@
 <?php
+declare(strict_types=1);
+
 // get classes
 use WebDev\config\Database;
 use WebDev\Functions\CSRF;
 use WebDev\Functions\Auth;
+use WebDev\Functions\AppException;
 
 $db = Database::getInstance(); // database
 $csrf = CSRF::getInstance(); // CSRF
+
+// load the appexception class and all its subclasses
+AppException::init();
+
+// global handler for any thrown exceptions
+set_exception_handler(function (Throwable $ae){
+    if (AppException::globalHandle($ae)){ // appException or its subclasses
+        // error page or smth would go here (todo)
+        exit;
+    }
+    else { // anything but appException and its subclasses
+        error_log($ae->getMessage()); // temporary
+    }
+});
 
 /**
  * Redirects the user to a specified URL with an optional message.
@@ -127,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
                 Auth::validateUser($username);
             } 
             catch (Exception $e){
-                redirect('/login', "Invalid username.");
+                redirect('/login', "Invalid username or password.");
             }
 
             // Get the password
@@ -146,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
             } 
             catch (Exception $e){
                 error_log("Login failed: " . $e->getMessage());
-                redirect('/login', "Login failed: " . $e->getMessage());
+                redirect('/login', "Invalid username or password.");
             }
 
             break;

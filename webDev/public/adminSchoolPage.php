@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 session_start();
 
@@ -7,23 +8,40 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use WebDev\config\Database;
 use WebDev\Functions\TableRenderer;
 use WebDev\Functions\Table;
+use WebDev\Functions\AppException;
+use WebDev\Functions\AuthorizationException;
 
-// todo: fix
-// if (!($_SESSION['id'] === '1') || !isset($_SESSION['id'])){
-//     header('Location: /');
-//     exit;
-// }
+// make sure AppException and all its subclasses are loaded
+AppException::init();
 
-// generate a CSRF token to prevent CSRF attacks
-// todo: put this across all files
-// if (!isset($_SESSION['csrfToken'])) {
-//     $_SESSION['csrfToken'] = bin2hex(random_bytes(32)); // Generate a new RANDOM CSRF token
-// }
+set_exception_handler(function (Throwable $ae){
+    if (AppException::globalHandle($ae)){ // appException or its subclasses
+        header('Location: /'); // for now
+        exit;
+    }
+    else { // anything but appException and its subclasses
+        error_log($ae->getMessage()); // temporary (in this file no other exceptions are thrown but AuthorizationException)
+    }
+});
+
+if (!isset($_SESSION['id']) || $_SESSION['id'] !== 1){
+    throw new AuthorizationException(
+        message: "Unauthorized access attempt to admin page",
+        code: 403,
+        userRole: "guest", // User role
+        resource: "/adminSchoolPage", // Resource being accessed
+        actionAttempted: "view", // Action attempted
+        requiredRole: "owner", // Required role
+        ipv4: $_SERVER['REMOTE_ADDR'] ?? 'Unknown', // Client IP address
+        userId: $_SESSION['id'] ?? null, // User ID 
+        previous: null // No previous exception
+    );
+}
 
 /*
     #######################################
     #                                     #
-    #             AJAX SCRIPT             #
+    #             AJAX SCRIPT             # 
     #                                     #
     #######################################
 */
@@ -105,7 +123,7 @@ include __DIR__ . './../php/includes/header.php';
                     $dropdownHtml = TableRenderer::getTableNamesDropdown($tableNames);
 
                     // Echo the dropdown HTML if it was successfully generated
-                    if ($dropdownHtml !== false) {
+                    if ($dropdownHtml !== false){
                         echo $dropdownHtml;
                     } 
                     else {
@@ -154,13 +172,13 @@ include __DIR__ . './../php/includes/footer.php';
 <script>
 
 // functions to send data to php
-function tableSelect(value) {
+function tableSelect(value){
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
             document.getElementById("tableData").innerHTML = xhr.responseText;
         }
     };
@@ -169,13 +187,13 @@ function tableSelect(value) {
     xhr.send("action=getValue&value=" + encodeURIComponent(value));
 }
 
-function actionSelect(value) {
+function actionSelect(value){
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
             document.getElementById("actionForm").innerHTML = xhr.responseText;
         }
     };
@@ -188,24 +206,24 @@ function actionSelect(value) {
 }
 
 // on select change, display new value based on choice
-document.getElementById("tableName").addEventListener("change", function() {
+document.getElementById("tableName").addEventListener("change", function(){
     tableSelect(this.value);
 });
 
-document.getElementById("tableAction").addEventListener("change", function() {
+document.getElementById("tableAction").addEventListener("change", function(){
     actionSelect(this.value);
 });
 
 // on window load, make sure the default values are chosen and displayed
-window.onload = function() {
+window.onload = function(){
     var tableSelectElement = document.getElementById("tableName");
-    if (tableSelectElement.options.length > 0) {
+    if (tableSelectElement.options.length > 0){
         tableSelectElement.value = tableSelectElement.options[0].value; // Select the first option
         tableSelect(tableSelectElement.value); // Trigger AJAX
     }
 
     var actionSelectElement = document.getElementById("tableAction");
-    if (actionSelectElement.options.length > 0) {
+    if (actionSelectElement.options.length > 0){
         actionSelectElement.value = actionSelectElement.options[0].value; // Select the first option
         actionSelect(actionSelectElement.value); // Trigger AJAX
     }
@@ -213,7 +231,7 @@ window.onload = function() {
 
 // ADD
 
-function sanitizeInput(input) {
+function sanitizeInput(input){
     // remove all unwanted characters to prevent XSS
     return input.replace(/[<>"'`]/g, "");
 }
@@ -234,8 +252,8 @@ document.getElementById("actionFormSubmitButton").addEventListener("click", func
     xhr.open("POST", "/actionScript", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
             // Display the server's response in the actionForm div
             // document.getElementById("actionForm").innerHTML = xhr.responseText;
         }
