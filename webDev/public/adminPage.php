@@ -31,22 +31,22 @@ set_exception_handler(function (Throwable $ae){
         header('Location: /'); // for now
         exit;
     }
-    else{ // anything but appException and its subclasses
+    else { // anything but appException and its subclasses
         error_log($ae->getMessage());
     }
 });
 
-if (!isset($_SESSION['id']) || $_SESSION['id'] !== 1) {
+if (!isset($_SESSION['id']) || !in_array($_SESSION['id'], [1, 2])){
     throw new AuthorizationException(
-        "Unauthorized access attempt to admin page",
-        403,
-        null, // No previous exception
-        $_SERVER['REMOTE_ADDR'] ?? 'Unknown', // Client IP address
-        $_SESSION['id'] ?? null, // User ID (if available)
-        "guest", // User role 
-        "co-owner", // Required role
-        "/admin", // Resource being accessed
-        "view" // Action attempted
+        message: "Unauthorized access attempt to admin page",
+        code: 403,
+        userRole: 'user',
+        resource: "/admin",
+        actionAttempted: "view",
+        requiredRole: "co-owner",
+        ipv4: $_SERVER['REMOTE_ADDR'] ?? 'Unknown',
+        userId: $_SESSION['id'] ?? null,
+        previous: null
     );
 }
 
@@ -65,7 +65,7 @@ $db = Database::getInstance();
             $dropdownHtml = TableRenderer::getTableNamesDropdown($tableNames);
 
             // Echo the dropdown HTML if it was successfully generated
-            if ($dropdownHtml !== false) {
+            if ($dropdownHtml !== false){
                 echo $dropdownHtml;
             } 
             else {

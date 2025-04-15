@@ -415,7 +415,11 @@ final class UserException extends AppException {
      * 
      * ### Example usage:
      * ```php
-     * throw new UserException("Failed to connect to the database", 500);
+     * throw new UserException(
+     *     message: "Failed to connect to the database",
+     *     code: 500,
+     *     previous: $previousException
+     * );
      * ```
      * 
      * @param string $message The exception message.
@@ -468,18 +472,6 @@ final class UserException extends AppException {
  * - Captures the field name that triggered the exception.
  * - Logs the validation failure type and error message.
  * - Supports exception chaining to preserve the original exception context.
- * 
- * ### Example usage:
- * ```php
- * throw new ValidationException(
- *     "Invalid username provided",
- *     400,
- *     $previousException,
- *     "username",
- *     ValidationFailureType::INVALID_USERNAME,
- *     "The username contains invalid characters."
- * );
- * ```
  */
 final class ValidationException extends AppException {
     private ?string $fieldName; // The name of the field which triggered the exception
@@ -493,20 +485,32 @@ final class ValidationException extends AppException {
      * details about the validation error, such as the field name, failure type, and
      * error message.
      * 
+     * ### Example usage:
+     * ```php
+     * throw new ValidationException(
+     *     message: "Invalid username provided",
+     *     code: 422,
+     *     failureType: ValidationFailureType::INVALID_USERNAME,
+     *     fieldName: "username",
+     *     errorMessage: "The username contains invalid characters.",
+     *     previous: $previousException
+     * );
+     * ```
+     * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
-     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
-     * @param ?string $fieldName The name of the field which triggered the exception (default is null).
      * @param ValidationFailureType $failureType The type of validation failure.
+     * @param ?string $fieldName The name of the field which triggered the exception (default is null).
      * @param ?string $errorMessage Additional error message to log (default is null).
+     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      */
     final public function __construct(
         string $message,
         int $code = 0,
-        ?Throwable $previous = null,
-        ?string $fieldName = null,
         ValidationFailureType $failureType,
-        ?string $errorMessage = null
+        ?string $fieldName = null,
+        ?string $errorMessage = null,
+        ?Throwable $previous = null
     ){
         parent::__construct($message, $code, ExceptionType::VALIDATION_EXCEPTION, $previous);
 
@@ -555,17 +559,6 @@ final class ValidationException extends AppException {
  * - Captures the type of authentication action (e.g., login, logout, register).
  * - Logs the failure reason for debugging purposes.
  * - Supports exception chaining to preserve the original exception context.
- * 
- * ### Example usage:
- * ```php
- * throw new AuthenticationException(
- *     "Invalid credentials provided",
- *     401,
- *     $previousException,
- *     AuthenticationType::LOGIN,
- *     "The username or password is incorrect."
- * );
- * ```
  */
 final class AuthenticationException extends AppException {
     private AuthenticationType $authType; // The type of authentication action (e.g., login, logout, register)
@@ -577,18 +570,29 @@ final class AuthenticationException extends AppException {
      * This constructor initializes the exception with a message, code, and optional
      * details about the authentication error, such as the type of action and the failure reason.
      * 
+     * ### Example usage:
+     * ```php
+     * throw new AuthenticationException(
+     *     message: "Invalid credentials provided",
+     *     code: 401,
+     *     authType: AuthenticationType::LOGIN,
+     *     failureReason: "The username or password is incorrect.",
+     *     previous: $previousException
+     * );
+     * ```
+     * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
-     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      * @param AuthenticationType $authType The type of authentication action (e.g., login, logout, register).
      * @param ?string $failureReason The reason for the authentication failure (default is null).
+     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      */
     final public function __construct(
         string $message,
         int $code = 0,
-        ?Throwable $previous = null,
         AuthenticationType $authType,
-        ?string $failureReason = null
+        ?string $failureReason = null,
+        ?Throwable $previous = null
     ){
         parent::__construct($message, $code, ExceptionType::AUTHENTICATION_EXCEPTION, $previous);
 
@@ -635,21 +639,6 @@ final class AuthenticationException extends AppException {
  * - Captures the action attempted and the resource being accessed.
  * - Logs the user's role, required role, and IP address.
  * - Supports exception chaining to preserve the original exception context.
- * 
- * ### Example usage:
- * ```php
- * throw new AuthorizationException(
- *     "Access denied to admin page",
- *     403,
- *     $previousException,
- *     $_SERVER['REMOTE_ADDR'],
- *     123,
- *     "user",
- *     "admin",
- *     "/admin",
- *     "view"
- * );
- * ```
  */
 final class AuthorizationException extends AppException {
     private string $actionAttempted; // The action the user attempted to perform
@@ -663,35 +652,49 @@ final class AuthorizationException extends AppException {
      * Constructs a new AuthorizationException instance.
      * 
      * This constructor initializes the exception with a message, code, and optional
-     * details about the authorization failure, such as the user's IP address, user ID,
-     * role, resource, and action attempted.
+     * details about the authorization failure, such as the user's role, resource, and action attempted.
+     * 
+     * ### Example usage:
+     * ```php
+     * throw new AuthorizationException(
+     *     message: "Access denied to admin page",
+     *     code: 403,
+     *     userRole: "user",
+     *     resource: "/admin",
+     *     actionAttempted: "view",
+     *     requiredRole: "admin",
+     *     ipv4: $_SERVER['REMOTE_ADDR'] ?? 'Unknown',
+     *     userId: $_SESSION['id'] ?? null,
+     *     previous: $previousException
+     * );
+     * ```
      * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
-     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
-     * @param ?string $ipv4 The user's IP address (default is null).
-     * @param ?int $userId The ID of the user attempting the action (default is null).
      * @param string $userRole The role of the user attempting the action.
-     * @param ?string $requiredRole The role required to perform the action (default is null).
      * @param string $resource The resource the user tried to access.
      * @param string $actionAttempted The action the user attempted to perform.
+     * @param ?string $requiredRole The role required to perform the action (default is null).
+     * @param ?string $ipv4 The user's IP address (default is null).
+     * @param ?int $userId The ID of the user attempting the action (default is null).
+     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      */
     final public function __construct(
         string $message,
         int $code = 0,
-        ?Throwable $previous = null,
+        string $userRole,
+        string $resource,
+        string $actionAttempted,
+        ?string $requiredRole = null,
         ?string $ipv4 = null,
         ?int $userId = null,
-        string $userRole,
-        ?string $requiredRole = null,
-        string $resource,
-        string $actionAttempted
+        ?Throwable $previous = null
     ){
         parent::__construct($message, $code, ExceptionType::AUTHORIZATION_EXCEPTION, $previous);
 
         // either set the passed ip adress and if its ::1 (the same device) set it to 127.0.0.1 or put it as unknown
         $this->ipv4 = ($ipv4 === '::1') ? '127.0.0.1' : ($ipv4 ?? 'Unknown');
-        $this->userId = $userId ?? '0'; // 0 - guest
+        $this->userId = $userId ?? 0; // 0 - guest
         $this->userRole = $userRole;
         $this->requiredRole = $requiredRole ?? 'Not provided';
         $this->resource = $resource;
@@ -748,20 +751,6 @@ final class AuthorizationException extends AppException {
  * - Captures server-specific details such as hostname, environment, PHP version, memory usage, and request information.
  * - Logs the exception message along with server details for easier debugging.
  * - Supports exception chaining to preserve the original exception context.
- * 
- * ### Example usage:
- * ```php
- * throw new ServerException(
- *     "Failed to process the request",
- *     500,
- *     $previousException,
- *     "MyServer",
- *     "production",
- *     "8.1.0",
- *     "https://example.com/api",
- *     "POST"
- * );
- * ```
  */
 final class ServerException extends AppException {
     private ?string $serverName; // The name of the server where the exception occurred
@@ -777,6 +766,20 @@ final class ServerException extends AppException {
      * This constructor initializes the exception with a message, code, and optional
      * server-specific details such as hostname, environment, PHP version, memory usage,
      * and request information.
+     * 
+     * ### Example usage:
+     * ```php
+     * throw new ServerException(
+     *     message: "Failed to process the request",
+     *     code: 500,
+     *     previous: $previousException,
+     *     serverName: "MyServer",
+     *     environment: "production",
+     *     phpVersion: "8.1.0",
+     *     requestUrl: "https://example.com/api",
+     *     requestMethod: "POST"
+     * );
+     * ```
      * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
@@ -856,18 +859,6 @@ final class ServerException extends AppException {
  * - Logs the database error code and message.
  * - Includes the function name where the exception originated.
  * - Supports exception chaining for preserving the original exception context.
- * 
- * ### Example usage:
- * ```php
- * throw new DatabaseException(
- *     "Failed to execute query",
- *     500,
- *     $previousException,
- *     "SELECT * FROM users WHERE id = :id",
- *     1045,
- *     "Access denied for user 'root'@'localhost'"
- * );
- * ```
  */
 final class DatabaseException extends AppException {
     private ?string $query; // The SQL query that caused the exception
@@ -880,6 +871,18 @@ final class DatabaseException extends AppException {
      * 
      * This constructor initializes the exception with a message, code, and optional
      * details about the database error, such as the query, error code, and error message.
+     * 
+     * ### Example usage:
+     * ```php
+     * throw new DatabaseException(
+     *     message: "Failed to execute query",
+     *     code: 500,
+     *     previous: $previousException,
+     *     query: "SELECT * FROM users WHERE id = :id",
+     *     dbErrorCode: 1045,
+     *     dbErrorMessage: "Access denied for user 'root'@'localhost'"
+     * );
+     * ```
      * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
@@ -942,20 +945,6 @@ final class DatabaseException extends AppException {
  * - Captures the endpoint and HTTP method that caused the exception.
  * - Logs the response code and failure reason for debugging purposes.
  * - Supports exception chaining to preserve the original exception context.
- * 
- * ### Example usage:
- * ```php
- * throw new APIException(
- *     "Failed to fetch data from API",
- *     500,
- *     $previousException,
- *     "/v1/resource",
- *     "GET",
- *     "Internal Server Error",
- *     500,
- *     "ExternalService"
- * );
- * ```
  */
 final class APIException extends AppException {
     private string $endpoint; // The API endpoint that caused the exception
@@ -971,24 +960,38 @@ final class APIException extends AppException {
      * details about the API error, such as the endpoint, HTTP method, response code,
      * failure reason, and API name.
      * 
+     * ### Example usage:
+     * ```php
+     * throw new APIException(
+     *     message: "Failed to fetch data from API",
+     *     code: 500,
+     *     endpoint: "/v1/resource",
+     *     method: "GET",
+     *     failureReason: "Internal Server Error",
+     *     responseCode: 500,
+     *     apiName: "ExternalService",
+     *     previous: $previousException
+     * );
+     * ```
+     * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
-     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      * @param string $endpoint The API endpoint that caused the exception.
      * @param string $method The HTTP method used for the API request (e.g., GET, POST).
      * @param string $failureReason The reason for the API failure.
      * @param ?int $responseCode The HTTP response code returned by the API (default is null).
      * @param ?string $apiName The name of the API (default is 'Internal').
+     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      */
     final public function __construct(
         string $message,
         int $code = 0,
-        ?Throwable $previous = null,
         string $endpoint,
         string $method,
         string $failureReason,
         ?int $responseCode = null,
-        ?string $apiName = null
+        ?string $apiName = null,
+        ?Throwable $previous = null
     ) {
         parent::__construct($message, $code, ExceptionType::API_EXCEPTION, $previous);
 
@@ -1058,19 +1061,6 @@ final class APIException extends AppException {
  * - Captures the configuration key and source that caused the exception.
  * - Logs the expected value and configuration path for debugging purposes.
  * - Supports exception chaining to preserve the original exception context.
- * 
- * ### Example usage:
- * ```php
- * throw new ConfigurationException(
- *     "Missing required configuration key",
- *     500,
- *     $previousException,
- *     "DATABASE_URL",
- *     ".env",
- *     "A valid database connection string",
- *     "/path/to/.env"
- * );
- * ```
  */
 final class ConfigurationException extends AppException {
     private string $configKey; // The configuration key that caused the exception
@@ -1085,22 +1075,35 @@ final class ConfigurationException extends AppException {
      * details about the configuration error, such as the configuration key, source,
      * expected value, and configuration path.
      * 
+     * ### Example usage:
+     * ```php
+     * throw new ConfigurationException(
+     *     message: "Missing required configuration key",
+     *     code: 500,
+     *     configKey: "DATABASE_URL",
+     *     source: ".env",
+     *     expected: "A valid database connection string",
+     *     configPath: "/path/to/.env",
+     *     previous: $previousException
+     * );
+     * ```
+     * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
-     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      * @param string $configKey The configuration key that caused the exception.
      * @param string $source The source of the configuration (e.g., .env, config.php).
      * @param ?string $expected The expected value for the configuration key (default is 'Not specified').
      * @param ?string $configPath The path to the configuration file (default is 'Not specified').
+     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      */
     final public function __construct(
         string $message,
         int $code = 0,
-        ?Throwable $previous = null,
         string $configKey,
         string $source,
         ?string $expected = null,
-        ?string $configPath = null
+        ?string $configPath = null,
+        ?Throwable $previous = null
     ) {
         parent::__construct($message, $code, ExceptionType::CONFIGURATION_EXCEPTION, $previous);
 
@@ -1167,19 +1170,6 @@ final class ConfigurationException extends AppException {
  * - Captures the file path and action that caused the exception.
  * - Logs the error message and error code for debugging purposes.
  * - Supports exception chaining to preserve the original exception context.
- * 
- * ### Example usage:
- * ```php
- * throw new FileException(
- *     "Failed to read the file",
- *     500,
- *     $previousException,
- *     "/path/to/file.txt",
- *     "read",
- *     "Permission denied",
- *     13
- * );
- * ```
  */
 final class FileException extends AppException {
     private string $filePath; // The file path that caused the exception
@@ -1187,29 +1177,42 @@ final class FileException extends AppException {
     private ?string $fileErrorMessage; // The error message associated with the file operation
     private ?int $fileErrorCode; // The error code associated with the file operation
 
-    /**
+        /**
      * Constructs a new FileException instance.
      * 
      * This constructor initializes the exception with a message, code, and optional
      * details about the file error, such as the file path, action, error message,
      * and error code.
      * 
+     * ### Example usage:
+     * ```php
+     * throw new FileException(
+     *     message: "Failed to read the file",
+     *     code: 500,
+     *     filePath: "/path/to/file.txt",
+     *     action: "read",
+     *     fileErrorMessage: "Permission denied",
+     *     fileErrorCode: 13,
+     *     previous: $previousException
+     * );
+     * ```
+     * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
-     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      * @param string $filePath The file path that caused the exception.
      * @param string $action The action being performed (e.g., read, write, delete).
      * @param ?string $fileErrorMessage The error message associated with the file operation (default is 'No specific error message').
      * @param ?int $fileErrorCode The error code associated with the file operation (default is 0).
+     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      */
     final public function __construct(
         string $message,
         int $code = 0,
-        ?Throwable $previous = null,
         string $filePath,
         string $action,
         ?string $fileErrorMessage = null,
-        ?int $fileErrorCode = null
+        ?int $fileErrorCode = null,
+        ?Throwable $previous = null
     ) {
         parent::__construct($message, $code, ExceptionType::FILE_EXCEPTION, $previous);
 
@@ -1283,40 +1286,48 @@ final class FileException extends AppException {
  * - Captures error details and PHP error codes.
  * - Logs the exception message along with error details for easier debugging.
  * - Supports exception chaining to preserve the original exception context.
- * 
- * ### Example usage:
- * ```php
- * throw new PHPException(
- *     "Invalid argument supplied to preg_match",
- *     500,
- *     $previousException,
- *     "Invalid regular expression",
- *     2
- * );
- * ```
  */
 final class PHPException extends AppException {
     private ?string $errorDetails; // Additional details about the PHP error
     private ?int $errorCode; // The PHP-specific error code
 
     /**
-     * Constructs a new PHPException instance.
+     * Constructs a new AuthorizationException instance.
      * 
      * This constructor initializes the exception with a message, code, and optional
-     * details about the PHP error, such as error details and error codes.
+     * details about the authorization failure, such as the user's role, resource, and action attempted.
+     * 
+     * ### Example usage:
+     * ```php
+     * throw new AuthorizationException(
+     *     message: "Access denied to admin page",
+     *     code: 403,
+     *     userRole: "guest",
+     *     resource: "/admin",
+     *     actionAttempted: "view",
+     *     requiredRole: "admin",
+     *     ipv4: $_SERVER['REMOTE_ADDR'] ?? 'Unknown',
+     *     userId: $_SESSION['id'] ?? null, // Pass null if the user is not logged in
+     *     previous: $previousException
+     * );
+     * ```
      * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
+     * @param string $userRole The role of the user attempting the action.
+     * @param string $resource The resource the user tried to access.
+     * @param string $actionAttempted The action the user attempted to perform.
+     * @param ?string $requiredRole The role required to perform the action (default is null).
+     * @param ?string $ipv4 The user's IP address (default is null).
+     * @param ?int $userId The ID of the user attempting the action (default is null).
      * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
-     * @param ?string $errorDetails Additional details about the PHP error (default is null).
-     * @param ?int $errorCode The PHP-specific error code (default is null).
      */
     final public function __construct(
         string $message,
         int $code = 0,
-        ?Throwable $previous = null,
         ?string $errorDetails = null,
-        ?int $errorCode = null
+        ?int $errorCode = null,
+        ?Throwable $previous = null
     ){
         parent::__construct($message, $code, ExceptionType::PHP_EXCEPTION, $previous);
 
@@ -1366,18 +1377,6 @@ final class PHPException extends AppException {
  * - Captures the reason for the logic error.
  * - Logs the expected and actual states for debugging purposes.
  * - Supports exception chaining to preserve the original exception context.
- * 
- * ### Example usage:
- * ```php
- * throw new LogicException(
- *     "Invalid state transition",
- *     500,
- *     $previousException,
- *     "State transition not allowed",
- *     "Active",
- *     "Inactive"
- * );
- * ```
  */
 final class LogicException extends AppException {
     private string $reason; // The reason for the logic error
@@ -1390,20 +1389,32 @@ final class LogicException extends AppException {
      * This constructor initializes the exception with a message, code, and optional
      * details about the logic error, such as the reason, expected state, and actual state.
      * 
+     * ### Example usage:
+     * ```php
+     * throw new LogicException(
+     *     message: "Invalid state transition",
+     *     code: 500,
+     *     reason: "State transition not allowed",
+     *     expectedState: "Active",
+     *     actualState: "Inactive",
+     *     previous: $previousException
+     * );
+     * ```
+     * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
-     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      * @param string $reason The reason for the logic error.
      * @param ?string $expectedState The expected state of the application (default is 'Not specified').
      * @param ?string $actualState The actual state of the application (default is 'Not specified').
+     * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      */
     final public function __construct(
         string $message,
         int $code = 0,
-        ?Throwable $previous = null,
         string $reason,
         ?string $expectedState = null,
-        ?string $actualState = null
+        ?string $actualState = null,
+        ?Throwable $previous = null
     ) {
         parent::__construct($message, $code, ExceptionType::LOGIC_EXCEPTION, $previous);
 

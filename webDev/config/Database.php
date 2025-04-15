@@ -90,11 +90,11 @@ class Database {
             throw new ConfigurationException(
                 "Missing environment variables. Please check your .env file.",
                 500, // HTTP status code for internal server error
-                null, // No previous exception
                 implode(', ', array_keys($missing)), // The missing configuration keys
                 ".env", // The source of the configuration
                 "All required environment variables must be set.", // Expected value or explanation
-                __DIR__ . '/../.env' // Path to the .env file
+                __DIR__ . '/../.env', // Path to the .env file
+                null, // No previous exception
             );
         }
 

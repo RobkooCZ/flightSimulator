@@ -26,15 +26,15 @@ set_exception_handler(function (Throwable $ae){
 
 if (!isset($_SESSION['id']) || $_SESSION['id'] !== 1){
     throw new AuthorizationException(
-        "Unauthorized access attempt to admin page",
-        403,
-        null, // No previous exception
-        $_SERVER['REMOTE_ADDR'] ?? 'Unknown', // Client IP address
-        $_SESSION['id'] ?? null, // User ID (if available)
-        "guest", // User role 
-        "owner", // Required role
-        "/adminSchoolPage", // Resource being accessed
-        "view" // Action attempted
+        message: "Unauthorized access attempt to admin page",
+        code: 403,
+        userRole: "guest", // User role
+        resource: "/adminSchoolPage", // Resource being accessed
+        actionAttempted: "view", // Action attempted
+        requiredRole: "owner", // Required role
+        ipv4: $_SERVER['REMOTE_ADDR'] ?? 'Unknown', // Client IP address
+        userId: $_SESSION['id'] ?? null, // User ID 
+        previous: null // No previous exception
     );
 }
 

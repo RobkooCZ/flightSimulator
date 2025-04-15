@@ -125,19 +125,39 @@ class Auth {
      */
     final public static function validatePass(string $pass): void {
         if (strlen($pass) < 8){
-            throw new ValidationException("Password must be at least 8 characters long.", failureType: ValidationFailureType::PASSWORD_TOO_SHORT);
+            throw new ValidationException(
+                message: "Password must be at least 8 characters long.",
+                code: 422, // Unprocessable Entity
+                failureType: ValidationFailureType::PASSWORD_TOO_SHORT
+            );
         }
         if (!preg_match('/[A-Z]/', $pass)){
-            throw new ValidationException("Password must include at least one uppercase letter.", failureType: ValidationFailureType::PASSWORD_MISSING_UPPERCASE);
+            throw new ValidationException(
+                message: "Password must include at least one uppercase letter.",
+                code: 422, // Unprocessable Entity
+                failureType: ValidationFailureType::PASSWORD_MISSING_UPPERCASE
+            );
         }
         if (!preg_match('/[a-z]/', $pass)){
-            throw new ValidationException("Password must include at least one lowercase letter.", failureType: ValidationFailureType::PASSWORD_MISSING_LOWERCASE);
+            throw new ValidationException(
+                message: "Password must include at least one lowercase letter.",
+                code: 422, // Unprocessable Entity
+                failureType: ValidationFailureType::PASSWORD_MISSING_LOWERCASE
+            );
         }
         if (!preg_match('/[0-9]/', $pass)){
-            throw new ValidationException("Password must include at least one number.", failureType: ValidationFailureType::PASSWORD_MISSING_NUMBER);
+            throw new ValidationException(
+                message: "Password must include at least one number.",
+                code: 422, // Unprocessable Entity
+                failureType: ValidationFailureType::PASSWORD_MISSING_NUMBER
+            );
         }
         if (!preg_match('/[\W]/', $pass)){
-            throw new ValidationException("Password must include at least one special character.", failureType: ValidationFailureType::PASSWORD_MISSING_SPECIAL_CHAR);
+            throw new ValidationException(
+                message: "Password must include at least one special character.",
+                code: 422, // Unprocessable Entity
+                failureType: ValidationFailureType::PASSWORD_MISSING_SPECIAL_CHAR
+            );
         }
     }
 
@@ -167,7 +187,7 @@ class Auth {
         $hashedPassword = $this->hashPass($combinedPassword); // Hash the password
 
         if ($hashedPassword === false){
-            throw new PHPException("Failed to hash password.");
+            throw new PHPException("Failed to hash password.", 500);
         }
 
         $parameters = [
