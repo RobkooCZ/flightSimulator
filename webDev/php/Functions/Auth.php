@@ -1,10 +1,17 @@
 <?php
+declare(strict_types=1);
 
 namespace WebDev\Functions;
 
 use WebDev\config\Database;
 use WebDev\Functions\CSRF;
-use Exception;
+use WebDev\Functions\LogicException;
+use WebDev\Functions\PHPException;
+use WebDev\Functions\DatabaseException;
+use WebDev\Functions\AuthenticationException;
+use WebDev\Functions\AuthenticationType;
+use WebDev\Functions\ValidationException;
+use WebDev\Functions\ValidationFailureType;
 
 class Auth {
     private static ?Auth $instance = null; // singleton
@@ -16,10 +23,11 @@ class Auth {
      * This method prevents the unserialization of the singleton instance,
      * ensuring that the class cannot be instantiated through unserialization.
      * 
-     * @throws Exception Always throws an exception when called.
+     * @throws LogicException Always throws a LogicException with a reason indicating
+     *                        that unserializing the singleton would violate the singleton pattern.
      */
     public function __wakeup(): never {
-        throw new Exception(message: "Cannot unserialize singleton");
+        throw new LogicException(message: "Cannot unserialize singleton.", reason: "Would violate the singleton pattern.");
     }
 
     /**
@@ -28,10 +36,11 @@ class Auth {
      * This method ensures that the singleton instance cannot be cloned,
      * maintaining the integrity of the singleton pattern.
      * 
-     * @throws Exception Always throws an exception when called.
+     * @throws LogicException Always throws a LogicException with a reason indicating
+     *                        that cloning the singleton would violate the singleton pattern.
      */
     public function __clone(): void {
-        throw new Exception(message: "Cannot clone singleton");
+        throw new LogicException(message: "Cannot clone singleton", reason: "Would violate the singleton pattern.");
     }
 
     /**
@@ -84,11 +93,11 @@ class Auth {
      * 
      * @param string $user The username to validate.
      * @return bool True if the username is valid.
-     * @throws Exception If the username is invalid.
+     * @throws ValidationException If the username is invalid.
      */
     final public static function validateUser(string $user): bool {
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $user)){
-            throw new Exception("Invalid characters in username.");
+            throw new ValidationException(message: "Invalid characters in username.", failureType: ValidationFailureType::INVALID_USERNAME);
         }
         return true;
     }
@@ -112,23 +121,23 @@ class Auth {
      * 
      * @param string $pass The password to validate.
      * @return void
-     * @throws Exception If the password does not meet the criteria.
+     * @throws ValidationException If the password does not meet the criteria.
      */
     final public static function validatePass(string $pass): void {
         if (strlen($pass) < 8){
-            throw new Exception("Password must be at least 8 characters long.");
+            throw new ValidationException("Password must be at least 8 characters long.", failureType: ValidationFailureType::PASSWORD_TOO_SHORT);
         }
         if (!preg_match('/[A-Z]/', $pass)){
-            throw new Exception("Password must include at least one uppercase letter.");
+            throw new ValidationException("Password must include at least one uppercase letter.", failureType: ValidationFailureType::PASSWORD_MISSING_UPPERCASE);
         }
         if (!preg_match('/[a-z]/', $pass)){
-            throw new Exception("Password must include at least one lowercase letter.");
+            throw new ValidationException("Password must include at least one lowercase letter.", failureType: ValidationFailureType::PASSWORD_MISSING_LOWERCASE);
         }
         if (!preg_match('/[0-9]/', $pass)){
-            throw new Exception("Password must include at least one number.");
+            throw new ValidationException("Password must include at least one number.", failureType: ValidationFailureType::PASSWORD_MISSING_NUMBER);
         }
         if (!preg_match('/[\W]/', $pass)){
-            throw new Exception("Password must include at least one special character.");
+            throw new ValidationException("Password must include at least one special character.", failureType: ValidationFailureType::PASSWORD_MISSING_SPECIAL_CHAR);
         }
     }
 
@@ -149,7 +158,8 @@ class Auth {
      * @param string $username The username of the new user.
      * @param string $password The password of the new user.
      * @return void
-     * @throws Exception If the registration fails.
+     * @throws PHPException If the password hash fails.
+     * @throws DatabaseException If the query execution fails.
      */
     final public function register(string $username, string $password): void {
         $salt = bin2hex(random_bytes(16)); // Generate a 128-bit random salt
@@ -157,7 +167,7 @@ class Auth {
         $hashedPassword = $this->hashPass($combinedPassword); // Hash the password
 
         if ($hashedPassword === false){
-            throw new Exception("Failed to hash password.");
+            throw new PHPException("Failed to hash password.");
         }
 
         $parameters = [
@@ -167,7 +177,7 @@ class Auth {
         ];
 
         if (!$this->db->execute("INSERT INTO users (username, password, salt, lastActivityAt, createdAt, updatedAt) VALUES (:username, :password, :salt, NOW(), NOW(), NOW())", $parameters)){
-            throw new Exception("Failed to execute INSERT INTO.");
+            throw new DatabaseException("Failed to execute query.", query: "INSERT INTO users (username, password, salt, lastActivityAt, createdAt, updatedAt)");
         }
     }
 
@@ -189,18 +199,22 @@ class Auth {
      * @param string $user The username of the user.
      * @param string $pass The password of the user.
      * @return array An associative array containing the user's details.
-     * @throws Exception If the login fails.
+     * @throws AuthenticationException If the login fails.
+     * @throws DatabaseException If the query resulted in no results.
      */
     final public function login(string $user, string $pass): array {
+        // Query the database for the user's credentials
         $result = $this->db->query(
             sql: "SELECT id, username, password, salt FROM users WHERE username = :username",
             parameters: ["username" => $user]
         );
 
+        // Check if the query returned results
         if ($result && count($result) > 0){
             $hashedPassword = $result[0]['password'];
             $salt = $result[0]['salt'];
 
+            // Verify the password
             if (password_verify($pass . $salt, $hashedPassword)){
                 session_regenerate_id(true); // Prevent session fixation
                 return [
@@ -209,11 +223,21 @@ class Auth {
                 ];
             } 
             else {
-                throw new Exception("Invalid username or password.");
+                throw new AuthenticationException(
+                    message: "Invalid username or password.",
+                    previous: null,
+                    authType: AuthenticationType::LOGIN,
+                    code: 401 // Unauthorized
+                );
             }
         }
 
-        throw new Exception("Invalid username or password.");
+        // If no results were found, throw a database exception
+        throw new DatabaseException(
+            message: "No results found.",
+            code: 404, // Not found
+            query: "SELECT id, username, password, salt FROM users"
+        );
     }
 
     /**

@@ -1,8 +1,12 @@
 <?php
+declare(strict_types=1);
+
 namespace WebDev\Functions;
 
-use Exception;
 use WebDev\config\Database;
+use WebDev\Functions\LogicException;
+use WebDev\Functions\DatabaseException;
+use WebDev\Functions\ConfigurationException;
 use PDO;
 
 class Table {
@@ -16,10 +20,14 @@ class Table {
      * This method prevents the unserialization of the singleton instance,
      * ensuring that the class cannot be instantiated through unserialization.
      * 
-     * @throws Exception Always throws an exception when called.
+     * @throws LogicException Always throws a LogicException with a reason indicating
+     *                        that unserializing the singleton would violate the singleton pattern.
      */
     public function __wakeup(): never {
-        throw new Exception(message: "Cannot unserialize singleton");
+        throw new LogicException(
+            message: "Cannot unserialize singleton.",
+            reason: "Would violate the singleton pattern."
+        );
     }
 
     /**
@@ -28,10 +36,14 @@ class Table {
      * This method ensures that the singleton instance cannot be cloned,
      * maintaining the integrity of the singleton pattern.
      * 
-     * @throws Exception Always throws an exception when called.
+     * @throws LogicException Always throws a LogicException with a reason indicating
+     *                        that cloning the singleton would violate the singleton pattern.
      */
     public function __clone(): void {
-        throw new Exception(message: "Cannot clone singleton");
+        throw new LogicException(
+            message: "Cannot clone singleton.",
+            reason: "Would violate the singleton pattern."
+        );
     }
 
     /**
@@ -41,18 +53,25 @@ class Table {
      * It also establishes a database connection and stores the table name.
      * 
      * @param string $tableName The name of the table.
-     * @throws Exception If the table does not exist in the database.
+     * @throws ConfigurationException If the table does not exist in the database.
      */
     private function __construct(string $tableName){
         if (!Database::getInstance()->tableExists($tableName)){
-            throw new Exception("Table '$tableName' doesn't exist.");
+            throw new ConfigurationException(
+                message: "Table '$tableName' doesn't exist.",
+                code: 400,
+                configKey: "tableName",
+                source: "Table",
+                expected: "A valid table name in the database.",
+                configPath: null
+            );
         }
-        
+
         $this->conn = Database::getInstance()->getConnection();
         $this->tableName = $tableName;
 
         self::$instances[$tableName] = $this;
-    } 
+    }
 
     /**
      * Retrieves or creates a Table instance for a specific table name.
@@ -107,22 +126,20 @@ class Table {
      * }
      * ```
      * 
-     * @return array|false An array of column metadata, or false on failure.
-     * @throws Exception If no columns are found in the table.
+     * @return array An array of column metadata.
+     * @throws DatabaseException If no columns are found in the table or the query fails.
      */
-    public function getTableHeader(): array|false {
-        try {
-            $result = Database::getInstance()->query("SHOW COLUMNS FROM {$this->tableName}");
+    public function getTableHeader(): array {
+        $result = Database::getInstance()->query("SHOW COLUMNS FROM {$this->tableName}");
 
-            if (count($result) === 0){
-                throw new Exception("No columns found in table {$this->tableName}.");
-            }
-
-            return $result;
-        } catch (Exception $e){
-            error_log("getTableHeader error for {$this->tableName}: " . $e->getMessage());
-            return false;
+        if (empty($result)){
+            throw new DatabaseException(
+                message: "No columns found in table '{$this->tableName}'.",
+                code: 500
+            );
         }
+
+        return $result;
     }
 
     /**
@@ -140,22 +157,20 @@ class Table {
      * }
      * ```
      * 
-     * @return array|false An array of rows from the table, or false on failure.
-     * @throws Exception If the query fails or no data is found.
+     * @return array An array of rows from the table.
+     * @throws DatabaseException If the query fails or no data is found.
      */
-    public function selectAll(): array|false {
-        try {
-            $result = Database::getInstance()->query("SELECT * FROM {$this->tableName}");
+    public function selectAll(): array {
+        $result = Database::getInstance()->query("SELECT * FROM {$this->tableName}");
 
-            if (empty($result)){
-                throw new Exception("Failed to get data about table '$this->tableName'");
-            }
-
-            return $result;
-        } catch (Exception $e){
-            error_log($e->getMessage());
-            return false;
+        if (empty($result)){
+            throw new DatabaseException(
+                message: "Failed to retrieve data from table '{$this->tableName}'.",
+                code: 500
+            );
         }
+
+        return $result;
     }
 
     /**
@@ -170,36 +185,30 @@ class Table {
      * echo $nextId; // Outputs the next available ID for the 'users' table.
      * ```
      * 
-     * @return int|false The next available ID.
-     */ 
-    public function getNextId(): int|false {
-        try {
-            $parameters = [
-                ":db" => "webDev",
-                ":table" => $this->tableName
-            ];
-    
-            // Execute the query with parameter binding
-            $result = Database::getInstance()->query(
-                "SELECT AUTO_INCREMENT 
-                      FROM INFORMATION_SCHEMA.TABLES
-                      WHERE TABLE_SCHEMA = :db 
-                      AND TABLE_NAME = :table",
-                $parameters
+     * @return int The next available ID.
+     * @throws DatabaseException If the query fails or no AUTO_INCREMENT value is found.
+     */
+    public function getNextId(): int {
+        $parameters = [
+            ":db" => "webDev",
+            ":table" => $this->tableName
+        ];
+
+        $result = Database::getInstance()->query(
+            "SELECT AUTO_INCREMENT 
+             FROM INFORMATION_SCHEMA.TABLES
+             WHERE TABLE_SCHEMA = :db 
+             AND TABLE_NAME = :table",
+            $parameters
+        );
+
+        if (empty($result) || !isset($result[0]['AUTO_INCREMENT'])){
+            throw new DatabaseException(
+                message: "No AUTO_INCREMENT value found for table '{$this->tableName}'.",
+                code: 500
             );
-    
-            // Check if the result is valid
-            if (empty($result) || !isset($result[0]['AUTO_INCREMENT'])){
-                throw new Exception("No AUTO_INCREMENT value found for table '{$this->tableName}'.");
-            }
-    
-            // Return the next availible ID
-            return (int)($result[0]['AUTO_INCREMENT']);
-        } 
-        catch (Exception $e){
-            // Log the error and return false
-            error_log("getNextId error for {$this->tableName}: " . $e->getMessage());
-            return false;
         }
+
+        return (int)$result[0]['AUTO_INCREMENT'];
     }
 }

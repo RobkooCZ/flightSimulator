@@ -1,8 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace WebDev\Functions;
 
-use Exception;
+use WebDev\Functions\LogicException;
+use WebDev\Functions\ValidationException;
+use WebDev\Functions\ValidationFailureType;
 
 class CSRF {
     private static ?CSRF $instance = null; // Singleton pattern
@@ -25,10 +28,11 @@ class CSRF {
      * This method prevents the unserialization of the singleton instance,
      * ensuring that the class cannot be instantiated through unserialization.
      * 
-     * @throws Exception Always throws an exception when called.
+     * @throws LogicException Always throws a LogicException with a reason indicating
+     *                        that unserializing the singleton would violate the singleton pattern.
      */
     public function __wakeup(): never {
-        throw new Exception(message: "Cannot unserialize singleton");
+        throw new LogicException(message: "Cannot unserialize singleton.", reason: "Would violate the singleton pattern.");
     }
 
     /**
@@ -37,10 +41,11 @@ class CSRF {
      * This method ensures that the singleton instance cannot be cloned,
      * maintaining the integrity of the singleton pattern.
      * 
-     * @throws Exception Always throws an exception when called.
+     * @throws LogicException Always throws a LogicException with a reason indicating
+     *                        that cloning the singleton would violate the singleton pattern.
      */
     public function __clone(): void {
-        throw new Exception(message: "Cannot clone singleton");
+        throw new LogicException(message: "Cannot clone singleton", reason: "Would violate the singleton pattern.");
     }
 
     /**
@@ -64,7 +69,7 @@ class CSRF {
      * @return CSRF The singleton instance of the CSRF class.
      */
     public static function getInstance(): CSRF {
-        if (self::$instance === null) {
+        if (self::$instance === null){
             self::$instance = new CSRF();
         }
         return self::$instance;
@@ -102,26 +107,49 @@ class CSRF {
      * @param string $token The CSRF token submitted by the client.
      * 
      * @return bool True if the token is valid, false otherwise.
+     * @throws ValidationException If the token is mismatched, invalid, expired, or the cookie doesn't match.
      */
     public function validateToken(string $token): bool {
-        if (isset($_SESSION[self::SESSION_CSRF_KEY]['token']) &&
-            $_SESSION[self::SESSION_CSRF_KEY]['token'] === $token &&
-            $_SESSION[self::SESSION_CSRF_KEY]['expires'] > time()){
-    
-            if (isset($_COOKIE[self::COOKIE_NAME]) && $_COOKIE[self::COOKIE_NAME] === $token){
-                $this->regenerateToken(); // Regenerate the token after successful validation
-                return true;
-            }
-    
-            error_log("CSRF validation failed: Cookie data doesn't match.");
-        } 
-        else{
-            // Token expired or mismatch
-            error_log("CSRF validation failed: Token mismatch or expired.");
-            $this->generateToken(); // Regenerate a new token
+        // Check if the token exists in the session
+        if (!isset($_SESSION[self::SESSION_CSRF_KEY]['token'])){
+            throw new ValidationException(
+                message: "CSRF validation failed: token is missing.",
+                code: 400,
+                failureType: ValidationFailureType::CSRF_MISSING
+            );
         }
-    
-        return false; // Validation failed
+
+        // Check if the token has expired
+        if ($_SESSION[self::SESSION_CSRF_KEY]['expires'] <= time()){
+            $this->generateToken(); // Regenerate a new token
+            throw new ValidationException(
+                message: "CSRF validation failed: token has expired.",
+                code: 400,
+                failureType: ValidationFailureType::CSRF_EXPIRED
+            );
+        }
+
+        // Check if the token matches the session token
+        if ($_SESSION[self::SESSION_CSRF_KEY]['token'] !== $token){
+            throw new ValidationException(
+                message: "CSRF validation failed: token mismatched.",
+                code: 400,
+                failureType: ValidationFailureType::CSRF_MISMATCHED
+            );
+        }
+
+        // Check if the token matches the cookie
+        if (!isset($_COOKIE[self::COOKIE_NAME]) || $_COOKIE[self::COOKIE_NAME] !== $token){
+            throw new ValidationException(
+                message: "CSRF validation failed: cookie data doesn't match.",
+                code: 400,
+                failureType: ValidationFailureType::CSRF_COOKIE_MISMATCHED
+            );
+        }
+
+        // If all checks pass, regenerate the token and return true
+        $this->regenerateToken(); // Regenerate the token after successful validation
+        return true;
     }
 
     /**

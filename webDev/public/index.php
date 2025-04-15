@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 
 // only start session if its requested
 $startSession = false;

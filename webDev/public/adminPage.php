@@ -1,13 +1,9 @@
 <?php
+declare(strict_types=1);
+
 // start session and set a variable to not start it in header.php
 session_start();
 $startSession = false;
-
-// not functional rn. 
-// todo: fix
-// if (!isset($_SESSION['id']) || ($_SESSION['id'] !== '1' || $_SESSION['id'] !== '2')) {
-//     header('Location: /');
-// }
 
 // DO show the header and footer
 $showHeader = true;
@@ -24,6 +20,36 @@ include __DIR__ . './../php/includes/header.php';
 use WebDev\config\Database;
 use WebDev\Functions\Table;
 use WebDev\Functions\TableRenderer;
+use WebDev\Functions\AppException;
+use WebDev\Functions\AuthorizationException;
+
+AppException::init();
+
+set_exception_handler(function (Throwable $ae){
+    if ($ae instanceof AppException){ // appException or its subclasses
+        AppException::globalHandle($ae);
+        header('Location: /'); // for now
+        exit;
+    }
+    else{ // anything but appException and its subclasses
+        error_log($ae->getMessage());
+    }
+});
+
+if (!isset($_SESSION['id']) || $_SESSION['id'] !== 1) {
+    throw new AuthorizationException(
+        "Unauthorized access attempt to admin page",
+        403,
+        null, // No previous exception
+        $_SERVER['REMOTE_ADDR'] ?? 'Unknown', // Client IP address
+        $_SESSION['id'] ?? null, // User ID (if available)
+        "guest", // User role 
+        "co-owner", // Required role
+        "/admin", // Resource being accessed
+        "view" // Action attempted
+    );
+}
+
 $db = Database::getInstance();
 
 ?>

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 // Start session and set a variable to not start it in header.php
 session_start();
 $startSession = false;

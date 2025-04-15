@@ -1,5 +1,7 @@
-<!-- show the footer if its requested -->
 <?php
+declare(strict_types=1);
+
+// show the header if requested
 if ($showFooter === true) {
     echo '
         <footer>
