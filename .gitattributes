@@ -1,2 +1,13 @@
 README.md merge=ours
+
+# make sure all header files are considered C, not CPP or any other crap
 *.h linguist-language=C
+
+# mark external dependencies as vendored to prevent them from counting into the linguist count
+# ** means iterate over EVERYTHING in the specified folder and set it as vendored
+# gameDev branch
+gameDev/fonts/** linguist-vendored
+gameDev/SDL2/** linguist-vendored
+
+# webDev branch
+webDev/vendor/** linguist-vendored
