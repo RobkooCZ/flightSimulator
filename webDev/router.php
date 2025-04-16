@@ -2,8 +2,28 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+use WebDev\AppBootstrapper;
+use WebDev\Bootstrap;
+// global exception handler
+use WebDev\Functions\AppException;
+
+// make sure AppException and all its subclasses are loaded
+AppException::init();
+
+set_exception_handler(function (Throwable $ae){
+    if (AppException::globalHandle($ae)){ // appException or its subclasses
+        exit;
+    }
+    else { // anything but appException and its subclasses
+        error_log($ae->getMessage()); // temporary
+    }
+});
+
+// init the app stuff
+Bootstrap::init();
+
 // function to serve static files
-function serveStaticFile($filePath): void{ // no return
+function serveStaticFile($filePath): void { // no return
     if (file_exists($filePath)){ // check if the file exists
         $ext = pathinfo($filePath, PATHINFO_EXTENSION); // get the extension of static file
 
@@ -20,7 +40,7 @@ function serveStaticFile($filePath): void{ // no return
         readfile($filePath); // read the file
         exit;
     } 
-    else{ // file not found
+    else { // file not found
         http_response_code(404);
         echo "File ($filePath) not found.";
         exit;
@@ -28,7 +48,7 @@ function serveStaticFile($filePath): void{ // no return
 }
 
 // function to handle the routing
-function handleRequest($uri): void{
+function handleRequest($uri): void {
     switch ($uri){
         // Serve the homepage (index.php)
         case '/':
