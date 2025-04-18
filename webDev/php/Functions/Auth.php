@@ -4,18 +4,24 @@ declare(strict_types=1);
 namespace WebDev\Functions;
 
 use WebDev\config\Database;
-use WebDev\Functions\CSRF;
-use WebDev\Functions\LogicException;
-use WebDev\Functions\PHPException;
-use WebDev\Functions\DatabaseException;
-use WebDev\Functions\AuthenticationException;
-use WebDev\Functions\AuthenticationType;
-use WebDev\Functions\ValidationException;
-use WebDev\Functions\ValidationFailureType;
 
+/**
+ * Class Auth
+ *
+ * This class is responsible for handling authentication-related functionality.
+ * It may include methods for user login, logout, session management, and other
+ * authentication mechanisms.
+ */
 class Auth {
-    private static ?Auth $instance = null; // singleton
-    private Database $db; // connection to the db
+    /**
+     * @var Auth|null $instance Singleton instance of the Auth class.
+     */
+    private static ?Auth $instance = null; 
+    
+    /**
+     * @var Database $db Connection to the database.
+     */
+    private Database $db; 
 
     /**
      * Prevent unserialize attacks.
@@ -50,10 +56,31 @@ class Auth {
      * is started if it hasn't already been started.
      */
     private function __construct(){
+        Logger::log(
+            "Initializing the Auth class and establishing a database connection...",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $this->db = Database::getInstance();
+
         if (session_status() === PHP_SESSION_NONE){
+            Logger::log(
+                "Starting a new session for the Auth class.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             session_start();
         }
+
+        Logger::log(
+            "Auth class initialized successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
     }
 
     /**
@@ -73,7 +100,21 @@ class Auth {
      */
     final public static function getInstance(): Auth {
         if (self::$instance === null){
+            Logger::log(
+                "Creating a new Auth singleton instance.",
+                LogLevel::DEBUG,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             self::$instance = new Auth();
+        } 
+        else {
+            Logger::log(
+                "Reusing the existing Auth singleton instance.",
+                LogLevel::DEBUG,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
         }
         return self::$instance;
     }
@@ -96,9 +137,30 @@ class Auth {
      * @throws ValidationException If the username is invalid.
      */
     final public static function validateUser(string $user): bool {
+        Logger::log(
+            "Validating username: $user",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $user)){
+            Logger::log(
+                "Validation failed for username: $user",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             throw new ValidationException(message: "Invalid characters in username.", failureType: ValidationFailureType::INVALID_USERNAME);
         }
+
+        Logger::log(
+            "Username validated successfully: $user",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         return true;
     }
 
@@ -124,41 +186,85 @@ class Auth {
      * @throws ValidationException If the password does not meet the criteria.
      */
     final public static function validatePass(string $pass): void {
+        Logger::log(
+            "Validating password.",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         if (strlen($pass) < 8){
+            Logger::log(
+                "Password validation failed: Too short.",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             throw new ValidationException(
                 message: "Password must be at least 8 characters long.",
-                code: 422, // Unprocessable Entity
+                code: 422,
                 failureType: ValidationFailureType::PASSWORD_TOO_SHORT
             );
         }
         if (!preg_match('/[A-Z]/', $pass)){
+            Logger::log(
+                "Password validation failed: Missing uppercase letter.",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             throw new ValidationException(
                 message: "Password must include at least one uppercase letter.",
-                code: 422, // Unprocessable Entity
+                code: 422,
                 failureType: ValidationFailureType::PASSWORD_MISSING_UPPERCASE
             );
         }
         if (!preg_match('/[a-z]/', $pass)){
+            Logger::log(
+                "Password validation failed: Missing lowercase letter.",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             throw new ValidationException(
                 message: "Password must include at least one lowercase letter.",
-                code: 422, // Unprocessable Entity
+                code: 422,
                 failureType: ValidationFailureType::PASSWORD_MISSING_LOWERCASE
             );
         }
         if (!preg_match('/[0-9]/', $pass)){
+            Logger::log(
+                "Password validation failed: Missing number.",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             throw new ValidationException(
                 message: "Password must include at least one number.",
-                code: 422, // Unprocessable Entity
+                code: 422,
                 failureType: ValidationFailureType::PASSWORD_MISSING_NUMBER
             );
         }
         if (!preg_match('/[\W]/', $pass)){
+            Logger::log(
+                "Password validation failed: Missing special character.",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             throw new ValidationException(
                 message: "Password must include at least one special character.",
-                code: 422, // Unprocessable Entity
+                code: 422,
                 failureType: ValidationFailureType::PASSWORD_MISSING_SPECIAL_CHAR
             );
         }
+
+        Logger::log(
+            "Password validated successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
     }
 
     /**
@@ -182,9 +288,16 @@ class Auth {
      * @throws DatabaseException If the query execution fails.
      */
     final public function register(string $username, string $password): void {
-        $salt = bin2hex(random_bytes(16)); // Generate a 128-bit random salt
-        $combinedPassword = $password . $salt; // Combine the password with the salt
-        $hashedPassword = $this->hashPass($combinedPassword); // Hash the password
+        Logger::log(
+            "Registering new user: $username",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        $salt = bin2hex(random_bytes(16));
+        $combinedPassword = $password . $salt;
+        $hashedPassword = $this->hashPass($combinedPassword);
 
         if ($hashedPassword === false){
             throw new PHPException("Failed to hash password.", 500);
@@ -196,7 +309,21 @@ class Auth {
             "salt" => $salt
         ];
 
-        if (!$this->db->execute("INSERT INTO users (username, password, salt, lastActivityAt, createdAt, updatedAt) VALUES (:username, :password, :salt, NOW(), NOW(), NOW())", $parameters)){
+        if ($this->db->execute("INSERT INTO users (username, password, salt, lastActivityAt, createdAt, updatedAt) VALUES (:username, :password, :salt, NOW(), NOW(), NOW())", $parameters)){
+            Logger::log(
+                "User registered successfully: $username",
+                LogLevel::SUCCESS,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        } 
+        else {
+            Logger::log(
+                "Failed to register user: $username",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             throw new DatabaseException("Failed to execute query.", query: "INSERT INTO users (username, password, salt, lastActivityAt, createdAt, updatedAt)");
         }
     }
@@ -223,39 +350,61 @@ class Auth {
      * @throws DatabaseException If the query resulted in no results.
      */
     final public function login(string $user, string $pass): array {
-        // Query the database for the user's credentials
+        Logger::log(
+            "Attempting login for user: $user",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $result = $this->db->query(
             sql: "SELECT id, username, password, salt FROM users WHERE username = :username",
             parameters: ["username" => $user]
         );
 
-        // Check if the query returned results
         if ($result && count($result) > 0){
             $hashedPassword = $result[0]['password'];
             $salt = $result[0]['salt'];
 
-            // Verify the password
             if (password_verify($pass . $salt, $hashedPassword)){
-                session_regenerate_id(true); // Prevent session fixation
+                Logger::log(
+                    "Login successful for user: $user",
+                    LogLevel::SUCCESS,
+                    LoggerType::NORMAL,
+                    Loggers::CMD
+                );
+                session_regenerate_id(true);
                 return [
                     'id' => $result[0]['id'],
                     'username' => $result[0]['username']
                 ];
             } 
             else {
+                Logger::log(
+                    "Login failed for user: $user - Invalid password.",
+                    LogLevel::FAILURE,
+                    LoggerType::NORMAL,
+                    Loggers::CMD
+                );
                 throw new AuthenticationException(
                     message: "Invalid username or password.",
                     previous: null,
                     authType: AuthenticationType::LOGIN,
-                    code: 401 // Unauthorized
+                    code: 401
                 );
             }
         }
 
-        // If no results were found, throw a database exception
+        Logger::log(
+            "Login failed for user: $user - No results found.",
+            LogLevel::FAILURE,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         throw new DatabaseException(
             message: "No results found.",
-            code: 404, // Not found
+            code: 404,
             query: "SELECT id, username, password, salt FROM users"
         );
     }
@@ -277,6 +426,13 @@ class Auth {
      * @return void
      */
     final public function logout(): void {
+        Logger::log(
+            "Logging out the current user.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         if (session_status() === PHP_SESSION_ACTIVE){
             session_unset();
             session_destroy();
@@ -290,9 +446,21 @@ class Auth {
             session_regenerate_id(true);
 
             CSRF::getInstance()->clearToken();
-        } 
+
+            Logger::log(
+                "User logged out successfully.",
+                LogLevel::SUCCESS,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
         else {
-            error_log("Logout attempted without an active session.");
+            Logger::log(
+                "Logout attempted without an active session.",
+                LogLevel::WARNING,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
         }
     }
 
@@ -303,6 +471,13 @@ class Auth {
      * @return string The hashed password.
      */
     private function hashPass(string $pass): string {
+        Logger::log(
+            "Hashing password.",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         return password_hash($pass, PASSWORD_DEFAULT);
     }
 }

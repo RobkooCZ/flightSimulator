@@ -30,6 +30,7 @@ enum ExceptionType: string {
     
     // Internal technical errors
     case PHP_EXCEPTION = 'PHPException'; // PHP-related errors
+    case NULL_EXCEPTION = 'NullException'; // Whenever key variable, object or anything else is null
     case LOGIC_EXCEPTION = 'LogicException'; // Application logic errors
 }
 
@@ -82,6 +83,11 @@ enum AuthenticationType: string {
  * Subclasses should extend this class to define specific exception types.
  */
 abstract class AppException extends Exception {
+    /**
+     * The type of exception (e.g., USER_EXCEPTION).
+     * 
+     * @var ExceptionType 
+     */
     protected ExceptionType $exceptionType; // The type of exception (e.g., USER_EXCEPTION)
 
     /**
@@ -138,10 +144,20 @@ abstract class AppException extends Exception {
      */
     final public static function init(): void {
         if (!class_exists(self::class)){ 
-            error_log("AppException class not loaded.");
-            throw new Exception("Critical error: AppException failed to load!");
+            throw new ConfigurationException(
+                "AppException class failed to load!",
+                500,
+                "AppException",
+                "PSR-4 Autoloader"
+            );
         }
-        error_log("AppException initialized successfully.");
+
+        Logger::log(
+            "AppException initialized successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
     }
 
     /**
@@ -153,20 +169,34 @@ abstract class AppException extends Exception {
      */
     final public function handle(): void {
         match ($this->exceptionType){
+            // user exceptions
             ExceptionType::USER_EXCEPTION => $this->userException(),
-            ExceptionType::SERVER_EXCEPTION => $this->serverException(),
-            ExceptionType::DATABASE_EXCEPTION => $this->databaseException(),
-            ExceptionType::PHP_EXCEPTION => $this->phpException(),
             ExceptionType::VALIDATION_EXCEPTION => $this->validationException(),
-            ExceptionType::FILE_EXCEPTION => $this->fileException(),
             ExceptionType::AUTHENTICATION_EXCEPTION => $this->authenticationException(),
             ExceptionType::AUTHORIZATION_EXCEPTION => $this->authorizationException(),
+
+            // server/backend exceptions
+            ExceptionType::SERVER_EXCEPTION => $this->serverException(),
+            ExceptionType::DATABASE_EXCEPTION => $this->databaseException(),
             ExceptionType::API_EXCEPTION => $this->apiException(),
             ExceptionType::CONFIGURATION_EXCEPTION => $this->configurationException(),
+            ExceptionType::FILE_EXCEPTION => $this->fileException(),
+
+            // internal exceptions
+            ExceptionType::PHP_EXCEPTION => $this->phpException(),
+            ExceptionType::NULL_EXCEPTION => $this->nullException(),
             ExceptionType::LOGIC_EXCEPTION => $this->logicException(),
-            default => throw (function(){
-                error_log("[UNKNOWN EXCEPTION] " . $this->getMessage() . " | File: " . $this->getFile() . " | Line: " . $this->getLine() . " | Timestamp: " . $this->getDateAndTime());
-                return new Exception("Unhandled exception type: " . $this->exceptionType->value);
+
+            // default case if it doesn't match
+            default => (function(){
+                Logger::log(
+                    "Invalid exceptionType provided.",
+                    LogLevel::WARNING,
+                    LoggerType::NORMAL,
+                    Loggers::CMD,
+                    __LINE__,
+                    __FILE__
+                );
             })()
         };
     }
@@ -272,123 +302,212 @@ abstract class AppException extends Exception {
     }
 
     /**
-     * Handles server-related exceptions.
+     * Logs a validation exception.
      * 
-     * By default, this method logs the exception message to the error log.
-     * Subclasses can override this method to provide custom handling logic.
-     * 
-     * @return void
-     */
-    protected function serverException(): void {
-        error_log("[SERVER ERROR] " . $this->getMessage() . " | Exception code: " . $this->getCode());
-    }
-
-    /**
-     * Handles database-related exceptions.
-     * 
-     * By default, this method logs the exception message to the error log.
-     * Subclasses can override this method to provide custom handling logic.
-     * 
-     * @return void
-     */
-    protected function databaseException(): void {
-        error_log("[DB ERROR] " . $this->getMessage() . " | Exception code: " . $this->getCode());
-    }
-
-    /**
-     * Handles PHP-related exceptions.
-     * 
-     * This method is triggered for errors related to PHP built-in functions or extensions.
-     * Examples include errors from `preg_match`, `mb_convert_encoding`, or `iconv`.
-     * 
-     * @return void
-     */
-    protected function phpException(): void {
-        error_log("[PHP ERROR] " . $this->getMessage() . " | Exception code: " . $this->getCode());
-    }
-
-    /**
-     * Handles validation-related exceptions.
-     * 
-     * This method is triggered for errors related to input validation, such as invalid form data
-     * or failed CSRF token validation.
+     * Default implementation for logging validation exceptions. Subclasses should override this method for specific handling.
      * 
      * @return void
      */
     protected function validationException(): void {
-        error_log("[VALIDATION ERROR] " . $this->getMessage() . " | Exception code: " . $this->getCode());
+        Logger::log(
+            "[VALIDATION] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::WARNING,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
     }
 
     /**
-     * Handles file-related exceptions.
+     * Logs an authentication exception.
      * 
-     * This method is triggered for errors related to file operations, such as reading, writing,
-     * or uploading files. Examples include file not found or permission errors.
-     * 
-     * @return void
-     */
-    protected function fileException(): void {
-        error_log("[FILE I/O ERROR] " . $this->getMessage() . " | Exception code: " . $this->getCode());
-    }
-
-    /**
-     * Handles authentication-related exceptions.
-     * 
-     * This method is triggered for errors related to user authentication, such as login failures,
-     * invalid session tokens, or registration issues.
+     * Default implementation for logging authentication exceptions. Subclasses should override this method for specific handling.
      * 
      * @return void
      */
     protected function authenticationException(): void {
-        error_log("[AUTHENTICATION ERROR] " . $this->getMessage() . " | Exception code: " . $this->getCode());
+        Logger::log(
+            "[AUTHENTICATION] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::WARNING,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
     }
 
     /**
-     * Handles authorization-related exceptions.
+     * Logs an authorization exception.
      * 
-     * This method is triggered for errors related to user permissions, such as access to restricted
-     * resources or insufficient privileges.
+     * Default implementation for logging authorization exceptions. Subclasses should override this method for specific handling.
      * 
      * @return void
      */
     protected function authorizationException(): void {
-        error_log("[AUTHORIZATION ERROR] " . $this->getMessage() . " | Exception code: " . $this->getCode());
+        Logger::log(
+            "[AUTHORIZATION] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::WARNING,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
     }
 
     /**
-     * Handles API-related exceptions.
+     * Logs a server exception.
      * 
-     * This method is triggered for errors related to API calls or external services, such as failed
-     * HTTP requests, invalid API responses, or rate limit violations.
+     * Default implementation for logging server exceptions. Subclasses should override this method for specific handling.
+     * 
+     * @return void
+     */
+    protected function serverException(): void {
+        Logger::log(
+            "[SERVER] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
+    }
+
+    /**
+     * Logs a database exception.
+     * 
+     * Default implementation for logging database exceptions. Subclasses should override this method for specific handling.
+     * 
+     * @return void
+     */
+    protected function databaseException(): void {
+        Logger::log(
+            "[DB] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
+    }
+
+    /**
+     * Logs an API exception.
+     * 
+     * Default implementation for logging API exceptions. Subclasses should override this method for specific handling.
      * 
      * @return void
      */
     protected function apiException(): void {
-        error_log("[API ERROR] " . $this->getMessage() . " | Exception code: " . $this->getCode());
+        Logger::log(
+            "[API] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
     }
 
     /**
-     * Handles configuration-related exceptions.
+     * Logs a configuration exception.
      * 
-     * This method is triggered for errors related to application configuration, such as missing
-     * `.env` variables or invalid settings.
+     * Default implementation for logging configuration exceptions. Subclasses should override this method for specific handling.
      * 
      * @return void
      */
     protected function configurationException(): void {
-        error_log("[CONFIGURATION ERROR] " . $this->getMessage() . " | Exception code: " . $this->getCode());
+        Logger::log(
+            "[CONFIGURATION] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
     }
 
     /**
-     * Handles logic-related exceptions.
+     * Logs a file exception.
      * 
-     * This method is triggered for errors related to application logic, such as invalid state
-     * transitions or unexpected null values.
+     * Default implementation for logging file exceptions. Subclasses should override this method for specific handling.
+     * 
+     * @return void
+     */
+    protected function fileException(): void {
+        Logger::log(
+            "[FILE] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
+    }
+
+    /**
+     * Logs a PHP exception.
+     * 
+     * Default implementation for logging PHP exceptions. Subclasses should override this method for specific handling.
+     * 
+     * @return void
+     */
+    protected function phpException(): void {
+        Logger::log(
+            "[PHP] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
+    }
+
+    /**
+     * Logs a null exception.
+     * 
+     * Default implementation for logging null exceptions. Subclasses should override this method for specific handling.
+     * 
+     * @return void
+     */
+    protected function nullException(): void {
+        Logger::log(
+            "[NULL] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
+    }
+
+    /**
+     * Logs a logic exception.
+     * 
+     * Default implementation for logging logic exceptions. Subclasses should override this method for specific handling.
      * 
      * @return void
      */
     protected function logicException(): void {
-        error_log("[LOGIC ERROR] " . $this->getMessage() . " | Exception code: " . $this->getCode());
+        Logger::log(
+            "[LOGIC] " . $this->getMessage() .
+            " | Exception code: " . $this->getCode(),
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
     }
 }
 
@@ -437,17 +556,33 @@ final class UserException extends AppException {
     /**
      * Handles user-related exceptions.
      * 
-     * Ensures the session is started before setting a session message. Logs the
-     * exception message for debugging purposes.
+     * This method ensures that the session is started before setting a session message
+     * with the exception message. It also logs the exception details, including the
+     * function where the exception originated, for debugging purposes.
+     * 
+     * ### Behavior:
+     * - Starts the session if it is not already active.
+     * - Throws a `PHPException` if the session cannot be started.
+     * - Sets a session message with the exception message for user feedback.
+     * - Logs the exception details, including the function name, exception code, file, and line.
+     * 
+     * ### Logged Details:
+     * - Exception message and code.
+     * - The function where the exception was thrown.
+     * - File, line, and timestamp of the exception.
      * 
      * @return void
+     * @throws PHPException If the session cannot be started.
      */
     final protected function userException(): void {
         // make sure the session is started
         if (session_status() === PHP_SESSION_NONE){
             // handle the case where session can't be started
             if (!@session_start()){
-                error_log("[SESSION ERROR] Failed to start session for UserException.");
+                throw new PHPException(
+                    "Failed to start session for userException",
+                    500
+                );
                 return;
             }
         }
@@ -456,8 +591,16 @@ final class UserException extends AppException {
         // get the function name
         $functionName = parent::getFailedFunctionName();
         // log it to the console, just for fun
-        error_log("[USER ERROR] " . $this->getMessage() . " | Function: " . $functionName . " | Code: " . $this->getCode() . " | File: " . $this->getFile() . " | Line: " . $this->getLine() . " | Timestamp: " . parent::getDateAndTime());
-        // next update this func will be extended and tweaked with the addition of logging
+        Logger::log(
+            "[USER] " . $this->getMessage() .
+            " | Function: " . $functionName .
+            " | Code: " . $this->getCode(),
+            LogLevel::WARNING,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
     }
 }
 
@@ -536,14 +679,17 @@ final class ValidationException extends AppException {
      * @return void
      */
     final protected function validationException(): void {
-        // Log the validation error details
-        error_log("[VALIDATION ERROR] " . $this->getMessage() .
+        // Log the validation error details using Logger::writeLog
+        Logger::getInstance()->log(
+            "[VALIDATION] " . $this->getMessage() .
             " | Field: " . $this->fieldName .
             " | Failure Type: " . $this->failureType->value .
-            " | Error Message: " . $this->errorMessage .
-            " | File: " . $this->getFile() .
-            " | Line: " . $this->getLine() .
-            " | Timestamp: " . parent::getDateAndTime()
+            " | Error Message: " . $this->errorMessage,
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
         );
     }
 }
@@ -616,13 +762,15 @@ final class AuthenticationException extends AppException {
      * @return void
      */
     final protected function authenticationException(): void {
-        // Log the authentication failure details
-        error_log("[AUTHENTICATION ERROR] " . $this->getMessage() .
+        Logger::getInstance()->log(
+            "[AUTHENTICATION] " . $this->getMessage() .
             " | Action: " . $this->authType->value .
-            " | Failure Reason: " . $this->failureReason .
-            " | File: " . $this->getFile() .
-            " | Line: " . $this->getLine() .
-            " | Timestamp: " . parent::getDateAndTime()
+            " | Failure Reason: " . $this->failureReason,
+            LogLevel::WARNING,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
         );
     }
 }
@@ -718,16 +866,20 @@ final class AuthorizationException extends AppException {
      * @return void
      */
     final protected function authorizationException(): void {
-        error_log("[AUTHORIZATION ERROR] " . $this->getMessage() .
+        // Log authorization exception details
+        Logger::getInstance()->log(
+            "[AUTHORIZATION] " . $this->getMessage() .
             " | IPv4: " . $this->ipv4 .
             " | Action: " . $this->actionAttempted .
             " | Resource: " . $this->resource .
             " | User ID: " . $this->userId .
             " | User Role: " . $this->userRole .
-            " | Required Role: " . $this->requiredRole .
-            " | File: " . $this->getFile() .
-            " | Line: " . $this->getLine() .
-            " | Timestamp: " . parent::getDateAndTime()
+            " | Required Role: " . $this->requiredRole,
+            LogLevel::WARNING,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
         );
     }
 }
@@ -831,18 +983,22 @@ final class ServerException extends AppException {
         // Get the function name where the exception was thrown
         $functionName = parent::getFailedFunctionName();
 
-        // Log the server error details
-        error_log("[SERVER ERROR] " . $this->getMessage() .
+        // Log the server exception details
+        Logger::getInstance()->log(
+            "[SERVER] " . $this->getMessage() .
             " | Function: " . $functionName .
             " | Server: " . $this->serverName .
             " | Environment: " . $this->environment .
             " | PHP Version: " . $this->phpVersion .
             " | Memory Usage: " . $this->memoryUsage .
             " | Request Method: " . $this->requestMethod .
-            " | Request URL: " . $this->requestUrl .
-            " | File: " . $this->getFile() .
-            " | Line: " . $this->getLine() .
-            " | Timestamp: " . parent::getDateAndTime());
+            " | Request URL: " . $this->requestUrl,
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
     }
 }
 
@@ -903,7 +1059,7 @@ final class DatabaseException extends AppException {
 
         // Initialize database-specific properties
         $this->query = $query ?? 'No query specified.';
-        $this->dbErrorCode = $dbErrorCode;
+        $this->dbErrorCode = $dbErrorCode ?? 0;
         $this->dbErrorMessage = $dbErrorMessage ?? 'No error message specified.';
     }
 
@@ -919,16 +1075,19 @@ final class DatabaseException extends AppException {
         // Get the function name where the exception was thrown
         $functionName = parent::getFailedFunctionName();
 
-        // Log the error details
-        error_log("[DATABASE ERROR] " . $this->getMessage() . 
+        // Log the exception details
+        Logger::getInstance()->log(
+            "[DATABASE] " . $this->getMessage() . 
             " | Function: " . $functionName .
             " | Query: " . $this->query . 
             " | Database Type: " . $this->dbType . 
-            " | Error Code: " . $this->dbErrorCode ?? 'No error code specified.' . 
-            " | Error Message: " . $this->dbErrorMessage . 
-            " | File: " . $this->getFile() . 
-            " | Line: " . $this->getLine() . 
-            " | Timestamp: " . parent::getDateAndTime()
+            " | Error Code: " . $this->dbErrorCode . 
+            " | Error Message: " . $this->dbErrorMessage,
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
         );
     }
 }
@@ -992,7 +1151,7 @@ final class APIException extends AppException {
         ?int $responseCode = null,
         ?string $apiName = null,
         ?Throwable $previous = null
-    ) {
+    ){
         parent::__construct($message, $code, ExceptionType::API_EXCEPTION, $previous);
 
         $this->endpoint = $endpoint;
@@ -1016,35 +1175,24 @@ final class APIException extends AppException {
      * - Response code and failure reason.
      * - File, line, and timestamp of the exception.
      * 
-     * ### Example Log Output:
-     * ```
-     * [API ERROR] Failed to fetch data from API
-     * | Function: fetchData
-     * | API: ExternalService
-     * | Endpoint: /v1/resource
-     * | Method: GET
-     * | Response Code: 500
-     * | Reason: Internal Server Error
-     * | File: /path/to/file.php
-     * | Line: 42
-     * | Timestamp: 2025-04-13 14:30:00
-     * ```
-     * 
      * @return void
      */
     final protected function apiException(): void {
         $fnName = parent::getFailedFunctionName();
 
-        error_log("[API ERROR] " . $this->getMessage() .
+        Logger::log(
+            "[API] " . $this->getMessage() .
             " | Function: $fnName" .
             " | API: " . $this->apiName .
             " | Endpoint: " . $this->endpoint .
             " | Method: " . $this->method .
             " | Response Code: " . ($this->responseCode ?? 'N/A') .
-            " | Reason: " . $this->failureReason .
-            " | File: " . $this->getFile() .
-            " | Line: " . $this->getLine() .
-            " | Timestamp: " . parent::getDateAndTime()
+            " | Reason: " . $this->failureReason,
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
         );
     }
 }
@@ -1104,7 +1252,7 @@ final class ConfigurationException extends AppException {
         ?string $expected = null,
         ?string $configPath = null,
         ?Throwable $previous = null
-    ) {
+    ){
         parent::__construct($message, $code, ExceptionType::CONFIGURATION_EXCEPTION, $previous);
 
         // Initialize configuration-specific properties with fallback values
@@ -1127,34 +1275,24 @@ final class ConfigurationException extends AppException {
      * - Configuration key, source, expected value, and configuration path.
      * - File, line, and timestamp of the exception.
      * 
-     * ### Example Log Output:
-     * ```
-     * [CONFIGURATION ERROR] Missing required configuration key
-     * | Function: loadConfig
-     * | Config Key: DATABASE_URL
-     * | Source: .env
-     * | Expected: A valid database connection string
-     * | Path: /path/to/.env
-     * | File: /path/to/file.php
-     * | Line: 42
-     * | Timestamp: 2025-04-13 14:30:00
-     * ```
-     * 
      * @return void
      */
     final protected function configurationException(): void {
         $fnName = parent::getFailedFunctionName();
 
         // Log the configuration error details
-        error_log("[CONFIGURATION ERROR] " . $this->getMessage() .
+        Logger::log(
+            "[CONFIGURATION] " . $this->getMessage() .
             " | Function: $fnName" .
             " | Config Key: " . $this->configKey .
             " | Source: " . $this->source .
             " | Expected: " . $this->expected .
-            " | Path: " . $this->configPath .
-            " | File: " . $this->getFile() .
-            " | Line: " . $this->getLine() .
-            " | Timestamp: " . parent::getDateAndTime()
+            " | Path: " . $this->configPath,
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
         );
     }
 }
@@ -1213,7 +1351,7 @@ final class FileException extends AppException {
         ?string $fileErrorMessage = null,
         ?int $fileErrorCode = null,
         ?Throwable $previous = null
-    ) {
+    ){
         parent::__construct($message, $code, ExceptionType::FILE_EXCEPTION, $previous);
 
         $this->filePath = $filePath;
@@ -1235,34 +1373,24 @@ final class FileException extends AppException {
      * - File path, action, error message, and error code.
      * - File, line, and timestamp of the exception.
      * 
-     * ### Example Log Output:
-     * ```
-     * [FILE ERROR] Failed to read the file
-     * | Function: readFile
-     * | File Path: /path/to/file.txt
-     * | Action: read
-     * | Error Message: Permission denied
-     * | Error Code: 13
-     * | File: /path/to/file.php
-     * | Line: 42
-     * | Timestamp: 2025-04-13 14:30:00
-     * ```
-     * 
      * @return void
      */
     final protected function fileException(): void {
         $fnName = parent::getFailedFunctionName();
 
         // Log the file error details
-        error_log("[FILE ERROR] " . $this->getMessage() .
+        Logger::log(
+            "[FILE] " . $this->getMessage() .
             " | Function: $fnName" .
             " | File Path: " . $this->filePath .
             " | Action: " . $this->action .
             " | Error Message: " . $this->fileErrorMessage .
-            " | Error Code: " . $this->fileErrorCode .
-            " | File: " . $this->getFile() .
-            " | Line: " . $this->getLine() .
-            " | Timestamp: " . parent::getDateAndTime()
+            " | Error Code: " . $this->fileErrorCode,
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
         );
     }
 }
@@ -1354,14 +1482,49 @@ final class PHPException extends AppException {
         // get the function name
         $functionName = parent::getFailedFunctionName();
 
-        // error log
-        error_log("[PHP ERROR] " . $this->getMessage() . 
-            " | Function: " . $functionName . 
-            " | Error Details: " . $this->errorDetails . 
-            " | PHP Error Code: " . $this->errorCode . 
+        // Log the PHP exception
+        Logger::log(
+            "[PHP] " . $this->getMessage() .
+            " | Function: " . $functionName .
+            " | Error Details: " . $this->errorDetails .
+            " | PHP Error Code: " . $this->errorCode,
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
+        );
+    }
+}
+
+final class NullException extends AppException {
+    private ?string $exceptedValue = null;
+
+    final public function __construct(
+        string $message,
+        int $code = 0,
+        ?string $expectedValue = null,
+        ?Throwable $previous = null
+    ){
+        parent::__construct($message, $code, ExceptionType::NULL_EXCEPTION, $previous);
+
+        $this->exceptedValue = $expectedValue ?? 'Not provided';
+    }
+
+    final protected function nullException(): void {
+        $functionName = parent::getFailedFunctionName();
+
+        Logger::log(
+            "[NULL] " . $this->getMessage() . 
+            " | Function: " . $functionName .
+            " | Expected value: " . $this->exceptedValue .
             " | File: " . $this->getFile() . 
-            " | Line: " . $this->getLine() . 
-            " | Timestamp: " . parent::getDateAndTime()
+            " | Line: " . $this->getLine(),
+            LogLevel::ALERT,
+            LoggerType::EXCEPTION,
+            Loggers::CMD,
+            $this->getLine(),
+            $this->getFile()
         );
     }
 }
@@ -1415,7 +1578,7 @@ final class LogicException extends AppException {
         ?string $expectedState = null,
         ?string $actualState = null,
         ?Throwable $previous = null
-    ) {
+    ){
         parent::__construct($message, $code, ExceptionType::LOGIC_EXCEPTION, $previous);
 
         $this->reason = $reason;
@@ -1436,32 +1599,21 @@ final class LogicException extends AppException {
      * - Reason, expected state, and actual state.
      * - File, line, and timestamp of the exception.
      * 
-     * ### Example Log Output:
-     * ```
-     * [LOGIC ERROR] Invalid state transition
-     * | Function: transitionState
-     * | Reason: State transition not allowed
-     * | Expected State: Active
-     * | Actual State: Inactive
-     * | File: /path/to/file.php
-     * | Line: 42
-     * | Timestamp: 2025-04-13 14:30:00
-     * ```
-     * 
      * @return void
      */
     final protected function logicException(): void {
         $fnName = parent::getFailedFunctionName();
 
-        // Log the logic error details
-        error_log("[LOGIC ERROR] " . $this->getMessage() .
+        // Log the logic exception details
+        Logger::log(
+            "[LOGIC ERROR] " . $this->getMessage() .
             " | Function: $fnName" .
             " | Reason: " . $this->reason .
             " | Expected State: " . $this->expectedState .
-            " | Actual State: " . $this->actualState .
-            " | File: " . $this->getFile() .
-            " | Line: " . $this->getLine() .
-            " | Timestamp: " . parent::getDateAndTime()
+            " | Actual State: " . $this->actualState,
+            LogLevel::ERROR,
+            LoggerType::EXCEPTION,
+            Loggers::CMD
         );
     }
 }

@@ -7,20 +7,48 @@ use WebDev\Functions\LogicException;
 use WebDev\Functions\ValidationException;
 use WebDev\Functions\ValidationFailureType;
 
+/**
+ * Class CSRF
+ *
+ * This class is responsible for handling Cross-Site Request Forgery (CSRF) protection mechanisms.
+ * It provides methods to generate and validate CSRF tokens to ensure secure form submissions
+ * and prevent unauthorized actions on behalf of authenticated users.
+ */
 class CSRF {
-    private static ?CSRF $instance = null; // Singleton pattern
-    
-    // define constants
-    private const SESSION_CSRF_KEY = '_csrf_token'; // Key for storing CSRF token in the session
-    private const SESSION_EXPIRY_KEY = 'expires'; // Key for storing token expiry in the session
+    /**
+     * @var CSRF|null $instance Singleton instance of the CSRF class.
+     */
+    private static ?CSRF $instance = null;
 
-    // cookies
-    private const COOKIE_NAME = 'csrf_token'; // Name of the CSRF cookie
-    private const COOKIE_EXPIRY_TIME = 1800; // 30 minutes (30 * 60 seconds)
-    private const COOKIE_PATH = '/'; // Default path for cookies
+    /**
+     * @var string $SESSION_CSRF_KEY Key for storing CSRF token in the session.
+     */
+    private const SESSION_CSRF_KEY = '_csrf_token';
 
-    // token
-    private const TOKEN_LENGTH = 32; // 256-bit token (32 bytes)
+    /**
+     * @var string $SESSION_EXPIRY_KEY Key for storing token expiry in the session.
+     */
+    private const SESSION_EXPIRY_KEY = 'expires';
+
+    /**
+     * @var string $COOKIE_NAME Name of the CSRF cookie.
+     */
+    private const COOKIE_NAME = 'csrf_token';
+
+    /**
+     * @var int $COOKIE_EXPIRY_TIME Cookie expiry time in seconds (30 minutes).
+     */
+    private const COOKIE_EXPIRY_TIME = 1800;
+
+    /**
+     * @var string $COOKIE_PATH Default path for cookies.
+     */
+    private const COOKIE_PATH = '/';
+
+    /**
+     * @var int $TOKEN_LENGTH Length of the CSRF token in bytes (256-bit token).
+     */
+    private const TOKEN_LENGTH = 32;
 
     /**
      * Prevent unserialize attacks.
@@ -54,9 +82,29 @@ class CSRF {
      * This method ensures that the session is started if it hasn't already been started.
      */
     private function __construct(){
+        Logger::log(
+            "Initializing the CSRF class...",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         if (session_status() === PHP_SESSION_NONE){
+            Logger::log(
+                "Starting a new session for the CSRF class.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             session_start();
         }
+
+        Logger::log(
+            "CSRF class initialized successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
     }
 
     /**
@@ -70,7 +118,21 @@ class CSRF {
      */
     public static function getInstance(): CSRF {
         if (self::$instance === null){
+            Logger::log(
+                "Creating a new CSRF singleton instance.",
+                LogLevel::DEBUG,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             self::$instance = new CSRF();
+        }
+        else {
+            Logger::log(
+                "Reusing the existing CSRF singleton instance.",
+                LogLevel::DEBUG,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
         }
         return self::$instance;
     }
@@ -84,6 +146,13 @@ class CSRF {
      * @return void
      */
     private function generateToken(): void {
+        Logger::log(
+            "Generating a new CSRF token.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $token = bin2hex(random_bytes(self::TOKEN_LENGTH));
         $_SESSION[self::SESSION_CSRF_KEY] = [
             'token' => $token,
@@ -96,6 +165,13 @@ class CSRF {
             'httponly' => true,
             'samesite' => 'Strict',
         ]);
+
+        Logger::log(
+            "CSRF token generated and stored successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
     }
 
     /**
@@ -110,7 +186,13 @@ class CSRF {
      * @throws ValidationException If the token is mismatched, invalid, expired, or the cookie doesn't match.
      */
     public function validateToken(string $token): bool {
-        // Check if the token exists in the session
+        Logger::log(
+            "Validating CSRF token.",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         if (!isset($_SESSION[self::SESSION_CSRF_KEY]['token'])){
             throw new ValidationException(
                 message: "CSRF validation failed: token is missing.",
@@ -119,9 +201,8 @@ class CSRF {
             );
         }
 
-        // Check if the token has expired
         if ($_SESSION[self::SESSION_CSRF_KEY]['expires'] <= time()){
-            $this->generateToken(); // Regenerate a new token
+            $this->generateToken();
             throw new ValidationException(
                 message: "CSRF validation failed: token has expired.",
                 code: 400,
@@ -129,7 +210,6 @@ class CSRF {
             );
         }
 
-        // Check if the token matches the session token
         if ($_SESSION[self::SESSION_CSRF_KEY]['token'] !== $token){
             throw new ValidationException(
                 message: "CSRF validation failed: token mismatched.",
@@ -138,7 +218,6 @@ class CSRF {
             );
         }
 
-        // Check if the token matches the cookie
         if (!isset($_COOKIE[self::COOKIE_NAME]) || $_COOKIE[self::COOKIE_NAME] !== $token){
             throw new ValidationException(
                 message: "CSRF validation failed: cookie data doesn't match.",
@@ -147,8 +226,14 @@ class CSRF {
             );
         }
 
-        // If all checks pass, regenerate the token and return true
-        $this->regenerateToken(); // Regenerate the token after successful validation
+        Logger::log(
+            "CSRF token validated successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        $this->regenerateToken();
         return true;
     }
 
@@ -160,10 +245,30 @@ class CSRF {
      * @return string The current CSRF token.
      */
     public function getToken(): string {
+        Logger::log(
+            "Retrieving the current CSRF token.",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         if (!isset($_SESSION[self::SESSION_CSRF_KEY])){
+            Logger::log(
+                "No CSRF token found in the session. Generating a new token.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             $this->generateToken();
         }
-        
+
+        Logger::log(
+            "CSRF token retrieved successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         return $_SESSION[self::SESSION_CSRF_KEY]['token'];
     }
 
@@ -177,14 +282,28 @@ class CSRF {
      * @return void
      */
     public function clearToken(): void {
+        Logger::log(
+            "Clearing the CSRF token from the session and removing the cookie.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         unset($_SESSION[self::SESSION_CSRF_KEY]);
         setcookie(self::COOKIE_NAME, '', [
-            self::SESSION_EXPIRY_KEY => time() - self::COOKIE_EXPIRY_TIME, // immediatelly invalidates token
+            self::SESSION_EXPIRY_KEY => time() - self::COOKIE_EXPIRY_TIME,
             'path' => self::COOKIE_PATH,
             'secure' => true,
             'httponly' => true,
             'samesite' => 'Strict',
         ]);
+
+        Logger::log(
+            "CSRF token cleared successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
     }
 
     /**
@@ -197,7 +316,23 @@ class CSRF {
      * @return bool Returns true if the CSRF token is expired or missing, false otherwise.
      */
     public function isTokenExpired(): bool {
-        return !isset($_SESSION[self::SESSION_CSRF_KEY]) || $_SESSION[self::SESSION_CSRF_KEY][self::SESSION_EXPIRY_KEY] <= time();
+        Logger::log(
+            "Checking if the CSRF token has expired.",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        $expired = !isset($_SESSION[self::SESSION_CSRF_KEY]) || $_SESSION[self::SESSION_CSRF_KEY][self::SESSION_EXPIRY_KEY] <= time();
+
+        Logger::log(
+            $expired ? "CSRF token is expired or missing." : "CSRF token is valid.",
+            $expired ? LogLevel::FAILURE : LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        return $expired;
     }
 
     /**
@@ -208,8 +343,22 @@ class CSRF {
      * @return void
      */
     public function addTokenToHeader(): void {
+        Logger::log(
+            "Adding the CSRF token to the HTTP response headers.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $token = $this->getToken();
         header("X-CSRF-Token: " . $token);
+
+        Logger::log(
+            "CSRF token added to the HTTP headers successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
     }
 
     /**
@@ -221,8 +370,24 @@ class CSRF {
      * @return string The newly generated CSRF token.
      */
     public function regenerateToken(): string {
+        Logger::log(
+            "Regenerating the CSRF token.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         unset($_SESSION[self::SESSION_CSRF_KEY]);
-        return $this->getToken();
+        $newToken = $this->getToken();
+
+        Logger::log(
+            "CSRF token regenerated successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        return $newToken;
     }
 
     /**
@@ -234,7 +399,23 @@ class CSRF {
      * @return string The HTML for the hidden input field.`
      */
     public function getCSRFField(): string {
+        Logger::log(
+            "Generating an HTML hidden input field containing the CSRF token.",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $token = htmlspecialchars($this->getToken(), ENT_QUOTES, 'UTF-8');
-        return '<input type="hidden" name="csrf_token" value="' . $token . '">';
+        $field = '<input type="hidden" name="csrf_token" value="' . $token . '">';
+
+        Logger::log(
+            "CSRF hidden input field generated successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        return $field;
     }
 }

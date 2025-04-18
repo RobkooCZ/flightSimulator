@@ -4,14 +4,29 @@ declare(strict_types=1);
 namespace WebDev\Functions;
 
 use WebDev\config\Database;
-use WebDev\Functions\LogicException;
-use WebDev\Functions\DatabaseException;
-use WebDev\Functions\ConfigurationException;
 use PDO;
 
+/**
+ * Class Table
+ * 
+ * This class provides a mechanism to manage database table interactions.
+ * It uses a singleton pattern to ensure only one instance per table is created.
+ */
 class Table {
+    /**
+     * @var array $instances An associative array to hold instances of the class.
+     * Each instance is identified by a table name.
+     */
     private static array $instances = [];
+
+    /**
+     * @var PDO $conn The PDO connection instance for database interactions.
+     */
     private PDO $conn;
+
+    /**
+     * @var string $tableName The name of the database table associated with this class.
+     */
     private string $tableName;
 
     /**
@@ -56,6 +71,13 @@ class Table {
      * @throws ConfigurationException If the table does not exist in the database.
      */
     private function __construct(string $tableName){
+        Logger::log(
+            "Initializing Table instance for table: '$tableName'.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         if (!Database::getInstance()->tableExists($tableName)){
             throw new ConfigurationException(
                 message: "Table '$tableName' doesn't exist.",
@@ -69,6 +91,13 @@ class Table {
 
         $this->conn = Database::getInstance()->getConnection();
         $this->tableName = $tableName;
+
+        Logger::log(
+            "Table instance for '$tableName' initialized successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
 
         self::$instances[$tableName] = $this;
     }
@@ -91,6 +120,23 @@ class Table {
      * @return Table The Table instance for the given table name.
      */
     public static function getInstance(string $tableName): Table {
+        if (isset(self::$instances[$tableName])){
+            Logger::log(
+                "Reusing existing Table instance for table: '$tableName'.",
+                LogLevel::DEBUG,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+        else {
+            Logger::log(
+                "Creating new Table instance for table: '$tableName'.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+
         return self::$instances[$tableName] ?? new self($tableName);
     }
 
@@ -108,6 +154,12 @@ class Table {
      * @return string The name of the table.
      */
     public function getTableName(): string {
+        Logger::log(
+            "Retrieving the table name: '{$this->tableName}'.",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
         return $this->tableName;
     }
 
@@ -130,14 +182,21 @@ class Table {
      * @throws DatabaseException If no columns are found in the table or the query fails.
      */
     public function getTableHeader(): array {
+        Logger::log(
+            "Fetching table header (columns) for table: '{$this->tableName}'.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $result = Database::getInstance()->query("SHOW COLUMNS FROM {$this->tableName}");
 
-        if (empty($result)){
-            throw new DatabaseException(
-                message: "No columns found in table '{$this->tableName}'.",
-                code: 500
-            );
-        }
+        Logger::log(
+            "Table header fetched successfully for table: '{$this->tableName}'.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
 
         return $result;
     }
@@ -161,14 +220,21 @@ class Table {
      * @throws DatabaseException If the query fails or no data is found.
      */
     public function selectAll(): array {
+        Logger::log(
+            "Fetching all rows from table: '{$this->tableName}'.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $result = Database::getInstance()->query("SELECT * FROM {$this->tableName}");
 
-        if (empty($result)){
-            throw new DatabaseException(
-                message: "Failed to retrieve data from table '{$this->tableName}'.",
-                code: 500
-            );
-        }
+        Logger::log(
+            "All rows fetched successfully from table: '{$this->tableName}'.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
 
         return $result;
     }
@@ -189,6 +255,13 @@ class Table {
      * @throws DatabaseException If the query fails or no AUTO_INCREMENT value is found.
      */
     public function getNextId(): int {
+        Logger::log(
+            "Fetching next AUTO_INCREMENT ID for table: '{$this->tableName}'.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $parameters = [
             ":db" => "webDev",
             ":table" => $this->tableName
@@ -202,12 +275,12 @@ class Table {
             $parameters
         );
 
-        if (empty($result) || !isset($result[0]['AUTO_INCREMENT'])){
-            throw new DatabaseException(
-                message: "No AUTO_INCREMENT value found for table '{$this->tableName}'.",
-                code: 500
-            );
-        }
+        Logger::log(
+            "Next AUTO_INCREMENT ID fetched successfully for table: '{$this->tableName}'.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
 
         return (int)$result[0]['AUTO_INCREMENT'];
     }

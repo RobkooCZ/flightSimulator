@@ -3,16 +3,17 @@ declare(strict_types=1);
 namespace WebDev\Functions;
 
 use WebDev\config\Database;
-use WebDev\Functions\Table;
-use WebDev\Functions\RoleManager;
-use WebDev\Functions\PHPException;
-use WebDev\Functions\DatabaseException;
-use WebDev\Functions\ConfigurationException;
-use WebDev\Functions\LogicException;
 
 class TableRenderer {
-    private static array $instances = []; // Registry for TableRenderer instances
-    private $table;
+    /**
+     * @var array $instances Registry for TableRenderer instances
+     */
+    private static array $instances = [];
+
+    /**
+     * @var Table $table The table instance or data associated with the TableRenderer
+     */
+    private Table $table;
 
     /**
      * Private constructor to initialize the TableRenderer class.
@@ -21,7 +22,13 @@ class TableRenderer {
      * 
      * @param Table $table The Table instance to render.
      */
-    private function __construct(Table $table) {
+    private function __construct(Table $table){
+        Logger::log(
+            "Initializing TableRenderer instance for table: '{$table->getTableName()}'.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
         $this->table = $table;
     }
 
@@ -78,8 +85,22 @@ class TableRenderer {
     public static function getInstance(Table $table): TableRenderer {
         $tableName = $table->getTableName();
 
-        if (!isset(self::$instances[$tableName])) {
+        if (!isset(self::$instances[$tableName])){
+            Logger::log(
+                "Creating new TableRenderer instance for table: '$tableName'.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             self::$instances[$tableName] = new self($table);
+        }
+        else {
+            Logger::log(
+                "Reusing existing TableRenderer instance for table: '$tableName'.",
+                LogLevel::DEBUG,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
         }
 
         return self::$instances[$tableName];
@@ -104,24 +125,32 @@ class TableRenderer {
      * @throws DatabaseException If the table header cannot be retrieved.
      */
     public function displayTable(array $result, bool $endTable): bool {
+        Logger::log(
+            "Rendering HTML table for table: '{$this->table->getTableName()}'.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $headerData = $this->table->getTableHeader();
 
         echo "<table style='border: var(--border)';>"; // Open the table
         echo "<tr>"; // Open the header row
 
-        foreach ($headerData as $header) {
+        foreach ($headerData as $header){
             echo "<th>" . htmlspecialchars((string)$header['Field']) . "</th>";
         }
 
         echo "</tr>"; // Close the header row
 
-        foreach ($result as $row) {
+        foreach ($result as $row){
             echo "<tr>";
 
-            foreach ($row as $key => $cell) {
-                if ($key === "password" || $key === "salt") {
+            foreach ($row as $key => $cell){
+                if ($key === "password" || $key === "salt"){
                     echo "<td> --------- </td>";
-                } else {
+                }
+                else {
                     echo "<td>" . htmlspecialchars((string)$cell) . "</td>";
                 }
             }
@@ -129,9 +158,16 @@ class TableRenderer {
             echo "</tr>";
         }
 
-        if ($endTable === true) {
+        if ($endTable === true){
             echo "</table>"; // Close the table
         }
+
+        Logger::log(
+            "HTML table rendered successfully for table: '{$this->table->getTableName()}'.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
 
         return true;
     }
@@ -157,7 +193,14 @@ class TableRenderer {
      * @throws PHPException If parsing the ENUM values fails.
      */
     public function getRolesDropdown(int $userId): string|false {
-        if ($this->table->getTableName() !== "users") {
+        Logger::log(
+            "Generating roles dropdown for user ID: $userId.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        if ($this->table->getTableName() !== "users"){
             throw new ConfigurationException(
                 message: "Table name isn't 'users'. Can't show roles.",
                 code: 400,
@@ -175,28 +218,14 @@ class TableRenderer {
              AND COLUMN_NAME = 'role'"
         );
 
-        if (empty($result)) {
-            throw new DatabaseException(
-                "No ENUM values found for 'role' column.",
-                500
-            );
-        }
-
         $enumString = $result[0]['COLUMN_TYPE'];
         preg_match("/^enum\((.*)\)$/", $enumString, $matches);
 
-        if (!isset($matches[1])) {
-            throw new PHPException(
-                "Failed to parse ENUM values for 'role' column.",
-                500
-            );
-        }
-
-        $enumValues = array_map(function ($value) {
+        $enumValues = array_map(function ($value){
             return trim($value, "'");
         }, explode(',', $matches[1]));
 
-        $currentRole = match ($userId) {
+        $currentRole = match ($userId){
             1 => "owner",
             2 => "coOwner",
             default => "user"
@@ -205,9 +234,16 @@ class TableRenderer {
         $filteredRoles = RoleManager::returnAvailibleRoles($enumValues, $currentRole);
 
         $options = '';
-        foreach ($filteredRoles as $value) {
+        foreach ($filteredRoles as $value){
             $options .= "<option value='" . htmlspecialchars((string)$value) . "'>" . htmlspecialchars((string)$value) . "</option>";
         }
+
+        Logger::log(
+            "Roles dropdown generated successfully for user ID: $userId.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
 
         return $options;
     }
@@ -232,6 +268,13 @@ class TableRenderer {
      * @throws ConfigurationException If the table is not configured correctly.
      */
     public function displayTableForm(array $result, string $actionName, int $userId): bool {
+        Logger::log(
+            "Rendering table form for action: '$actionName' and user ID: $userId.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $this->displayTable($result, false);
 
         $action = urldecode($actionName);
@@ -239,10 +282,10 @@ class TableRenderer {
 
         echo "<tr>";
 
-        foreach ($headerData as $header) {
+        foreach ($headerData as $header){
             $fieldName = $header['Field'];
 
-            switch ($fieldName) {
+            switch ($fieldName){
                 case "id":
                     $id = $this->table->getNextId();
                     echo '<td><input class="addInputs noBorder" type="text" pattern="[0-9]*" name="' . $fieldName . '" value="' . $id . '" disabled></td>';
@@ -259,9 +302,10 @@ class TableRenderer {
 
                 case "role":
                     $rolesDropdown = $this->getRolesDropdown($userId);
-                    if ($rolesDropdown !== false) {
+                    if ($rolesDropdown !== false){
                         echo '<td><select id="role" class="addInputs noBorder" name="role">' . $rolesDropdown . '</select></td>';
-                    } else {
+                    }
+                    else {
                         echo '<td><input class="addInputs noBorder" type="text" name="role" value="Error loading roles" disabled></td>';
                     }
                     break;
@@ -283,6 +327,13 @@ class TableRenderer {
         echo "</tr>";
         echo "</table>";
 
+        Logger::log(
+            "Table form rendered successfully for action: '$actionName' and user ID: $userId.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         return true;
     }
 
@@ -303,19 +354,24 @@ class TableRenderer {
      * @throws ValidationException If no table names are provided.
      */
     public static function getTableNamesDropdown(array $tableNames): string|false {
-        if (empty($tableNames)) {
-            throw new ConfigurationException(
-                message: "No table names provided to render.",
-                code: 400,
-                configKey: "Table",
-                source: "Database"
-            );
-        }
+        Logger::log(
+            "Generating table names dropdown.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
 
         $options = '';
-        foreach ($tableNames as $tableName) {
+        foreach ($tableNames as $tableName){
             $options .= "<option value='" . htmlspecialchars((string)$tableName) . "'>" . htmlspecialchars((string)$tableName) . "</option>";
         }
+
+        Logger::log(
+            "Table names dropdown generated successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
 
         return $options;
     }
