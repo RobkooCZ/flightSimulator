@@ -3,8 +3,12 @@ declare(strict_types=1);
 
 namespace WebDev\Functions;
 
-use WebDev\Functions\LogicException;
-
+/**
+ * Class RoleManager
+ *
+ * This class is responsible for managing user roles within the application.
+ * It provides methods to handle role-based access control and permissions.
+ */
 class RoleManager {
     /**
      * Returns a list of roles that are available for the current user based on their role.
@@ -42,10 +46,26 @@ class RoleManager {
             );
         }
 
+        Logger::log(
+            "Current user role '$currentUserRole' is valid. Filtering available roles.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         // Filter roles based on the current user's role
-        return array_filter($enumValues, function ($role) use ($roleHierarchy, $currentUserRole): bool {
+        $filteredRoles = array_filter($enumValues, function ($role) use ($roleHierarchy, $currentUserRole): bool {
             return isset($roleHierarchy[$role]) &&
                    $roleHierarchy[$role] > $roleHierarchy[$currentUserRole];
         });
+
+        Logger::log(
+            "Available roles for user with role '$currentUserRole': " . implode(', ', $filteredRoles),
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        return $filteredRoles;
     }
 }

@@ -3,16 +3,35 @@ declare(strict_types=1);
 
 namespace WebDev\config;
 
+// database things
 use PDO;
 use PDOException;
+
+// php things
 use Exception;
+
+// dotenv
 use Dotenv\Dotenv;
+
+// custom exceptions
 use WebDev\Functions\LogicException;
-use WebDev\Functions\AppException;
 use WebDev\Functions\ConfigurationException;
 use WebDev\Functions\DatabaseException;
-// use WebDev\Functions\ExceptionType;
 
+// custom logger
+use WebDev\Functions\Logger;
+use WebDev\Functions\Loggers;
+use WebDev\Functions\LogColours;
+use WebDev\Functions\LoggerType;
+use WebDev\Functions\LogLevel;
+
+/**
+ * Class Database
+ *
+ * This class is responsible for managing database connections and interactions.
+ * It provides methods to establish a connection to the database and perform
+ * various database operations.
+ */
 class Database {
     private static ?Database $instance = null;
     private ?PDO $conn = null;
@@ -67,17 +86,28 @@ class Database {
      * @throws DatabaseException If the database connection fails.
      */
     private function __construct(){
-        // Load .env variables
+        Logger::log(
+            "Initializing the Database class and loading .env variables...",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
         $dotenv->load();
 
-        // load necessary data from the .env file
+        Logger::log(
+            "Successfully loaded .env variables.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
         $dbHost = $_ENV['DB_HOST'] ?? null;
         $dbName = $_ENV['DB_NAME'] ?? null;
         $dbUser = $_ENV['DB_USER'] ?? null;
         $dbPass = $_ENV['DB_PASS'] ?? null;
 
-        // get an array of missing values
         $missing = array_filter([
             'DB_HOST' => $dbHost,
             'DB_NAME' => $dbName,
@@ -85,35 +115,53 @@ class Database {
             'DB_PASS' => $dbPass
         ], fn($value) => !$value);
 
-        // if anything is missing, throw an expection that displays all the missing key variables
         if (!empty($missing)){
+            Logger::log(
+                "Missing required environment variables: " . implode(', ', array_keys($missing)),
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             throw new ConfigurationException(
                 "Missing environment variables. Please check your .env file.",
-                500, // HTTP status code for internal server error
-                implode(', ', array_keys($missing)), // The missing configuration keys
-                ".env", // The source of the configuration
-                "All required environment variables must be set.", // Expected value or explanation
-                __DIR__ . '/../.env', // Path to the .env file
-                null, // No previous exception
+                500,
+                implode(', ', array_keys($missing)),
+                ".env",
+                "All required environment variables must be set.",
+                __DIR__ . '/../.env',
+                null,
             );
         }
 
-        // DSN - Data Source Name
         $dsn = "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4";
+
+        Logger::log(
+            "Attempting to establish a database connection...",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
 
         try {
             $this->conn = new PDO($dsn, $dbUser, $dbPass, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // set error reporting mode to throwing exceptions (PDOException)
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // set the default fetch mode for queries to return an associative array
-                PDO::ATTR_EMULATE_PREPARES => false, // disable emulated prepared statements, forcing you to use real prepared statements
-                PDO::ATTR_TIMEOUT => 5 // 5-second timeout to prevent hanging connections
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_TIMEOUT => 5
             ]);
+
+            Logger::log(
+                "Database connection established successfully.",
+                LogLevel::SUCCESS,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
         }
         catch (PDOException $e){
             throw new DatabaseException(
                 "Failed to establish a database connection: " . $e->getMessage(),
                 $e->getCode(),
-                $e // Pass the original exception for context
+                $e
             );
         }
     }
@@ -125,6 +173,12 @@ class Database {
      * It ensures that the database connection is closed to free up resources.
      */
     public function __destruct(){
+        Logger::log(
+            "Destroying the Database instance and closing the connection.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
         $this->close();
     }
 
@@ -138,12 +192,23 @@ class Database {
      * @return Database The singleton instance of the Database class.
      */
     public static function getInstance(): Database {
-        // Check if the instance is null (not yet created)
         if (self::$instance === null){
-            // Create a new instance of the Database class
+            Logger::log(
+                "Creating a new Database singleton instance.",
+                LogLevel::DEBUG,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
             self::$instance = new Database();
         }
-        // Return the existing or newly created instance
+        else {
+            Logger::log(
+                "Reusing the existing Database singleton instance.",
+                LogLevel::DEBUG,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
         return self::$instance;
     }
 
@@ -156,6 +221,12 @@ class Database {
      * @return PDO The PDO connection instance.
      */
     public function getConnection(): PDO {
+        Logger::log(
+            "Retrieving the PDO connection instance.",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
         return $this->conn;
     }
 
@@ -181,15 +252,26 @@ class Database {
      * @throws DatabaseException If any parameter is an array or an object.
      */
     private function validateParameters(array $parameters): void {
+        Logger::log(
+            "Validating query parameters...",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
         foreach ($parameters as $key => $value){
-            // if the value is array or object, throw exception
             if (is_array($value) || is_object($value)){
                 throw new DatabaseException(
                     "Invalid parameter type for key: '$key'. Expected scalar values (int, float, string, or bool), but received " . gettype($value) . ".",
-                    400 // HTTP status code for bad request
+                    400
                 );
             }
         }
+        Logger::log(
+            "Query parameters validated successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
     }
 
     /**
@@ -220,15 +302,24 @@ class Database {
      * @throws DatabaseException If the identifier contains invalid characters.
      */
     public function escapeIdentifier(string $identifier): string {
-        // basic validation for now
+        Logger::log(
+            "Escaping database identifier: '$identifier'",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $identifier)){
             throw new DatabaseException(
                 "Invalid identifier: '$identifier'. Identifiers must only contain alphanumeric characters or underscores.",
-                400 // HTTP status code for bad request
+                400
             );
         }
-
-        // return the quoted identifier
+        Logger::log(
+            "Database identifier escaped successfully: `$identifier`",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
         return "`" . $identifier . "`";
     }
 
@@ -270,48 +361,22 @@ class Database {
      * @throws DatabaseException If any part of the query process fails.
      */
     public function query(string $sql, array $parameters = []): array {
-        try {
-            // Check if there is a connection to the database established
-            if ($this->conn === null){
-                throw new DatabaseException(
-                    "Database connection not established. Ensure the connection is initialized before executing queries.",
-                    500 // Internal Server Error
-                );
-            }
-    
-            // Validate the parameters to ensure they are of acceptable types
-            $this->validateParameters($parameters);
-    
-            // Prepare the SQL statement
-            $statement = $this->conn->prepare($sql);
-    
-            // Check if the statement preparation failed
-            if ($statement === false){
-                throw new DatabaseException(
-                    "Failed to prepare the SQL statement: '$sql'. Parameters: " . json_encode($parameters),
-                    500 // Internal Server Error
-                );
-            }
-    
-            // Execute the SQL statement
-            if (!$statement->execute($parameters)){
-                throw new DatabaseException(
-                    "Failed to execute the SQL query: '$sql'. Parameters: " . json_encode($parameters),
-                    500 // Internal Server Error
-                );
-            }
-    
-            // Fetch and return the results as an associative array
-            return $statement->fetchAll();
-        } 
-        catch (PDOException $e){
-            // Wrap the PDOException in a DatabaseException for consistency
-            throw new DatabaseException(
-                "Database query failed: " . $e->getMessage(),
-                $e->getCode(),
-                $e // Pass the original exception for context
-            );
-        }
+        Logger::log(
+            "Executing query: '$sql'",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+        $this->validateParameters($parameters);
+        $statement = $this->conn->prepare($sql);
+        $statement->execute($parameters);
+        Logger::log(
+            "Query executed successfully.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+        return $statement->fetchAll();
     }
 
     /**
@@ -346,47 +411,22 @@ class Database {
      * @throws DatabaseException If the connection is not established, the statement preparation fails, or execution fails.
      */
     public function execute(string $sql, array $parameters = []): bool {
-        try {
-            // Check if there is a connection to the database established
-            if ($this->conn === null){
-                throw new DatabaseException(
-                    "Database connection not established. Ensure the connection is initialized before executing queries.",
-                    500 // Internal Server Error
-                );
-            }
-
-            // Validate the parameters to ensure they are of acceptable types
-            $this->validateParameters($parameters);
-
-            // Prepare the SQL statement
-            $statement = $this->conn->prepare($sql);
-
-            // Check if the statement preparation failed
-            if ($statement === false){
-                throw new DatabaseException(
-                    "Failed to prepare the SQL statement: '$sql'. Parameters: " . json_encode($parameters),
-                    500 // Internal Server Error
-                );
-            }
-
-            // Execute the SQL statement
-            if (!$statement->execute($parameters)){
-                throw new DatabaseException(
-                    "Failed to execute the SQL statement: '$sql'. Parameters: " . json_encode($parameters),
-                    500 // Internal Server Error
-                );
-            }
-
-            // Return true on successful execution
-            return true;
-        } 
-        catch (PDOException $e){
-            throw new DatabaseException(
-                "Database query execution failed: " . $e->getMessage(),
-                $e->getCode(),
-                $e // Pass the original exception for context
-            );
-        }
+        Logger::log(
+            "Executing SQL statement: '$sql'",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+        $this->validateParameters($parameters);
+        $statement = $this->conn->prepare($sql);
+        $result = $statement->execute($parameters);
+        Logger::log(
+            $result ? "SQL statement executed successfully." : "SQL statement execution failed.",
+            $result ? LogLevel::SUCCESS : LogLevel::FAILURE,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+        return $result;
     }
 
     /**
@@ -416,40 +456,23 @@ class Database {
      * @throws DatabaseException If the database connection is not established, the table name is invalid, or the query fails.
      */
     public function tableExists(string $tableName): bool {
-        try {
-            // Check if there is a connection to the database established
-            if ($this->conn === null){
-                throw new DatabaseException(
-                    "Database connection not established. Ensure the connection is initialized before checking table existence.",
-                    500
-                );
-            }
-
-            // Validate the table name
-            if (!preg_match('/^[a-zA-Z0-9_]+$/', $tableName)){
-                throw new DatabaseException(
-                    "Invalid table name: '$tableName'. Table names must only contain alphanumeric characters or underscores.",
-                    400
-                );
-            }
-
-            // Prepare the SQL statement
-            $sql = "SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = :tableName";
-            $statement = $this->conn->prepare($sql);
-
-            // Execute the query
-            $statement->execute([':tableName' => $tableName]);
-
-            // Return true if the table exists, false otherwise
-            return $statement->rowCount() > 0;
-        } 
-        catch (PDOException $e){
-            throw new DatabaseException(
-                "Error checking if table exists: " . $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
+        Logger::log(
+            "Checking if table exists: '$tableName'...",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+        $sql = "SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = :tableName";
+        $statement = $this->conn->prepare($sql);
+        $statement->execute([':tableName' => $tableName]);
+        $exists = $statement->rowCount() > 0;
+        Logger::log(
+            $exists ? "Table '$tableName' exists." : "Table '$tableName' does not exist.",
+            $exists ? LogLevel::SUCCESS : LogLevel::FAILURE,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+        return $exists;
     }
 
     /**
@@ -475,30 +498,23 @@ class Database {
      * @throws DatabaseException If the database connection is not established or the query fails.
      */
     public function getTableNames(): array {
-        try {
-            // Check if there is a connection to the database established
-            if ($this->conn === null){
-                throw new DatabaseException(
-                    "Database connection not established. Ensure the connection is initialized before fetching table names.",
-                    500
-                );
-            }
-
-            // Query to fetch all table names
-            $result = $this->query("SHOW TABLES");
-
-            // Return the table names as an array
-            return !empty($result)
-                ? array_map(fn($row) => array_values($row)[0], $result) // Extract table names from the result
-                : []; // Return an empty array if no tables are found
-        } 
-        catch (Exception $e){
-            throw new DatabaseException(
-                "Error fetching table names: " . $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
+        Logger::log(
+            "Fetching all table names from the database...",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+        $result = $this->query("SHOW TABLES");
+        $tables = !empty($result)
+            ? array_map(fn($row) => array_values($row)[0], $result)
+            : [];
+        Logger::log(
+            "Fetched " . count($tables) . " table(s) from the database.",
+            LogLevel::SUCCESS,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+        return $tables;
     }
 
     /**
@@ -512,6 +528,12 @@ class Database {
      * @return void
      */
     public function close(): void {
+        Logger::log(
+            "Closing the database connection.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
         $this->conn = null;
     }
 }
