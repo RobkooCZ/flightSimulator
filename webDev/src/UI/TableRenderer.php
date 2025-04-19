@@ -1,8 +1,29 @@
 <?php
 declare(strict_types=1);
-namespace WebDev\Functions;
 
-use WebDev\config\Database;
+namespace WebDev\UI;
+
+// Database
+use WebDev\Database\Database;
+
+// Exception classes
+use WebDev\Exception\LogicException;
+use WebDev\Exception\ConfigurationException;
+use WebDev\Exception\ValidationException;
+use WebDev\Exception\DatabaseException;
+use WebDev\Exception\PHPException;
+
+// Logger
+use WebDev\Logging\Logger;
+use WebDev\Logging\Enum\LoggerType;
+use WebDev\Logging\Enum\LogLevel;
+use WebDev\Logging\Enum\Loggers;
+
+// Role management
+use WebDev\Utilities\RoleManager;
+
+// Table
+use WebDev\Database\Table;
 
 class TableRenderer {
     /**

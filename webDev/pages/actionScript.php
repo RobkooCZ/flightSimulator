@@ -2,10 +2,10 @@
 declare(strict_types=1);
 
 // include db
-use WebDev\config\Database;
-use WebDev\Functions\AppException;
-use WebDev\Functions\DatabaseException;
-use WebDev\Functions\PHPException;
+use WebDev\Database\Database;
+use WebDev\Exception\AppException;
+use WebDev\Exception\DatabaseException;
+use WebDev\Exception\PHPException;
 
 // load the appexception class and all its subclasses
 AppException::init();

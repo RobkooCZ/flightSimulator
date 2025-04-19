@@ -2,14 +2,16 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use WebDev\AppBootstrapper;
 use WebDev\Bootstrap;
-// global exception handler
-use WebDev\Functions\AppException;
-use WebDev\Functions\Logger;
-use WebDev\Functions\LogLevel;
-use WebDev\Functions\LoggerType;
-use WebDev\Functions\Loggers;
+
+// Exception handler
+use WebDev\Exception\AppException;
+
+// Logger
+use WebDev\Logging\Logger;
+use WebDev\Logging\Enum\LogLevel;
+use WebDev\Logging\Enum\LoggerType;
+use WebDev\Logging\Enum\Loggers;
 
 // make sure AppException and all its subclasses are loaded
 AppException::init();
@@ -27,7 +29,7 @@ set_exception_handler(function (Throwable $ae){
 Bootstrap::init();
 
 // function to serve static files
-function serveStaticFile($filePath): void { // no return
+function serveStaticFile($filePath): never {
     Logger::log(
         "Attempting to serve static file: $filePath",
         LogLevel::INFO,
@@ -99,7 +101,7 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/php/login.php';
+            include __DIR__ . '/pages/login.php';  // UPDATED: php → pages
             break;
         case '/register':
             Logger::log(
@@ -108,7 +110,7 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/php/register.php';
+            include __DIR__ . '/pages/register.php';  // UPDATED: php → pages
             break;
         case '/logout':
             Logger::log(
@@ -117,7 +119,7 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/php/logout.php';
+            include __DIR__ . '/pages/logout.php';  // UPDATED: php → pages
             break;
         
         // admin
@@ -150,7 +152,7 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/php/Functions/actionScript.php';
+            include __DIR__ . '/pages/actionScript.php';  // UPDATED: php/Functions → pages
             break;
 
         // auth (register, login, and logout functionality)
@@ -161,7 +163,7 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/php/auth.php';
+            include __DIR__ . '/pages/auth.php';  // UPDATED: php → pages
             break;
         
         // static files

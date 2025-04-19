@@ -1,14 +1,20 @@
 <?php
 declare(strict_types=1);
 
-// get classes
-use WebDev\config\Database;
-use WebDev\Functions\CSRF;
-use WebDev\Functions\Auth;
-use WebDev\Functions\AppException;
-use WebDev\Functions\Logger;
-use WebDev\Functions\LogLevel;
-use WebDev\Functions\LoggerType;
+// Database
+use WebDev\Database\Database;
+
+// Auth classes
+use WebDev\Auth\CSRF;
+use WebDev\Auth\Auth;
+
+// Exception handling
+use WebDev\Exception\AppException;
+
+// Logger
+use WebDev\Logging\Logger;
+use WebDev\Logging\Enum\LogLevel;
+use WebDev\Logging\Enum\LoggerType;
 
 $db = Database::getInstance(); // database
 $csrf = CSRF::getInstance(); // CSRF

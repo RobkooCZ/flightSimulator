@@ -5,11 +5,16 @@ session_start();
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use WebDev\config\Database;
-use WebDev\Functions\TableRenderer;
-use WebDev\Functions\Table;
-use WebDev\Functions\AppException;
-use WebDev\Functions\AuthorizationException;
+// Database
+use WebDev\Database\Database;
+use WebDev\Database\Table;
+
+// UI
+use WebDev\UI\TableRenderer;
+
+// Exceptions
+use WebDev\Exception\AppException;
+use WebDev\Exception\AuthorizationException;
 
 // make sure AppException and all its subclasses are loaded
 AppException::init();
@@ -102,7 +107,7 @@ $showFooter = true;
 $stylesheet = 'schoolAdminPage';
 $title = 'School Admin Page';
 $show = true; // set show to true to show the top navbar
-include __DIR__ . './../php/includes/header.php';
+include __DIR__ . '/../templates/header.php';
 
 
 ?>
@@ -165,7 +170,7 @@ include __DIR__ . './../php/includes/header.php';
 
 <?php
 // include footer
-include __DIR__ . './../php/includes/footer.php';
+include __DIR__ . '/../templates/footer.php';
 ?>
 
 <!-- AJAX -->

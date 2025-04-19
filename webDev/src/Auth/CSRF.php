@@ -1,11 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace WebDev\Functions;
+namespace WebDev\Auth;
 
-use WebDev\Functions\LogicException;
-use WebDev\Functions\ValidationException;
-use WebDev\Functions\ValidationFailureType;
+// Exception classes
+use WebDev\Exception\LogicException;
+use WebDev\Exception\ValidationException;
+
+// Enums
+use WebDev\Exception\Enum\ValidationFailureType;
+
+// Logger
+use WebDev\Logging\Logger;
+use WebDev\Logging\Enum\LoggerType;
+use WebDev\Logging\Enum\LogLevel;
+use WebDev\Logging\Enum\Loggers; 
 
 /**
  * Class CSRF

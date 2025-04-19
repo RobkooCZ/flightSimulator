@@ -1,11 +1,13 @@
 {
+    "name": "robkoo/flight-simulator-page",
+    "description": "A webpage project for a flight simulator.",
     "require": {
-        "vlucas/phpdotenv": "^5.6"
+        "vlucas/phpdotenv": "^5.6",
+        "php": ">=7.4 <8.3"
     },
     "autoload": {
         "psr-4": {
-            "WebDev\\": "php/",
-            "WebDev\\config\\": "config/"
+            "WebDev\\": "src/"
         }
     }
 }

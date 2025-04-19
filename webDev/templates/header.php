@@ -6,11 +6,11 @@ if ($startSession === true){
     session_start();
 }
 
-use WebDev\Functions\CSRF;
+use WebDev\Auth\CSRF;
 
 // function to check for header to set correct active class
 
-function matchHeader(string $title): int{
+function matchHeader(string $title): int {
     // 0 - not found
     // 1 - main page
     // 2 - home
@@ -44,10 +44,10 @@ $activeVal = matchHeader($title);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title; ?></title>
     <!-- first theme for all the vars declared there -->
-    <link rel="stylesheet" href="../../assets/css/theme.css">
-    <link rel="stylesheet" href="../../assets/css/header.css">
-    <link rel="stylesheet" href="../../assets/css/footer.css">
-    <link rel="stylesheet" href="../../assets/css/<?php echo $stylesheet; ?>.css">
+    <link rel="stylesheet" href="/assets/css/theme.css">
+    <link rel="stylesheet" href="/assets/css/header.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
+    <link rel="stylesheet" href="/assets/css/<?php echo $stylesheet; ?>.css">
 </head>
 <body class="dark-theme">
     <!-- if $showHeader === true, show header, otherwise don't -->
