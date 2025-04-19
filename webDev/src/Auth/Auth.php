@@ -1,9 +1,27 @@
 <?php
 declare(strict_types=1);
 
-namespace WebDev\Functions;
+namespace WebDev\Auth;
 
-use WebDev\config\Database;
+// Database
+use WebDev\Database\Database;
+
+// Exception classes
+use WebDev\Exception\LogicException;
+use WebDev\Exception\ValidationException;
+use WebDev\Exception\AuthenticationException;
+use WebDev\Exception\PHPException;
+use WebDev\Exception\DatabaseException;
+
+// Enums
+use WebDev\Exception\Enum\ValidationFailureType;
+use WebDev\Exception\Enum\AuthenticationType;
+
+// Logger
+use WebDev\Logging\Logger;
+use WebDev\Logging\Enum\LoggerType;
+use WebDev\Logging\Enum\LogLevel;
+use WebDev\Logging\Enum\Loggers; 
 
 /**
  * Class Auth

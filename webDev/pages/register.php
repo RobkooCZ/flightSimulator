@@ -14,10 +14,10 @@ $showFooter = false;
 
 // Include header and the stylesheet for the current page
 $stylesheet = 'registerPage';
-include __DIR__ . '/../php/includes/header.php';
+include __DIR__ . '/../templates/header.php';
 
 // for CSRF hidden field
-use WebDev\Functions\CSRF;
+use WebDev\Auth\CSRF;
 
 $message = "";
 
@@ -48,5 +48,5 @@ if (isset($_SESSION['message'])) {
 </div>
 
 <?php // Include footer
-include __DIR__ . '/../php/includes/footer.php';
+include __DIR__ . '/../templates/footer.php';
 ?>

@@ -1,30 +1,25 @@
 <?php
 declare(strict_types=1);
 
-namespace WebDev\config;
+namespace WebDev\Database;
 
 // database things
 use PDO;
 use PDOException;
 
-// php things
-use Exception;
-
 // dotenv
 use Dotenv\Dotenv;
 
 // custom exceptions
-use WebDev\Functions\LogicException;
-use WebDev\Functions\ConfigurationException;
-use WebDev\Functions\DatabaseException;
+use WebDev\Exception\LogicException;
+use WebDev\Exception\ConfigurationException;
+use WebDev\Exception\DatabaseException;
 
 // custom logger
-use WebDev\Functions\Logger;
-use WebDev\Functions\Loggers;
-use WebDev\Functions\LogColours;
-use WebDev\Functions\LoggerType;
-use WebDev\Functions\LogLevel;
-
+use WebDev\Logging\Logger;
+use WebDev\Logging\Enum\LoggerType;
+use WebDev\Logging\Enum\LogLevel;
+use WebDev\Logging\Enum\Loggers; 
 /**
  * Class Database
  *
@@ -93,8 +88,27 @@ class Database {
             Loggers::CMD
         );
 
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-        $dotenv->load();
+        try {
+            $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+            $dotenv->load();
+        } 
+        catch (\Exception $e){
+            Logger::log(
+                "Failed to load .env variables: " . $e->getMessage(),
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            throw new ConfigurationException(
+                "Failed to load .env file. Please ensure it exists and is properly configured.",
+                500,
+                $e->getMessage(),
+                ".env",
+                "Error loading environment variables.",
+                __DIR__ . '/../.env',
+                $e
+            );
+        }
 
         Logger::log(
             "Successfully loaded .env variables.",

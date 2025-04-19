@@ -15,13 +15,18 @@ $showFooter = true;
 $stylesheet = 'adminPage';
 $title = 'Admin Page';
 $show = true; // set show to true to show the top navbar
-include __DIR__ . './../php/includes/header.php';
+include __DIR__ . '/../templates/header.php';
 
-use WebDev\config\Database;
-use WebDev\Functions\Table;
-use WebDev\Functions\TableRenderer;
-use WebDev\Functions\AppException;
-use WebDev\Functions\AuthorizationException;
+// Database
+use WebDev\Database\Database;
+use WebDev\Database\Table;
+
+// UI
+use WebDev\UI\TableRenderer;
+
+// Exceptions
+use WebDev\Exception\AppException;
+use WebDev\Exception\AuthorizationException;
 
 AppException::init();
 
@@ -96,4 +101,4 @@ if (isset($_POST['submit'])){
 }
 
 // include footer
-include __DIR__ . './../php/includes/footer.php';
+include __DIR__ . '/../templates/footer.php';

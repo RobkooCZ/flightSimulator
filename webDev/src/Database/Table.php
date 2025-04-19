@@ -1,10 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace WebDev\Functions;
+namespace WebDev\Database;
 
-use WebDev\config\Database;
+// Database
+use WebDev\Database\Database;
+
+// PDO
 use PDO;
+
+// Exception classes
+use WebDev\Exception\LogicException;
+use WebDev\Exception\ConfigurationException;
+use WebDev\Exception\DatabaseException;
+
+// Logger
+use WebDev\Logging\Logger;
+use WebDev\Logging\Enum\LoggerType;
+use WebDev\Logging\Enum\LogLevel;
+use WebDev\Logging\Enum\Loggers;
 
 /**
  * Class Table

@@ -5,9 +5,10 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 use Exception;
-use WebDev\Functions\ConfigurationException;
-use WebDev\Functions\FileException;
-use WebDev\Functions\LogicException;
+
+use WebDev\Exception\ConfigurationException;
+use WebDev\Exception\FileException;
+use WebDev\Exception\LogicException;
 
 /**
  * Class Bootstrap

@@ -13,7 +13,7 @@ $showHeader = true;
 $showFooter = true;
 
 // include header
-include __DIR__ . '/../php/includes/header.php'; 
+include __DIR__ . '/../templates/header.php'; 
 ?>
 
 <?php
@@ -30,5 +30,5 @@ echo "
 
 <?php
 // include footer
-include __DIR__ . '/../php/includes/footer.php';
+include __DIR__ . '/../templates/footer.php';
 ?>
