@@ -254,7 +254,7 @@ class Database {
      * ### Example usage:
      * 
      * ```php
-     * use WebDev\Functions\Database;
+     * use WebDev\Database\Database;
      * $db = Database::getInstance();
      * 
      * $db->validateParameters(['id' => 1, 'name' => 'John']); // Valid
@@ -381,15 +381,37 @@ class Database {
             LoggerType::NORMAL,
             Loggers::CMD
         );
+        
+        // validate the parameters using a custom method
         $this->validateParameters($parameters);
-        $statement = $this->conn->prepare($sql);
-        $statement->execute($parameters);
+
+        try {
+            // prepare the statement to prevent SQL injection
+            $statement = $this->conn->prepare($sql);
+
+            // execute the query
+            $statement->execute($parameters);
+        }
+        catch (PDOException $pe){
+            // catch PDOexception(s) and rethrow them as my custom exception
+            throw new DatabaseException(
+                "PDO error occured.",
+                500,
+                $pe,
+                $sql,
+                $pe->getCode(),
+                $pe->getMessage()
+            );
+        }
+
         Logger::log(
             "Query executed successfully.",
             LogLevel::SUCCESS,
             LoggerType::NORMAL,
             Loggers::CMD
         );
+
+        // return an assoc array based on the query
         return $statement->fetchAll();
     }
 
@@ -402,7 +424,7 @@ class Database {
      * ### Example usage:
      * 
      * ```php
-     * use WebDev\Functions\Database;
+     * use WebDev\Database\Database;
      * $db = Database::getInstance();
      * $success = $db->execute(
      *     "INSERT INTO table (column1, column2) VALUES (:value1, :value2)",
@@ -413,7 +435,8 @@ class Database {
      * );
      * if ($success){
      *     echo "Query executed successfully.";
-     * } else {
+     * }
+     * else {
      *     echo "Failed to execute query.";
      * }
      * ```
@@ -431,15 +454,37 @@ class Database {
             LoggerType::NORMAL,
             Loggers::CMD
         );
+
+        // validate the parameters using a custom method
         $this->validateParameters($parameters);
-        $statement = $this->conn->prepare($sql);
-        $result = $statement->execute($parameters);
+
+        try {
+            // prepare the statement to prevent SQL injection
+            $statement = $this->conn->prepare($sql);
+
+            // execute the query and put the resulting bool in a var
+            $result = $statement->execute($parameters);
+        }
+        catch (PDOException $pe){
+            // catch PDOexception(s) and rethrow them as my custom exception
+            throw new DatabaseException(
+                "PDO error occured.",
+                500,
+                $pe,
+                $sql,
+                $pe->getCode(),
+                $pe->getMessage()
+            );
+        }
+        
         Logger::log(
             $result ? "SQL statement executed successfully." : "SQL statement execution failed.",
             $result ? LogLevel::SUCCESS : LogLevel::FAILURE,
             LoggerType::NORMAL,
             Loggers::CMD
         );
+
+        // return a bool based on whether it went correctly or not
         return $result;
     }
 
@@ -453,13 +498,13 @@ class Database {
      * ### Example usage:
      * 
      * ```php
-     * use WebDev\Functions\Database;
+     * use WebDev\Database\Database;
      * $db = Database::getInstance();
      * $exists = $db->tableExists('users');
      * 
      * if ($exists){
      *     echo "The table exists.";
-     * } 
+     * }
      * else {
      *     echo "The table does not exist.";
      * }
@@ -499,7 +544,7 @@ class Database {
      * ### Example usage:
      * 
      * ```php
-     * use WebDev\Functions\Database;
+     * use WebDev\Database\Database;
      * $db = Database::getInstance();
      * $tables = $db->getTableNames();
      * 
