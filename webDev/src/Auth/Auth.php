@@ -109,7 +109,7 @@ class Auth {
      * 
      * ### Example usage:
      * ```php
-     * use WebDev\Functions\Auth;
+     * use WebDev\Auth\Auth;
      * 
      * $auth = Auth::getInstance();
      * ```
@@ -145,7 +145,7 @@ class Auth {
      * 
      * ### Example usage:
      * ```php
-     * use WebDev\Functions\Auth;
+     * use WebDev\Auth\Auth;
      * 
      * Auth::validateUser('valid_username'); // Returns true
      * ```
@@ -194,7 +194,7 @@ class Auth {
      * 
      * ### Example usage:
      * ```php
-     * use WebDev\Functions\Auth;
+     * use WebDev\Auth\Auth;
      * 
      * Auth::validatePass('StrongP@ssw0rd'); // No exception thrown
      * ```
@@ -293,7 +293,7 @@ class Auth {
      * 
      * ### Example usage:
      * ```php
-     * use WebDev\Functions\Auth;
+     * use WebDev\Auth\Auth;
      * 
      * $auth = Auth::getInstance();
      * $auth->register('new_user', 'StrongP@ssw0rd');
@@ -354,7 +354,7 @@ class Auth {
      * 
      * ### Example usage:
      * ```php
-     * use WebDev\Functions\Auth;
+     * use WebDev\Auth\Auth;
      * 
      * $auth = Auth::getInstance();
      * $user = $auth->login('existing_user', 'StrongP@ssw0rd');
@@ -363,11 +363,11 @@ class Auth {
      * 
      * @param string $user The username of the user.
      * @param string $pass The password of the user.
-     * @return array An associative array containing the user's details.
+     * @return User An object based on the id from the query.
      * @throws AuthenticationException If the login fails.
      * @throws DatabaseException If the query resulted in no results.
      */
-    final public function login(string $user, string $pass): array {
+    final public function login(string $user, string $pass): User {
         Logger::log(
             "Attempting login for user: $user",
             LogLevel::INFO,
@@ -391,11 +391,12 @@ class Auth {
                     LoggerType::NORMAL,
                     Loggers::CMD
                 );
+                
+                // regenerate id for security
                 session_regenerate_id(true);
-                return [
-                    'id' => $result[0]['id'],
-                    'username' => $result[0]['username']
-                ];
+
+                // return an user object rather than the user id
+                return User::load($result[0]['id']);
             } 
             else {
                 Logger::log(
@@ -435,7 +436,7 @@ class Auth {
      * 
      * ### Example usage:
      * ```php
-     * use WebDev\Functions\Auth;
+     * use WebDev\Auth\Auth;
      * 
      * $auth = Auth::getInstance();
      * $auth->logout();

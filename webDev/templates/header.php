@@ -7,6 +7,13 @@ if ($startSession === true){
 }
 
 use WebDev\Auth\CSRF;
+use WebDev\Auth\User;
+
+// logging
+use WebDev\Logging\Enum\Loggers;
+use WebDev\Logging\Enum\LoggerType;
+use WebDev\Logging\Enum\LogLevel;
+use WebDev\Logging\Logger;
 
 // function to check for header to set correct active class
 
@@ -33,6 +40,22 @@ function matchHeader(string $title): int {
 // get active val
 $activeVal = matchHeader($title);
 
+// if a link was clicked
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['linkClicked']) && $_POST['linkClicked'] == "true") {
+        // Check if user is logged in before accessing session data
+        if (isset($_SESSION[User::SESSION_ID_KEY])) {
+            Logger::log(
+                "User (ID: {$_SESSION[User::SESSION_ID_KEY]}) has performed an action.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            User::load($_SESSION[User::SESSION_ID_KEY])->recordActivity();
+        }
+    }
+}
+
 ?>
 
 <!-- html -->
@@ -58,13 +81,13 @@ $activeVal = matchHeader($title);
                     <nav class="navbar">
                         <div class="leftSide">
                             <a>Logo</a> 
-                            <a href="/" ' . ($activeVal === 1 ? 'class="active"' : '') . '>Main Page</a>
-                            <a href="/home" ' . ($activeVal === 2 ? 'class="active"' : '') . '>Home</a>
+                            <a href="/" ' . ($activeVal === 1 ? 'class="active links"' : 'class="links"') . '>Main Page</a>
+                            <a href="/home" ' . ($activeVal === 2 ? 'class="active links"' : 'class="links"') . '>Home</a>
                         </div>
                         ';
                         
                         if (!empty($_SESSION['id']) && in_array($_SESSION['id'], [1, 2])){
-                            $adminPage = '<a href="/admin" ' . ($activeVal === 3 ? 'class="active"' : '') . '>Admin Page</a>';
+                            $adminPage = '<a href="/admin" ' . ($activeVal === 3 ? 'class="active links"' : 'class="links"') . '>Admin Page</a>';
                         } 
                         else {
                             $adminPage = ''; // Ensure $adminPage is always defined
@@ -72,7 +95,7 @@ $activeVal = matchHeader($title);
                         
                         // Append the "School Admin Page" link if the user is id = 1
                         if (!empty($_SESSION['id']) && $_SESSION['id'] == 1){
-                            $adminPage .= '<a href="/adminSchool" ' . ($activeVal === 4 ? 'class="active"' : '') . '>School Admin Page</a>';
+                            $adminPage .= '<a href="/adminSchool" ' . ($activeVal === 4 ? 'class="active links"' : 'class="links"') . '>School Admin Page</a>';
                         }
                         
 
@@ -81,7 +104,7 @@ $activeVal = matchHeader($title);
                                 <div class="rightSide">
                                     <p id="loggedInAs">Logged in as <b>' . $_SESSION['username'] . '</b></p>'
                                     . $adminPage .
-                                    '<a href="/auth?action=logout&csrf_token=' . CSRF::getInstance()->getToken() . '">Logout</a>
+                                    '<a href="/auth?action=logout&csrf_token=' . CSRF::getInstance()->getToken() . '" class="links">Logout</a>
                                 </div>
                             ';
                         } 
@@ -99,3 +122,48 @@ $activeVal = matchHeader($title);
             ';
         }
 ?>
+<script>
+
+// todo: separatate JS (or maybe switch to TS) into separate files
+async function sendData(url, data){
+    try{
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams(data).toString()
+        });
+
+        // if the network response wasnt ok, throw new error
+        if (!response.ok) throw new error("Network response was not okay.");
+    }
+    catch (error){
+        console.log('Error: ', error);
+    }
+}
+
+const links = document.getElementsByClassName("links");
+
+[...links].forEach(link => {
+    link.addEventListener('click', e => {
+        // Prevent default navigation
+        e.preventDefault();
+        
+        // Get the URL we want to navigate to
+        const href = link.getAttribute('href');
+        
+        // Send AJAX request and wait for it to complete
+        sendData(window.location.pathname, { linkClicked: "true" })
+            .then(() => {
+                // Navigate after logging completes
+                window.location.href = href;
+            })
+            .catch(() => {
+                // Navigate even if logging fails
+                window.location.href = href;
+            });
+    });
+});
+
+</script>

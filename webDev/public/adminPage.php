@@ -28,6 +28,9 @@ use WebDev\UI\TableRenderer;
 use WebDev\Exception\AppException;
 use WebDev\Exception\AuthorizationException;
 
+// User
+use WebDev\Auth\User;
+
 AppException::init();
 
 set_exception_handler(function (Throwable $ae){
@@ -87,6 +90,10 @@ $db = Database::getInstance();
 
 // button was pressed
 if (isset($_POST['submit'])){
+    // record activity
+    $user = User::current();
+    if ($user) $user->recordActivity();
+
     // get the table name
     $tableName = $_POST['tableName'];
 
