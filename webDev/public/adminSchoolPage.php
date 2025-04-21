@@ -16,6 +16,9 @@ use WebDev\UI\TableRenderer;
 use WebDev\Exception\AppException;
 use WebDev\Exception\AuthorizationException;
 
+// User
+use WebDev\Auth\User;
+
 // make sure AppException and all its subclasses are loaded
 AppException::init();
 
@@ -52,7 +55,11 @@ if (!isset($_SESSION['id']) || $_SESSION['id'] !== 1){
 */
 
 // some ajax request caught
-if (isset($_POST['action'])){    
+if (isset($_POST['action'])){
+    // => action
+    $user = User::current();
+    if ($user) $user->recordActivity();
+
     switch ($_POST['action']){
         case 'getValue':
             // get passed tablename

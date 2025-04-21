@@ -2,7 +2,11 @@
 declare(strict_types=1);
 
 // include db
+
+use WebDev\Auth\User;
 use WebDev\Database\Database;
+
+// custom exceptions
 use WebDev\Exception\AppException;
 use WebDev\Exception\DatabaseException;
 use WebDev\Exception\PHPException;
@@ -25,6 +29,11 @@ set_exception_handler(function (Throwable $ae){
 $db = Database::getInstance();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+    // someone has submitted a form
+    $user = User::current();
+    // if the user is logged in (not null) record the activity
+    if ($user) $user->recordActivity();
+
     // if the requested data is set
     if (isset($_POST['action']) && isset($_POST['tableName']) && isset($_POST['username']) && isset($_POST['password']) && isset($_POST['role'])){
         // get the action
