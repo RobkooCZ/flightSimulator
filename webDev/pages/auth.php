@@ -1,4 +1,20 @@
 <?php
+/**
+ * Auth Backend Script
+ *
+ * Handles authentication-related actions (login, register, logout) for the flight simulator web application.
+ * Validates CSRF tokens, manages user sessions, and redirects with messages as needed.
+ *
+ * @file auth.php
+ * @since 0.3.4
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see Auth, User, CSRF, AppException, Logger
+ * @todo Add more granular error handling and logging
+ */
+
 declare(strict_types=1);
 
 // Database

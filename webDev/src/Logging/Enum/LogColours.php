@@ -1,4 +1,20 @@
 <?php
+/**
+ * Terminal color codes for different log levels.
+ * 
+ * This enum defines ANSI escape sequences for colorizing log output
+ * in the terminal. Each case corresponds to a different log level or
+ * text formatting need.
+ *
+ * @file LogColours.php
+ * @since 0.2.2
+ * @package Logger
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see LogLevel
+ * @todo Add more color codes if needed
+ */
 
 declare(strict_types=1);
 
@@ -10,6 +26,11 @@ namespace WebDev\Logging\Enum;
  * This enum defines ANSI escape sequences for colorizing log output
  * in the terminal. Each case corresponds to a different log level or
  * text formatting need.
+ *
+ * @package Logger
+ * @since 0.2.2
+ * @see LogLevel
+ * @todo Add more color codes if needed
  */
 enum LogColours: string {
     case EMERGENCY = "\033[38;2;255;255;255;48;2;255;0;0m";

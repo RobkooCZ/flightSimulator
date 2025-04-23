@@ -1,4 +1,19 @@
 <?php
+/**
+ * Application Router
+ *
+ * Handles all HTTP routing for the flight simulator web application.
+ * Maps URIs to controllers, serves static files, and initializes core systems.
+ *
+ * @file router.php
+ * @since 0.1
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see Bootstrap, AppException, Logger
+ * @todo Add dynamic route support, improve error handling, and static file types
+ */
 
 require_once __DIR__ . '/vendor/autoload.php';
 

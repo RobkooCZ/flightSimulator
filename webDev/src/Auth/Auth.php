@@ -1,4 +1,20 @@
 <?php
+/**
+ * Authentication Class File
+ *
+ * This file contains the `Auth` class, which is responsible for handling authentication-related functionality
+ * such as user login, logout, session management, and validation.
+ *
+ * @file Auth.php
+ * @since 0.1.0
+ * @package Auth
+ * @version 0.3.4
+ * @author Robkoo
+ * @license TBD - decide before public release
+ * @see Database, Logger, User
+ * @todo Add support for multi-factor authentication
+ */
+
 declare(strict_types=1);
 
 namespace WebDev\Auth;
@@ -21,14 +37,18 @@ use WebDev\Exception\Enum\AuthenticationType;
 use WebDev\Logging\Logger;
 use WebDev\Logging\Enum\LoggerType;
 use WebDev\Logging\Enum\LogLevel;
-use WebDev\Logging\Enum\Loggers; 
+use WebDev\Logging\Enum\Loggers;
 
 /**
  * Class Auth
  *
- * This class is responsible for handling authentication-related functionality.
- * It may include methods for user login, logout, session management, and other
- * authentication mechanisms.
+ * Handles authentication-related functionality such as user login, logout, session management, and validation.
+ *
+ * @package Auth
+ * @since 0.1.0
+ * @version 0.3.4
+ * @see Database, Logger, User
+ * @todo Add password recovery functionality
  */
 class Auth {
     /**

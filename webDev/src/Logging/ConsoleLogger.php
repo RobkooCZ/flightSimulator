@@ -1,4 +1,20 @@
 <?php
+/**
+ * Console logger class for formatting and outputting logs to the terminal.
+ * 
+ * This class implements the singleton pattern and provides methods for
+ * writing both normal and exception log messages to the console with
+ * appropriate formatting and colors.
+ *
+ * @file ConsoleLogger.php
+ * @since 0.2.2
+ * @package Logger
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see LogLevel, LogColours, LoggerColour, TextStyle
+ * @todo Add more formatting options if needed
+ */
 
 declare(strict_types=1);
 
@@ -19,6 +35,11 @@ if (!defined('STDOUT')){
  * This class implements the singleton pattern and provides methods for
  * writing both normal and exception log messages to the console with
  * appropriate formatting and colors.
+ *
+ * @package Logger
+ * @since 0.2.2
+ * @see LogLevel, LogColours, LoggerColour, TextStyle
+ * @todo Add more formatting options if needed
  */
 class ConsoleLogger {
     /**

@@ -1,21 +1,44 @@
 <?php
+/**
+ * Bootstrap Class File
+ *
+ * Singleton class responsible for bootstrapping the application:
+ * - Loads environment variables from .env
+ * - Sets the application timezone
+ * - More features coming soon
+ *
+ * @file Bootstrap.php
+ * @since 0.2.5
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see ConfigurationException, FileException, LogicException
+ * @todo Add more initialization logic as needed
+ */
+
 namespace WebDev;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 use Exception;
-
 use WebDev\Exception\ConfigurationException;
 use WebDev\Exception\FileException;
 use WebDev\Exception\LogicException;
 
 /**
- * Class Bootstrap
+ * Handles application bootstrapping and environment setup.
  *
  * Singleton class responsible for bootstrapping the application:
+ * - Loads environment variables from .env
  * - Sets the application timezone
  * - More features coming soon
+ *
+ * @package FlightSimWeb
+ * @since 0.2.5
+ * @see ConfigurationException, FileException, LogicException
+ * @todo Add more initialization logic as needed
  */
 class Bootstrap {
     /**
@@ -55,14 +78,16 @@ class Bootstrap {
     }
 
     /**
-     * Private constructor to prevent direct instantiation
+     * Private constructor to prevent direct instantiation.
      */
     private function __construct(){}
 
     /**
-     * Loads environment variables using Dotenv
+     * Loads environment variables using Dotenv.
      *
      * @return void
+     * @throws FileException If the .env file cannot be loaded.
+     * @throws ConfigurationException If required environment variables are missing.
      */
     private static function loadEnv(): void {
         // Load .env variables

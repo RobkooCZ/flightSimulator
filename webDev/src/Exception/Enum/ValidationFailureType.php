@@ -1,15 +1,37 @@
 <?php
+/**
+ * ValidationFailureType Enum File
+ *
+ * This file contains the `ValidationFailureType` enum, which represents different types of validation failures.
+ * It is used to categorize validation errors into specific types, such as username, password, and CSRF token validation failures.
+ * This provides a structured way to handle validation errors and ensures that they are consistently categorized.
+ *
+ * @file ValidationFailureType.php
+ * @since 0.2.1
+ * @package Exception\Enum
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see https://www.php.net/manual/en/language.enumerations.php
+ * @todo Add more validation failure types if needed
+ */
 
 declare(strict_types=1);
 
 namespace WebDev\Exception\Enum;
 
 /**
+ * Enum ValidationFailureType
+ *
  * Enum representing different types of validation failures.
- * 
  * This enum is used to categorize validation errors into specific types, such as username,
  * password, and CSRF token validation failures. It provides a structured way to handle
  * validation errors and ensures that they are consistently categorized.
+ *
+ * @package Exception\Enum
+ * @since 0.2.1
+ * @see https://www.php.net/manual/en/language.enumerations.php
+ * @todo Add more validation failure types if needed
  */
 enum ValidationFailureType: string {
     // Username-related validation failures

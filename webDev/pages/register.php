@@ -1,4 +1,20 @@
 <?php
+/**
+ * Register Page
+ *
+ * Displays the registration form for the flight simulator web application.
+ * Handles CSRF protection and shows messages for registration attempts.
+ *
+ * @file register.php
+ * @since 0.1
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see Auth, CSRF, templates/header.php, templates/footer.php
+ * @todo Add more registration features and validation
+ */
+
 declare(strict_types=1);
 
 // Start session and set a variable to not start it in header.php

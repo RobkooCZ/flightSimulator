@@ -1,4 +1,20 @@
 <?php
+/**
+ * PHPException Class File
+ *
+ * This file contains the `PHPException` class, which handles exceptions that occur due to PHP built-in functions or extensions.
+ * It provides detailed context about the error, including error details, error codes, and the function where the exception originated.
+ * This information is logged for debugging purposes.
+ *
+ * @file PHPException.php
+ * @since 0.2.1
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType
+ * @todo Add more PHP error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -27,40 +43,37 @@ use WebDev\Logging\Enum\Loggers;
  * - Captures error details and PHP error codes.
  * - Logs the exception message along with error details for easier debugging.
  * - Supports exception chaining to preserve the original exception context.
+ *
+ * @package Exception
+ * @since 0.2.1
+ * @see AppException, ExceptionType
+ * @todo Add more PHP error context if needed
  */
 final class PHPException extends AppException {
     private ?string $errorDetails; // Additional details about the PHP error
     private ?int $errorCode; // The PHP-specific error code
 
     /**
-     * Constructs a new AuthorizationException instance.
+     * Constructs a new PHPException instance.
      * 
      * This constructor initializes the exception with a message, code, and optional
-     * details about the authorization failure, such as the user's role, resource, and action attempted.
+     * details about the PHP error, such as error details and error codes.
      * 
      * ### Example usage:
      * ```php
-     * throw new AuthorizationException(
-     *     message: "Access denied to admin page",
-     *     code: 403,
-     *     userRole: "guest",
-     *     resource: "/admin",
-     *     actionAttempted: "view",
-     *     requiredRole: "admin",
-     *     ipv4: $_SERVER['REMOTE_ADDR'] ?? 'Unknown',
-     *     userId: $_SESSION['id'] ?? null, // Pass null if the user is not logged in
+     * throw new PHPException(
+     *     message: "Invalid argument supplied to preg_match",
+     *     code: 500,
+     *     errorDetails: "Invalid regular expression",
+     *     errorCode: 2,
      *     previous: $previousException
      * );
      * ```
      * 
      * @param string $message The exception message.
      * @param int $code The exception code (default is 0).
-     * @param string $userRole The role of the user attempting the action.
-     * @param string $resource The resource the user tried to access.
-     * @param string $actionAttempted The action the user attempted to perform.
-     * @param ?string $requiredRole The role required to perform the action (default is null).
-     * @param ?string $ipv4 The user's IP address (default is null).
-     * @param ?int $userId The ID of the user attempting the action (default is null).
+     * @param ?string $errorDetails Additional details about the PHP error (default is null).
+     * @param ?int $errorCode The PHP-specific error code (default is null).
      * @param ?Throwable $previous The previous exception used for exception chaining (default is null).
      */
     final public function __construct(
@@ -90,6 +103,7 @@ final class PHPException extends AppException {
      * - File, line, and timestamp of the exception.
      * 
      * @return void
+     * @since 0.2.1
      */
     final protected function phpException(): void {
         // get the function name

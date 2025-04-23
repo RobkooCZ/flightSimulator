@@ -1,4 +1,20 @@
 <?php
+/**
+ * ServerException Class File
+ *
+ * This file contains the `ServerException` class, which handles exceptions that occur on the server side,
+ * such as internal errors or unexpected failures. It provides detailed context about the server environment
+ * and logs the error for debugging purposes.
+ *
+ * @file ServerException.php
+ * @since 0.2.1
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType
+ * @todo Add more server error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -27,6 +43,11 @@ use WebDev\Logging\Enum\Loggers;
  * - Captures server-specific details such as hostname, environment, PHP version, memory usage, and request information.
  * - Logs the exception message along with server details for easier debugging.
  * - Supports exception chaining to preserve the original exception context.
+ *
+ * @package Exception
+ * @since 0.2.1
+ * @see AppException, ExceptionType
+ * @todo Add more server error context if needed
  */
 final class ServerException extends AppException {
     private ?string $serverName; // The name of the server where the exception occurred
@@ -102,6 +123,7 @@ final class ServerException extends AppException {
      * - File, line, and timestamp of the exception.
      * 
      * @return void
+     * @since 0.2.1
      */
     final protected function serverException(): void {
         // Get the function name where the exception was thrown

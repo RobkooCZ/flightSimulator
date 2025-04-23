@@ -1,4 +1,22 @@
 <?php
+/**
+ * TableRenderer Class File
+ *
+ * This file contains the `TableRenderer` class, which provides methods for rendering
+ * HTML tables and forms for database tables, as well as generating dropdowns for roles
+ * and table names. It implements a per-table singleton pattern and integrates with the
+ * logging system for traceability.
+ *
+ * @file TableRenderer.php
+ * @since 0.2.1
+ * @package UI
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see Table, Logger, RoleManager, ConfigurationException, ValidationException, DatabaseException, PHPException
+ * @todo Add more rendering options and validation
+ */
+
 declare(strict_types=1);
 
 namespace WebDev\UI;
@@ -25,6 +43,16 @@ use WebDev\Utilities\RoleManager;
 // Table
 use WebDev\Database\Table;
 
+/**
+ * Renders HTML tables and forms for database tables, and generates dropdowns for roles and table names.
+ *
+ * Implements a per-table singleton pattern and integrates with the logging system for traceability.
+ *
+ * @package UI
+ * @since 0.2.1
+ * @see Table, Logger, RoleManager, ConfigurationException, ValidationException, DatabaseException, PHPException
+ * @todo Add more rendering options and validation
+ */
 class TableRenderer {
     /**
      * @var array $instances Registry for TableRenderer instances

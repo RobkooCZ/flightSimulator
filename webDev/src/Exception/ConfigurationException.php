@@ -1,4 +1,20 @@
 <?php
+/**
+ * ConfigurationException Class File
+ *
+ * This file contains the `ConfigurationException` class, which handles exceptions that occur during application configuration,
+ * such as missing `.env` variables, invalid settings, or misconfigured files.
+ * It provides detailed context about the configuration error, including the configuration key, source, expected value, and configuration path.
+ *
+ * @file ConfigurationException.php
+ * @since 0.2.1
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType
+ * @todo Add more configuration error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -28,6 +44,11 @@ use WebDev\Logging\Enum\Loggers;
  * - Captures the configuration key and source that caused the exception.
  * - Logs the expected value and configuration path for debugging purposes.
  * - Supports exception chaining to preserve the original exception context.
+ *
+ * @package Exception
+ * @since 0.2.1
+ * @see AppException, ExceptionType
+ * @todo Add more configuration error context if needed
  */
 final class ConfigurationException extends AppException {
     private string $configKey; // The configuration key that caused the exception
@@ -95,6 +116,7 @@ final class ConfigurationException extends AppException {
      * - File, line, and timestamp of the exception.
      * 
      * @return void
+     * @since 0.2.1
      */
     final protected function configurationException(): void {
         $fnName = parent::getFailedFunctionName();

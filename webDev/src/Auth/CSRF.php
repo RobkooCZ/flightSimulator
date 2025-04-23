@@ -1,4 +1,19 @@
 <?php
+/**
+ * CSRF Class File
+ *
+ * This file contains the `CSRF` class, which is responsible for handling Cross-Site Request Forgery (CSRF) protection mechanisms.
+ * It provides methods to generate and validate CSRF tokens to ensure secure form submissions
+ * and prevent unauthorized actions on behalf of authenticated users.
+ *
+ * @file CSRF.php
+ * @since 0.1.0
+ * @package Auth
+ * @version 0.3.4
+ * @see Logger, ValidationException
+ * @todo Add support for token rotation
+ */
+
 declare(strict_types=1);
 
 namespace WebDev\Auth;
@@ -14,14 +29,18 @@ use WebDev\Exception\Enum\ValidationFailureType;
 use WebDev\Logging\Logger;
 use WebDev\Logging\Enum\LoggerType;
 use WebDev\Logging\Enum\LogLevel;
-use WebDev\Logging\Enum\Loggers; 
+use WebDev\Logging\Enum\Loggers;
 
 /**
  * Class CSRF
  *
- * This class is responsible for handling Cross-Site Request Forgery (CSRF) protection mechanisms.
- * It provides methods to generate and validate CSRF tokens to ensure secure form submissions
- * and prevent unauthorized actions on behalf of authenticated users.
+ * Handles Cross-Site Request Forgery (CSRF) protection mechanisms.
+ * Provides methods to generate and validate CSRF tokens for secure form submissions.
+ *
+ * @package Auth
+ * @since 0.1.0
+ * @see Logger, ValidationException
+ * @todo Add support for token rotation
  */
 class CSRF {
     /**
@@ -61,10 +80,10 @@ class CSRF {
 
     /**
      * Prevent unserialize attacks.
-     * 
+     *
      * This method prevents the unserialization of the singleton instance,
      * ensuring that the class cannot be instantiated through unserialization.
-     * 
+     *
      * @throws LogicException Always throws a LogicException with a reason indicating
      *                        that unserializing the singleton would violate the singleton pattern.
      */
@@ -74,10 +93,10 @@ class CSRF {
 
     /**
      * Prevent cloning of the singleton instance.
-     * 
+     *
      * This method ensures that the singleton instance cannot be cloned,
      * maintaining the integrity of the singleton pattern.
-     * 
+     *
      * @throws LogicException Always throws a LogicException with a reason indicating
      *                        that cloning the singleton would violate the singleton pattern.
      */
@@ -87,7 +106,7 @@ class CSRF {
 
     /**
      * Private constructor to initialize the CSRF class.
-     * 
+     *
      * This method ensures that the session is started if it hasn't already been started.
      */
     private function __construct(){
@@ -118,11 +137,11 @@ class CSRF {
 
     /**
      * Retrieves the singleton instance of the CSRF class.
-     * 
+     *
      * This method ensures that only one instance of the CSRF class is created
      * during the application's lifecycle. If the instance does not already exist,
      * it initializes a new one.
-     * 
+     *
      * @return CSRF The singleton instance of the CSRF class.
      */
     public static function getInstance(): CSRF {
@@ -148,10 +167,10 @@ class CSRF {
 
     /**
      * Generates a new CSRF token and stores it in the session and a secure cookie.
-     * 
+     *
      * This method creates a cryptographically secure random token, stores it in the session,
      * and sets it as a secure cookie with a 1-hour expiration time.
-     * 
+     *
      * @return void
      */
     private function generateToken(): void {
@@ -185,12 +204,12 @@ class CSRF {
 
     /**
      * Validates the submitted CSRF token against the session and cookie.
-     * 
+     *
      * This method checks if the submitted token matches the token stored in the session
      * and the secure cookie. It also ensures that the token has not expired.
-     * 
+     *
      * @param string $token The CSRF token submitted by the client.
-     * 
+     *
      * @return bool True if the token is valid, false otherwise.
      * @throws ValidationException If the token is mismatched, invalid, expired, or the cookie doesn't match.
      */
@@ -248,9 +267,9 @@ class CSRF {
 
     /**
      * Retrieves the current CSRF token.
-     * 
+     *
      * This method generates a new token if one does not already exist in the session.
-     * 
+     *
      * @return string The current CSRF token.
      */
     public function getToken(): string {
@@ -346,9 +365,9 @@ class CSRF {
 
     /**
      * Adds the CSRF token to the HTTP response headers.
-     * 
+     *
      * This method sets the CSRF token as a custom HTTP header (`X-CSRF-Token`).
-     * 
+     *
      * @return void
      */
     public function addTokenToHeader(): void {
@@ -372,10 +391,10 @@ class CSRF {
 
     /**
      * Regenerates the CSRF token.
-     * 
+     *
      * This method invalidates the current token by removing it from the session
      * and generates a new token.
-     * 
+     *
      * @return string The newly generated CSRF token.
      */
     public function regenerateToken(): string {
@@ -401,11 +420,11 @@ class CSRF {
 
     /**
      * Generates an HTML hidden input field containing the CSRF token.
-     * 
+     *
      * This method creates a hidden input field with the CSRF token, which can be
      * included in forms to provide CSRF protection.
-     * 
-     * @return string The HTML for the hidden input field.`
+     *
+     * @return string The HTML for the hidden input field.
      */
     public function getCSRFField(): string {
         Logger::log(

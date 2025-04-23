@@ -1,4 +1,19 @@
 <?php
+/**
+ * Utility class for retrieving color codes based on log levels.
+ *
+ * This class provides static methods to map log levels to their corresponding
+ * ANSI color codes for terminal output, using the LogColours enum.
+ *
+ * @file LoggerColour.php
+ * @since 0.2.2
+ * @package Logger
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see LogColours, LogLevel
+ * @todo Add more mappings or styles if needed
+ */
 
 declare(strict_types=1);
 
@@ -9,6 +24,11 @@ use WebDev\Logging\Enum\LogLevel;
 
 /**
  * Utility class for retrieving color codes based on log levels.
+ *
+ * @package Logger
+ * @since 0.2.2
+ * @see LogColours, LogLevel
+ * @todo Add more mappings or styles if needed
  */
 class LoggerColour {
     /**
@@ -19,8 +39,7 @@ class LoggerColour {
      * If no matching case is found, it returns `null`.
      * 
      * @param string $name The name of the log level to find the corresponding color for.
-     * 
-     * @return LogColours|null The corresponding `LogColours` enum case or `null` if no match is found.
+     * @return ?LogColours The corresponding `LogColours` enum case or `null` if no match is found.
      */
     private static function fromName(string $name): ?LogColours {
         foreach (LogColours::cases() as $case){
@@ -41,7 +60,6 @@ class LoggerColour {
      * a `null` value in the output.
      * 
      * @param LogLevel $ill The log level for which to get the color.
-     * 
      * @return string The color code string associated with the log level.
      *               Returns the reset color code if no corresponding color is found.
      */

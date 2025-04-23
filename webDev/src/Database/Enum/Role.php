@@ -1,4 +1,19 @@
 <?php
+/**
+ * Role Enum File
+ *
+ * This file contains the `Role` enum, which represents the different roles available in the system.
+ * The values of the enums must match exactly as they are stored in the database.
+ *
+ * @file Role.php
+ * @since 0.3.0
+ * @package Database\Enum
+ * @author Robkoo
+ * @license TODO
+ * @version 0.3.4
+ * @see https://www.php.net/manual/en/language.enumerations.php
+ * @todo Add more roles if needed
+ */
 
 declare(strict_types=1);
 
@@ -9,6 +24,11 @@ namespace WebDev\Database\Enum;
  *
  * This enum represents the different roles available in the system.
  * The values of the enums must match exactly as they are stored in the database.
+ *
+ * @package Database\Enum
+ * @since 0.3.0
+ * @see https://www.php.net/manual/en/language.enumerations.php
+ * @todo Add more roles if needed
  */
 enum Role: string {
     case OWNER = 'owner';

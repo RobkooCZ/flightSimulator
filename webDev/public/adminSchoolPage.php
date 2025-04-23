@@ -1,4 +1,20 @@
 <?php
+/**
+ * School Admin Page
+ *
+ * Displays the school admin interface for managing database tables.
+ * Only accessible to users with owner permissions (ID 1).
+ *
+ * @file adminSchoolPage.php
+ * @since 0.1
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see TableRenderer, Table, Database, AuthorizationException, AppException, User
+ * @todo Add more admin features and validation
+ */
+
 declare(strict_types=1);
 
 session_start();

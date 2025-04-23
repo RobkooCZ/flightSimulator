@@ -1,4 +1,20 @@
 <?php
+/**
+ * LogicException Class File
+ *
+ * This file contains the `LogicException` class, which handles exceptions that occur due to application logic errors,
+ * such as invalid state transitions or unexpected null values. It provides detailed context about the logic error,
+ * including the reason, expected state, and actual state.
+ *
+ * @file LogicException.php
+ * @since 0.2.1
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType
+ * @todo Add more logic error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -27,6 +43,11 @@ use WebDev\Logging\Enum\Loggers;
  * - Captures the reason for the logic error.
  * - Logs the expected and actual states for debugging purposes.
  * - Supports exception chaining to preserve the original exception context.
+ *
+ * @package Exception
+ * @since 0.2.1
+ * @see AppException, ExceptionType
+ * @todo Add more logic error context if needed
  */
 final class LogicException extends AppException {
     private string $reason; // The reason for the logic error

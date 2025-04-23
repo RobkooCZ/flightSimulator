@@ -1,59 +1,55 @@
 <?php
+/**
+ * User Class File
+ *
+ * This file contains the `User` class, which represents a user entity in the application.
+ * It provides methods for user operations such as authentication, role and status management,
+ * session handling, and database persistence.
+ *
+ * @file User.php
+ * @since 0.1.0
+ * @package Auth
+ * @version 0.3.4
+ * @see Database, Auth, Logger
+ * @todo Implement user preferences
+ */
+
 declare(strict_types=1);
 
 namespace WebDev\Auth;
 
-// php/db things
+// PHP/DB dependencies
 use DateTime;
 use PDOException;
 
-// my db class
+// Database
 use WebDev\Database\Database;
 
-// auth
-use WebDev\Auth\Auth;
-
-// my db class enums
+// Enums
 use WebDev\Database\Enum\Status;
 use WebDev\Database\Enum\Role;
 
-// exceptions
+// Exceptions
 use WebDev\Exception\DatabaseException;
 use WebDev\Exception\PHPException;
 
-// logger
+// Logger
 use WebDev\Logging\Logger;
 use WebDev\Logging\Enum\LogLevel;
 use WebDev\Logging\Enum\LoggerType;
 use WebDev\Logging\Enum\Loggers;
 
 /**
- * User class representing a user entity in the application.
- * 
- * This class manages user data, authentication state, and provides methods for
- * user operations like status changes and role management. It implements a registry
- * pattern for caching user instances to reduce database queries.
- * 
- * ### Features:
- * - Registry pattern with time-based cache invalidation
- * - Session management for logged-in users
- * - Role and status validation
- * - Database persistence
- * - Activity tracking
- * 
- * ### Example usage:
- * ```php
- * // Load user by ID
- * $user = User::load(1);
- * 
- * // Get current logged-in user
- * $currentUser = User::current();
- * 
- * // Check user role
- * if ($user->hasRole('admin')){
- *     // Admin actions
- * }
- * ```
+ * Class User
+ *
+ * Represents a user entity in the application. This class manages user data, authentication state,
+ * and provides methods for user operations like status changes, role management, and activity tracking.
+ * It implements a registry pattern for caching user instances to reduce database queries.
+ *
+ * @package Auth
+ * @since 0.1.0
+ * @see Database, Auth, Logger
+ * @todo Implement user preferences
  */
 class User {
     /**************************************
