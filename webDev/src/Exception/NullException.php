@@ -1,4 +1,19 @@
 <?php
+/**
+ * NullException Class File
+ *
+ * This file contains the `NullException` class, which handles exceptions that occur when a null value is encountered
+ * where it is not expected. It provides detailed context about the null error, including the expected value and the function where the exception occurred.
+ *
+ * @file NullException.php
+ * @since 0.2.2
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType
+ * @todo Add more null error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -27,6 +42,11 @@ use WebDev\Logging\Enum\Loggers;
  * - Captures the expected value that was not null.
  * - Logs detailed information about the null exception for debugging purposes.
  * - Supports exception chaining to preserve the original exception context.
+ *
+ * @package Exception
+ * @since 0.2.2
+ * @see AppException, ExceptionType
+ * @todo Add more null error context if needed
  */
 final class NullException extends AppException {
 

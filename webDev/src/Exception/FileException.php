@@ -1,4 +1,20 @@
 <?php
+/**
+ * FileException Class File
+ *
+ * This file contains the `FileException` class, which handles exceptions that occur during file operations,
+ * such as reading, writing, or deleting files. It provides detailed context about the file error, including
+ * the file path, action, error message, and error code.
+ *
+ * @file FileException.php
+ * @since 0.2.1
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType
+ * @todo Add more file error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -27,6 +43,11 @@ use WebDev\Logging\Enum\Loggers;
  * - Captures the file path and action that caused the exception.
  * - Logs the error message and error code for debugging purposes.
  * - Supports exception chaining to preserve the original exception context.
+ *
+ * @package Exception
+ * @since 0.2.1
+ * @see AppException, ExceptionType
+ * @todo Add more file error context if needed
  */
 final class FileException extends AppException {
     private string $filePath; // The file path that caused the exception
@@ -34,7 +55,7 @@ final class FileException extends AppException {
     private ?string $fileErrorMessage; // The error message associated with the file operation
     private ?int $fileErrorCode; // The error code associated with the file operation
 
-        /**
+    /**
      * Constructs a new FileException instance.
      * 
      * This constructor initializes the exception with a message, code, and optional
@@ -93,6 +114,7 @@ final class FileException extends AppException {
      * - File, line, and timestamp of the exception.
      * 
      * @return void
+     * @since 0.2.1
      */
     final protected function fileException(): void {
         $fnName = parent::getFailedFunctionName();

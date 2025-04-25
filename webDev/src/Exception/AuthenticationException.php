@@ -1,4 +1,19 @@
 <?php
+/**
+ * AuthenticationException Class File
+ *
+ * This file contains the `AuthenticationException` class, which handles exceptions that occur during authentication processes.
+ * It provides detailed context about authentication errors, including the type of action and the failure reason.
+ *
+ * @file AuthenticationException.php
+ * @since 0.3.4
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType, AuthenticationType
+ * @todo Add more authentication error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -16,17 +31,18 @@ use WebDev\Logging\Logger;
 use WebDev\Logging\Enum\LoggerType;
 use WebDev\Logging\Enum\LogLevel;
 use WebDev\Logging\Enum\Loggers; 
+
 /**
  * Handles authentication-related exceptions.
  * 
  * This class is used for exceptions that occur during authentication processes, such as
  * login, logout, or registration failures. It provides detailed context about the
  * authentication error, including the type of action and the failure reason.
- * 
- * ### Features:
- * - Captures the type of authentication action (e.g., login, logout, register).
- * - Logs the failure reason for debugging purposes.
- * - Supports exception chaining to preserve the original exception context.
+ *
+ * @package Exception
+ * @since 0.3.4
+ * @see AppException, ExceptionType, AuthenticationType
+ * @todo Add more authentication error context if needed
  */
 final class AuthenticationException extends AppException {
     private AuthenticationType $authType; // The type of authentication action (e.g., login, logout, register)
@@ -73,7 +89,7 @@ final class AuthenticationException extends AppException {
      * 
      * Logs detailed information about the exception, including the type of authentication action,
      * the failure reason, and the function where the exception originated. This information is
-     * useful for debuggin fg authentication-related issues.
+     * useful for debugging authentication-related issues.
      * 
      * ### Logged Details:
      * - Exception message and code.
@@ -82,6 +98,7 @@ final class AuthenticationException extends AppException {
      * - File, line, and timestamp of the exception.
      * 
      * @return void
+     * @since 0.3.4
      */
     final protected function authenticationException(): void {
         Logger::getInstance()->log(

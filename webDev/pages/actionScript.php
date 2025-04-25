@@ -1,7 +1,21 @@
 <?php
-declare(strict_types=1);
+/**
+ * Action Script
+ *
+ * Handles AJAX actions for user and table management (add, edit, delete, etc.).
+ * Processes POST requests for admin/school admin interfaces.
+ *
+ * @file actionScript.php
+ * @since 0.3.4
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see Database, User, AppException, DatabaseException, PHPException
+ * @todo Add more actions (edit, delete), validation, and error handling
+ */
 
-// include db
+declare(strict_types=1);
 
 use WebDev\Auth\User;
 use WebDev\Database\Database;

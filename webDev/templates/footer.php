@@ -1,4 +1,20 @@
 <?php
+/**
+ * Footer Template
+ *
+ * Displays the footer for the flight simulator web application.
+ * Only shown if $showFooter is true.
+ *
+ * @file footer.php
+ * @since 0.1
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see templates/header.php
+ * @todo Add more footer content and links
+ */
+
 declare(strict_types=1);
 
 // show the header if requested

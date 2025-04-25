@@ -1,4 +1,19 @@
 <?php
+/**
+ * File logger class for writing logs to files.
+ * 
+ * This class implements the singleton pattern and provides a foundation
+ * for file-based logging, though the actual implementation is pending.
+ *
+ * @file FileLogger.php
+ * @since 0.2.2
+ * @package Logger
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see Logger, ConsoleLogger
+ * @todo Implement file-based logging methods
+ */
 
 declare(strict_types=1);
 
@@ -11,6 +26,11 @@ use WebDev\Exception\LogicException;
  * 
  * This class implements the singleton pattern and provides a foundation
  * for file-based logging, though the actual implementation is pending.
+ *
+ * @package Logger
+ * @since 0.2.2
+ * @see Logger, ConsoleLogger
+ * @todo Implement file-based logging methods
  */
 class FileLogger {
     /**

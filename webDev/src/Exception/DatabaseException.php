@@ -1,4 +1,20 @@
 <?php
+/**
+ * DatabaseException Class File
+ *
+ * This file contains the `DatabaseException` class, which handles exceptions that occur during database operations,
+ * such as connection failures, query errors, or other database-related issues. It provides detailed context about
+ * the error, including the query, database type, error code, and error message.
+ *
+ * @file DatabaseException.php
+ * @since 0.2.1
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType
+ * @todo Add more database error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -29,6 +45,11 @@ use WebDev\Logging\Enum\Loggers;
  * - Logs the database error code and message.
  * - Includes the function name where the exception originated.
  * - Supports exception chaining for preserving the original exception context.
+ *
+ * @package Exception
+ * @since 0.2.1
+ * @see AppException, ExceptionType
+ * @todo Add more database error context if needed
  */
 final class DatabaseException extends AppException {
     private ?string $query; // The SQL query that caused the exception
@@ -84,6 +105,7 @@ final class DatabaseException extends AppException {
      * error code, error message, and the function where the exception originated.
      * 
      * @return void
+     * @since 0.2.1
      */
     final protected function databaseException(): void {
         // Get the function name where the exception was thrown

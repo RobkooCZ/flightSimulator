@@ -1,4 +1,20 @@
 <?php
+/**
+ * Log level enumeration for categorizing log messages by severity.
+ * 
+ * This enum defines a hierarchy of log levels from least severe (TRACE)
+ * to most severe (EMERGENCY). The integer values represent the relative
+ * severity, with higher values indicating more severe issues.
+ *
+ * @file LogLevel.php
+ * @since 0.2.2
+ * @package Logger
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see Loggers, LoggerType, LogColours
+ * @todo Add more log levels or mappings if needed
+ */
 
 declare(strict_types=1);
 
@@ -10,6 +26,11 @@ namespace WebDev\Logging\Enum;
  * This enum defines a hierarchy of log levels from least severe (TRACE)
  * to most severe (EMERGENCY). The integer values represent the relative
  * severity, with higher values indicating more severe issues.
+ *
+ * @package Logger
+ * @since 0.2.2
+ * @see Loggers, LoggerType, LogColours
+ * @todo Add more log levels or mappings if needed
  */
 enum LogLevel: int {
     case NONE      = -1;

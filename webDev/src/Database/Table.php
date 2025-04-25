@@ -1,4 +1,20 @@
 <?php
+/**
+ * Table Class File
+ *
+ * This file contains the `Table` class, which provides a mechanism to manage database table interactions.
+ * It uses a singleton pattern to ensure only one instance per table is created.
+ *
+ * @file Table.php
+ * @since 0.3.4
+ * @package Database
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see Database
+ * @todo Add more table utility methods
+ */
+
 declare(strict_types=1);
 
 namespace WebDev\Database;
@@ -22,9 +38,14 @@ use WebDev\Logging\Enum\Loggers;
 
 /**
  * Class Table
- * 
- * This class provides a mechanism to manage database table interactions.
- * It uses a singleton pattern to ensure only one instance per table is created.
+ *
+ * Provides a mechanism to manage database table interactions.
+ * Uses a singleton pattern to ensure only one instance per table is created.
+ *
+ * @package Database
+ * @since 0.3.4
+ * @see Database
+ * @todo Add more table utility methods
  */
 class Table {
     /**
@@ -122,7 +143,7 @@ class Table {
      * This method ensures that only one instance of the Table class is created
      * for each table name during the application's lifecycle.
      * 
-     * ### Example usage:
+     * ### Example:
      * ```php
      * use WebDev\Functions\Table;
      * 
@@ -159,7 +180,7 @@ class Table {
      * 
      * This method returns the name of the table associated with the current Table instance.
      * 
-     * ### Example usage:
+     * ### Example:
      * ```php
      * $table = Table::getInstance('users');
      * echo $table->getTableName(); // Outputs: 'users'
@@ -182,7 +203,7 @@ class Table {
      * 
      * This method fetches the column names and metadata for the table using the `SHOW COLUMNS` SQL command.
      * 
-     * ### Example usage:
+     * ### Example:
      * ```php
      * $table = Table::getInstance('users');
      * $header = $table->getTableHeader();
@@ -220,7 +241,7 @@ class Table {
      * 
      * This method fetches all rows from the table using the `SELECT *` SQL command.
      * 
-     * ### Example usage:
+     * ### Example:
      * ```php
      * $table = Table::getInstance('users');
      * $rows = $table->selectAll();
@@ -258,7 +279,7 @@ class Table {
      * 
      * This method fetches the `AUTO_INCREMENT` value for the table from the `INFORMATION_SCHEMA.TABLES`.
      * 
-     * ### Example usage:
+     * ### Example:
      * ```php
      * $table = Table::getInstance('users');
      * $nextId = $table->getNextId();

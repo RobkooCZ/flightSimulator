@@ -1,4 +1,20 @@
 <?php
+/**
+ * Login Page
+ *
+ * Displays the login form for the flight simulator web application.
+ * Handles CSRF protection and shows messages for login attempts.
+ *
+ * @file login.php
+ * @since 0.1
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see Auth, CSRF, templates/header.php, templates/footer.php
+ * @todo Add more login features and validation
+ */
+
 declare(strict_types=1);
 
 // start session and set a variable to not start it in header.php

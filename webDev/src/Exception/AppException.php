@@ -1,4 +1,20 @@
 <?php
+/**
+ * AppException Base Class File
+ *
+ * This file contains the abstract `AppException` class, which provides a foundation for handling
+ * application-specific exceptions in a structured way. Subclasses should extend this class to define
+ * specific exception types for the application.
+ *
+ * @file AppException.php
+ * @since 0.2.1
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see ExceptionType, ConfigurationException, Logger
+ * @todo Expand with more granular exception handling as needed
+ */
 
 declare(strict_types=1);
 
@@ -25,6 +41,11 @@ use WebDev\Exception\ConfigurationException;
  * 
  * This class provides a foundation for handling exceptions in a structured way.
  * Subclasses should extend this class to define specific exception types.
+ *
+ * @package Exception
+ * @since 0.2.1
+ * @see ExceptionType, ConfigurationException, Logger
+ * @todo Expand with more granular exception handling as needed
  */
 abstract class AppException extends Exception {
     /**
@@ -39,13 +60,16 @@ abstract class AppException extends Exception {
      * 
      * Initializes the exception with a message, code, type, and an optional previous exception.
      * 
-     * /**
      * ### Example usage:
      * ```php
-     * use WebDev\Functions\UserException;
-     * use WebDev\Functions\ExceptionType;
+     * use WebDev\Exception\UserException;
+     * use WebDev\Exception\Enum\ExceptionType;
      * 
-     * throw new UserException("Invalid username or password", 401, ExceptionType::USER_EXCEPTION);
+     * throw new UserException(
+     *     message: "Invalid username or password",
+     *     code: 401,
+     *     previous: $previousException
+     * );
      * ```
      * 
      * @param string $message The exception message.
@@ -83,7 +107,7 @@ abstract class AppException extends Exception {
      * - Logs a success message if the class is loaded successfully.
      * - Logs an error message and throws an exception if the class is not loaded.
      * 
-     * @throws Exception If the AppException class is not loaded.
+     * @throws ConfigurationException If the AppException class is not loaded.
      * @return void
      */
     final public static function init(): void {
@@ -110,6 +134,8 @@ abstract class AppException extends Exception {
      * This method uses a match expression to determine the appropriate handling
      * method for the exception type. Subclasses can override these methods to
      * provide custom handling logic.
+     *
+     * @return void
      */
     final public function handle(): void {
         match ($this->exceptionType){

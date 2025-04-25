@@ -1,4 +1,20 @@
 <?php
+/**
+ * ValidationException Class File
+ *
+ * This file contains the `ValidationException` class, which handles exceptions that occur during input validation,
+ * such as invalid form data or failed CSRF token validation. It provides detailed context about the validation error,
+ * including the field name, failure type, and error message.
+ *
+ * @file ValidationException.php
+ * @since 0.2.1
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType, ValidationFailureType
+ * @todo Add more validation error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -28,6 +44,11 @@ use WebDev\Logging\Enum\Loggers;
  * - Captures the field name that triggered the exception.
  * - Logs the validation failure type and error message.
  * - Supports exception chaining to preserve the original exception context.
+ *
+ * @package Exception
+ * @since 0.2.1
+ * @see AppException, ExceptionType, ValidationFailureType
+ * @todo Add more validation error context if needed
  */
 final class ValidationException extends AppException {
     private ?string $fieldName; // The name of the field which triggered the exception
@@ -90,6 +111,7 @@ final class ValidationException extends AppException {
      * - File, line, and timestamp of the exception.
      * 
      * @return void
+     * @since 0.2.1
      */
     final protected function validationException(): void {
         // Log the validation error details using Logger::writeLog

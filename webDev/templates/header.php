@@ -1,4 +1,20 @@
 <?php
+/**
+ * Header Template
+ *
+ * Displays the header and navigation for the flight simulator web application.
+ * Handles navigation highlighting, user session, and AJAX link tracking.
+ *
+ * @file header.php
+ * @since 0.1
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see templates/footer.php, Auth\User, Auth\CSRF, Logger
+ * @todo Better style it, more links
+ */
+
 declare(strict_types=1);
 
 // only start session if its requested

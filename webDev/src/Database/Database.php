@@ -1,4 +1,20 @@
 <?php
+/**
+ * Database Class File
+ *
+ * This file contains the `Database` class, which is responsible for managing database connections and interactions.
+ * It provides methods to establish a connection to the database and perform various database operations.
+ *
+ * @file Database.php
+ * @since 0.2
+ * @package Database
+ * @version 0.3.4
+ * @author Robkoo
+ * @license TBD
+ * @see PDO, Logger
+ * @todo Add support for connection pooling
+ */
+
 declare(strict_types=1);
 
 namespace WebDev\Database;
@@ -20,12 +36,18 @@ use WebDev\Logging\Logger;
 use WebDev\Logging\Enum\LoggerType;
 use WebDev\Logging\Enum\LogLevel;
 use WebDev\Logging\Enum\Loggers; 
+
 /**
  * Class Database
  *
  * This class is responsible for managing database connections and interactions.
  * It provides methods to establish a connection to the database and perform
  * various database operations.
+ *
+ * @package Database
+ * @since 0.2
+ * @see PDO, Logger
+ * @todo Add support for connection pooling
  */
 class Database {
     private static ?Database $instance = null;

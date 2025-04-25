@@ -1,4 +1,20 @@
 <?php
+/**
+ * Landing Page
+ *
+ * Displays the landing page for the flight simulator web application.
+ * Shows a welcome message and user information if logged in.
+ *
+ * @file index.php
+ * @since 0.1
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see templates/header.php, templates/footer.php
+ * @todo Add more landing page features
+ */
+
 declare(strict_types=1);
 
 // only start session if its requested

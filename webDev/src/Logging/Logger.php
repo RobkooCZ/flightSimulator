@@ -1,4 +1,20 @@
 <?php
+/**
+ * Main logger class implementing the singleton pattern.
+ * 
+ * This class serves as the entry point for all logging operations,
+ * managing both file and console logging through their respective
+ * singleton instances.
+ *
+ * @file Logger.php
+ * @since 0.2.2
+ * @package Logger
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see LogLevel, Loggers, LoggerType, ConsoleLogger, FileLogger
+ * @todo Add file-based logging implementation
+ */
 
 declare(strict_types=1);
 
@@ -19,6 +35,11 @@ if (!defined('STDOUT')){
  * This class serves as the entry point for all logging operations,
  * managing both file and console logging through their respective
  * singleton instances.
+ *
+ * @package Logger
+ * @since 0.2.2
+ * @see LogLevel, Loggers, LoggerType, ConsoleLogger, FileLogger
+ * @todo Add file-based logging implementation
  */
 class Logger {
     /**

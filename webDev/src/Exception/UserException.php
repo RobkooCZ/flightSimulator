@@ -1,4 +1,19 @@
 <?php
+/**
+ * UserException Class File
+ *
+ * This file contains the `UserException` class, which handles exceptions that are user-facing,
+ * such as invalid input or authentication errors. It sets a session message and logs the error.
+ *
+ * @file UserException.php
+ * @since 0.2.1
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType, PHPException
+ * @todo Add more user error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -21,6 +36,11 @@ use WebDev\Logging\Enum\Loggers;
  * 
  * This class is used for exceptions that are user-facing, such as invalid input
  * or authentication errors. It sets a session message and logs the error.
+ *
+ * @package Exception
+ * @since 0.2.1
+ * @see AppException, ExceptionType, PHPException
+ * @todo Add more user error context if needed
  */
 final class UserException extends AppException {
     /**

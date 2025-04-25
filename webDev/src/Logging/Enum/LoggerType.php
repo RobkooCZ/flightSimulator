@@ -1,4 +1,19 @@
 <?php
+/**
+ * Types of log messages.
+ * 
+ * This enum distinguishes between regular log messages and
+ * exception-specific log messages, which require different formatting.
+ *
+ * @file LoggerType.php
+ * @since 0.2.2
+ * @package Logger
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see Loggers, LogLevel
+ * @todo Add more logger types if needed
+ */
 
 declare(strict_types=1);
 
@@ -9,6 +24,11 @@ namespace WebDev\Logging\Enum;
  * 
  * This enum distinguishes between regular log messages and
  * exception-specific log messages, which require different formatting.
+ *
+ * @package Logger
+ * @since 0.2.2
+ * @see Loggers, LogLevel
+ * @todo Add more logger types if needed
  */
 enum LoggerType: string {
     case NORMAL = "NORMAL";

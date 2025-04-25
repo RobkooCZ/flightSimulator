@@ -1,4 +1,19 @@
 <?php
+/**
+ * AuthorizationException Class File
+ *
+ * This file contains the `AuthorizationException` class, which handles exceptions that occur during authorization processes.
+ * It provides detailed context about authorization errors, including the action attempted, resource, user role, required role, and user IP.
+ *
+ * @file AuthorizationException.php
+ * @since 0.2.1
+ * @package Exception
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see AppException, ExceptionType
+ * @todo Add more authorization error context if needed
+ */
 
 declare(strict_types=1);
 
@@ -28,6 +43,11 @@ use WebDev\Logging\Enum\Loggers;
  * - Captures the action attempted and the resource being accessed.
  * - Logs the user's role, required role, and IP address.
  * - Supports exception chaining to preserve the original exception context.
+ *
+ * @package Exception
+ * @since 0.2.1
+ * @see AppException, ExceptionType
+ * @todo Add more authorization error context if needed
  */
 final class AuthorizationException extends AppException {
     private string $actionAttempted; // The action the user attempted to perform
@@ -105,6 +125,7 @@ final class AuthorizationException extends AppException {
      * - File, line, and timestamp of the exception.
      * 
      * @return void
+     * @since 0.2.1
      */
     final protected function authorizationException(): void {
         // Log authorization exception details

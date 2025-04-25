@@ -1,4 +1,20 @@
 <?php
+/**
+ * Admin Page
+ *
+ * Displays the admin interface for managing database tables.
+ * Only accessible to users with appropriate permissions (IDs 1 or 2).
+ *
+ * @file adminPage.php
+ * @since 0.1
+ * @package FlightSimWeb
+ * @author Robkoo
+ * @license TBD
+ * @version 0.3.4
+ * @see TableRenderer, Table, Database, AuthorizationException, AppException, User
+ * @todo Add more admin features and validation
+ */
+
 declare(strict_types=1);
 
 // start session and set a variable to not start it in header.php
