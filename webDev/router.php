@@ -59,7 +59,13 @@ function serveStaticFile($filePath): never {
             case 'css':
                 header('Content-Type: text/css');
                 break;
-            // other static files in the future (can be images, js, ...)
+            case 'js':
+                header('Content-Type: application/javascript');
+                break;
+            case 'json':
+                header('Content-Type: application/json');
+                break;
+            // other static files in the future
             default:
                 header('Content-Type: text/plain'); // plain text if the file extension is unrecognized
                 break;
@@ -180,9 +186,19 @@ function handleRequest($uri): void {
             );
             include __DIR__ . '/pages/auth.php';  // UPDATED: php → pages
             break;
+
+        case '/api/adminSchoolAjax.php':
+            Logger::log(
+                "Routing to adminSchoolAjax.php.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            include __DIR__ . '/api/adminSchoolAjax.php';
+            break;
         
         // static files
-        case (preg_match('/^\/assets\/(css)\/(.+)$/', $uri, $matches) ? true : false): // expression to match assets/css
+        case (preg_match('/^\/assets\/([a-zA-Z0-9]+)\/(.+)$/', $uri, $matches) ? true : false): // expression to match assets/css
             // match assets/css
             $fileType = $matches[1]; // css     
             $fileName = $matches[2]; // fileName

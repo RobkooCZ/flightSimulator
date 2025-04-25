@@ -1,0 +1,32 @@
+{
+    "adminSchool": {
+        "content": {
+            "name": "content",
+            "staticTable": {
+                "name": "staticTable",
+                "select": "tableSelect",
+                "display": "tableDisplay"
+            },
+            "actionTable": {
+                "name": "actionTable",
+                "select": "actionSelect",
+                "display": "actionDisplay"
+            }
+        }
+    },
+
+    "api": {
+        "ajaxApi": {
+            "success": {
+                "success": "success",
+                "message": "message",
+                "data": "data"
+            },
+            "failure": {
+                "success": "success",
+                "message": "message",
+                "error": "error"
+            }
+        }
+    }
+}
