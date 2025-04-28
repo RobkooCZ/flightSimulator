@@ -17,6 +17,10 @@
 
 declare(strict_types=1);
 
+use WebDev\Bootstrap;
+
+Bootstrap::init();
+
 // only start session if its requested
 $startSession = false;
 session_start();

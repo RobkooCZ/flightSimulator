@@ -15,7 +15,9 @@
  * @todo Add more login features and validation
  */
 
-declare(strict_types=1);
+use WebDev\Bootstrap;
+Bootstrap::init();
+ 
 
 // start session and set a variable to not start it in header.php
 session_start();

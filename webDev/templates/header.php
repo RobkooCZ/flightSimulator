@@ -15,7 +15,8 @@
  * @todo Better style it, more links
  */
 
-declare(strict_types=1);
+use WebDev\Bootstrap;
+Bootstrap::init();
 
 // only start session if its requested
 if ($startSession === true){

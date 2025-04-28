@@ -52,6 +52,7 @@ use WebDev\Logging\Enum\Loggers;
 class Database {
     private static ?Database $instance = null;
     private ?PDO $conn = null;
+    private static bool $initialized = false;
 
     /**
      * Prevent unserialize attacks.
@@ -219,6 +220,62 @@ class Database {
     }
 
     /**
+     * Initialize the database system.
+     *
+     * Sets up database connection, validates configuration,
+     * and ensures the database is ready for use.
+     *
+     * @throws LogicException If database is already initialized
+     * @throws ConfigurationException If database configuration is invalid
+     * @throws DatabaseException If connection fails
+     * @return void
+     */
+    public static function init(): void {
+        if (self::$initialized){
+            throw new LogicException(
+                message: "Database already initialized.",
+                reason: "init() should only be called once during bootstrap."
+            );
+        }
+
+        Logger::log(
+            "Initializing database system...",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        self::$initialized = true;
+        // Get instance to initialize connection
+        $instance = self::getInstance();
+
+        // Test connection
+        try {
+            $instance->getConnection()->query('SELECT 1');
+
+            Logger::log(
+                "Database initialized successfully.",
+                LogLevel::SUCCESS,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+        catch (\PDOException $e){
+            Logger::log(
+                "Database initialization failed: " . $e->getMessage(),
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            throw new DatabaseException(
+                "Failed to initialize database.",
+                500,
+                $e
+            );
+        }
+    }
+
+    /**
      * Retrieves the singleton instance of the Database class.
      * 
      * This method ensures that only one instance of the Database class
@@ -228,6 +285,19 @@ class Database {
      * @return Database The singleton instance of the Database class.
      */
     public static function getInstance(): Database {
+        if (!self::$initialized && !defined('PHPUNIT_RUNNING')) {
+            throw new LogicException(
+                "Database not initialized.",
+                0,
+                "Call Database::init() first.",
+                null,
+                null,
+                null,
+                __LINE__,
+                __FILE__
+            );
+        }
+
         if (self::$instance === null){
             Logger::log(
                 "Creating a new Database singleton instance.",

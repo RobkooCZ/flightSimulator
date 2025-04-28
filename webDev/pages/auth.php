@@ -15,7 +15,8 @@
  * @todo Add more granular error handling and logging
  */
 
-declare(strict_types=1);
+ use WebDev\Bootstrap;
+Bootstrap::init();
 
 // Database
 use WebDev\Database\Database;
@@ -23,7 +24,7 @@ use WebDev\Database\Database;
 // Auth classes
 use WebDev\Auth\CSRF;
 use WebDev\Auth\Auth;
-use WebDev\Auth\User;
+
 // Exception handling
 use WebDev\Exception\AppException;
 

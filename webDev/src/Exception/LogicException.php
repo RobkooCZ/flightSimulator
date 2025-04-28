@@ -85,7 +85,7 @@ final class LogicException extends AppException {
         string $reason,
         ?string $expectedState = null,
         ?string $actualState = null,
-        ?Throwable $previous = null
+        ?Throwable $previous = null,
     ){
         parent::__construct($message, $code, ExceptionType::LOGIC_EXCEPTION, $previous);
 
@@ -114,14 +114,16 @@ final class LogicException extends AppException {
 
         // Log the logic exception details
         Logger::log(
-            "[LOGIC ERROR] " . $this->getMessage() .
+            "[LOGIC] " . $this->getMessage() .
             " | Function: $fnName" .
             " | Reason: " . $this->reason .
             " | Expected State: " . $this->expectedState .
             " | Actual State: " . $this->actualState,
             LogLevel::ERROR,
             LoggerType::EXCEPTION,
-            Loggers::CMD
+            Loggers::CMD,
+            $this->line,
+            $this->file
         );
     }
 }

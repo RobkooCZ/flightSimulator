@@ -12,6 +12,9 @@
  * @todo Add user feedback for errors, loading indicators, and support for more actions.
  */
 
+import constsPromise from '../constants/constants.js';
+import ajaxHandler from './utils/ajaxHandler.js';
+
 /**
  * Sanitize user input to prevent injection of special characters.
  *

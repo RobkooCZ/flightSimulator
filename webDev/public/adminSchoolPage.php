@@ -17,6 +17,10 @@
 
 declare(strict_types=1);
 
+use WebDev\Bootstrap;
+
+Bootstrap::init();
+
 session_start();
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -33,16 +37,6 @@ use WebDev\Exception\AuthorizationException;
 
 // make sure AppException and all its subclasses are loaded
 AppException::init();
-
-set_exception_handler(function (Throwable $ae){
-    if (AppException::globalHandle($ae)){ // appException or its subclasses
-        header('Location: /'); // for now
-        exit;
-    }
-    else { // anything but appException and its subclasses
-        error_log($ae->getMessage()); // temporary (in this file no other exceptions are thrown but AuthorizationException)
-    }
-});
 
 if (!isset($_SESSION['id']) || $_SESSION['id'] !== 1){
     throw new AuthorizationException(

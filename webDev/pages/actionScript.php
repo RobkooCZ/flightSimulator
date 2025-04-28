@@ -15,7 +15,9 @@
  * @todo Add more actions (edit, delete), validation, and error handling
  */
 
-declare(strict_types=1);
+use WebDev\Bootstrap;
+Bootstrap::init();
+ 
 
 use WebDev\Auth\User;
 use WebDev\Database\Database;

@@ -19,29 +19,13 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use WebDev\Bootstrap;
 
-// Exception handler
-use WebDev\Exception\AppException;
+Bootstrap::init();
 
 // Logger
 use WebDev\Logging\Logger;
 use WebDev\Logging\Enum\LogLevel;
 use WebDev\Logging\Enum\LoggerType;
 use WebDev\Logging\Enum\Loggers;
-
-// make sure AppException and all its subclasses are loaded
-AppException::init();
-
-set_exception_handler(function (Throwable $ae){
-    if (AppException::globalHandle($ae)){ // appException or its subclasses
-        exit;
-    }
-    else { // anything but appException and its subclasses
-        error_log($ae->getMessage()); // temporary
-    }
-});
-
-// init the app stuff
-Bootstrap::init();
 
 // function to serve static files
 function serveStaticFile($filePath): never {
