@@ -6,11 +6,11 @@
  * It provides detailed context about API errors, including endpoint, HTTP method, response code, failure reason, and API name.
  *
  * @file APIException.php
- * @since 0.2.1
+ * @since 0.6
  * @package Exception
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see AppException, ExceptionType
  */
 
@@ -44,7 +44,7 @@ use WebDev\Logging\Enum\Loggers;
  * - Supports exception chaining to preserve the original exception context.
  *
  * @package Exception
- * @since 0.2.1
+ * @since 0.4
  * @see AppException, ExceptionType
  */
 final class APIException extends AppException {

@@ -7,11 +7,11 @@
  * and permissions, including filtering available roles based on the current user's role.
  *
  * @file RoleManager.php
- * @since 0.2.1
+ * @since 0.2
  * @package Utilities
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see LogicException, Logger, LogLevel, LoggerType, Loggers
  * @todo Add more role management utilities if needed
  */
@@ -36,7 +36,7 @@ use WebDev\Logging\Enum\Loggers;
  * supports role hierarchy logic for permissions.
  *
  * @package Utilities
- * @since 0.2.1
+ * @since 0.2
  * @see LogicException, Logger, LogLevel, LoggerType, Loggers
  * @todo Add more role management utilities if needed
  */

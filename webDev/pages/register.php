@@ -10,12 +10,13 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.3
  * @see Auth, CSRF, templates/header.php, templates/footer.php
  * @todo Add more registration features and validation
  */
 
-declare(strict_types=1);
+use WebDev\Bootstrap;
+Bootstrap::init();
 
 // Start session and set a variable to not start it in header.php
 session_start();

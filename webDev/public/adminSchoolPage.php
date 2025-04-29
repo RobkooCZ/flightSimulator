@@ -6,16 +6,18 @@
  * Only accessible to users with owner permissions (ID 1).
  *
  * @file adminSchoolPage.php
- * @since TBD
+ * @since 0.1
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version TBD
+ * @version 0.7.3
  * @see TableRenderer, Table, Database, AuthorizationException, AppException, User
  * @todo Add more admin features and validation
  */
 
-declare(strict_types=1);
+use WebDev\Bootstrap;
+
+Bootstrap::init();
 
 session_start();
 
@@ -33,16 +35,6 @@ use WebDev\Exception\AuthorizationException;
 
 // make sure AppException and all its subclasses are loaded
 AppException::init();
-
-set_exception_handler(function (Throwable $ae){
-    if (AppException::globalHandle($ae)){ // appException or its subclasses
-        header('Location: /'); // for now
-        exit;
-    }
-    else { // anything but appException and its subclasses
-        error_log($ae->getMessage()); // temporary (in this file no other exceptions are thrown but AuthorizationException)
-    }
-});
 
 if (!isset($_SESSION['id']) || $_SESSION['id'] !== 1){
     throw new AuthorizationException(

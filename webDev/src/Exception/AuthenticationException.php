@@ -6,11 +6,11 @@
  * It provides detailed context about authentication errors, including the type of action and the failure reason.
  *
  * @file AuthenticationException.php
- * @since 0.3.4
+ * @since 0.6
  * @package Exception
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see AppException, ExceptionType, AuthenticationType
  * @todo Add more authentication error context if needed
  */
@@ -40,7 +40,7 @@ use WebDev\Logging\Enum\Loggers;
  * authentication error, including the type of action and the failure reason.
  *
  * @package Exception
- * @since 0.3.4
+ * @since 0.4
  * @see AppException, ExceptionType, AuthenticationType
  * @todo Add more authentication error context if needed
  */

@@ -7,11 +7,11 @@
  * severity, with higher values indicating more severe issues.
  *
  * @file LogLevel.php
- * @since 0.2.2
+ * @since 0.6
  * @package Logger
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see Loggers, LoggerType, LogColours
  * @todo Add more log levels or mappings if needed
  */
@@ -28,7 +28,7 @@ namespace WebDev\Logging\Enum;
  * severity, with higher values indicating more severe issues.
  *
  * @package Logger
- * @since 0.2.2
+ * @since 0.5
  * @see Loggers, LoggerType, LogColours
  * @todo Add more log levels or mappings if needed
  */

@@ -1,14 +1,35 @@
 /**
- * @class ajaxHandler
+ * Utility for standardized AJAX requests and validation.
+ *
+ * Provides a static class for sending AJAX requests with built-in validation for data, HTTP methods, and headers.
+ * Ensures all requests and responses follow a consistent structure for easier debugging and integration with PHP APIs.
+ *
+ * @file ajaxHandler.js
+ * @since 0.7.2
+ * @author Robkoo
+ * @license TBD
+ * @version 0.7.2.1
+ * @see /webDev/assets/js/utils/ajaxHandler.js, /webDev/src/API/ApiResponse.php
+ * @todo Add support for custom response types (e.g., text, blob), request timeouts, and progress events.
+ */
+
+/**
  * A utility class for handling AJAX requests.
- * 
- * All validation methods are preserved and used.
+ *
+ * @class
+ * @classdesc Static-only class for sending AJAX requests with validation and unified error handling.
+ * @example
+ * import ajaxHandler from './utils/ajaxHandler.js';
+ * const result = await ajaxHandler.send('/api/endpoint.php', { foo: 'bar' });
  */
 export default class ajaxHandler {
     /**
      * Validate the data object.
-     * @param {Object} data
-     * @returns {{success: boolean, message: string}}
+     *
+     * @param {Object} data - Data to be sent in the request body.
+     * @returns {{success: boolean, message: string}} Validation result.
+     * @example
+     * const valid = ajaxHandler.#validateData({foo: 1});
      */
     static #validateData(data){
         /**
@@ -49,8 +70,11 @@ export default class ajaxHandler {
 
     /**
      * Validate the HTTP method.
-     * @param {string} method
-     * @returns {{success: boolean, message: string}}
+     *
+     * @param {string} method - HTTP method (e.g., 'POST', 'GET').
+     * @returns {{success: boolean, message: string}} Validation result.
+     * @example
+     * const valid = ajaxHandler.#validateMethod('POST');
      */
     static #validateMethod(method){
         switch (method){
@@ -72,8 +96,11 @@ export default class ajaxHandler {
 
     /**
      * Validate the headers object.
-     * @param {Object} header
-     * @returns {{success: boolean, message: string}}
+     *
+     * @param {Object} header - Headers to be sent with the request.
+     * @returns {{success: boolean, message: string}} Validation result.
+     * @example
+     * const valid = ajaxHandler.#validateHeader({'Content-Type': 'application/json'});
      */
     static #validateHeader(header){
         /**
@@ -224,11 +251,17 @@ export default class ajaxHandler {
 
     /**
      * Send an AJAX request.
-     * @param {string} url
-     * @param {object} data
-     * @param {string} [method='POST']
-     * @param {object} [headers]
-     * @returns {Promise<any>}
+     *
+     * @param {string} url - The endpoint URL.
+     * @param {object} [data={}] - Data to send (for POST, will be JSON or form-encoded).
+     * @param {string} [method='POST'] - HTTP method ('POST' or 'GET').
+     * @param {object} [headers] - Headers to send with the request.
+     * @returns {Promise<any>} Resolves with the parsed JSON response if successful.
+     * @throws {Error} If validation fails, fetch fails, or the response indicates failure.
+     *
+     * @example
+     * const result = await ajaxHandler.send('/api/endpoint.php', { foo: 'bar' });
+     * // result.success === true
      */
     static async send(
         url, 

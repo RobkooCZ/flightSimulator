@@ -1,5 +1,22 @@
 <?php
-declare(strict_types=1);
+/**
+ * Handles AJAX requests for the School Admin Page.
+ *
+ * Processes AJAX POST requests for table data and action forms, returning HTML fragments
+ * in a standardized API response structure. Integrates with user authentication, table rendering,
+ * and unified API response handling.
+ *
+ * @file adminSchoolAjax.php
+ * @since 0.7.2
+ * @package API
+ * @author Robkoo
+ * @license TBD
+ * @version 0.7.2
+ * @see /webDev/src/API/ApiResponse.php, /webDev/assets/constants/constants.php, /webDev/public/adminSchoolPage.php
+ * @todo Add CSRF protection, more granular error handling, and logging.
+ */
+use WebDev\Bootstrap;
+Bootstrap::init();
 
 include __DIR__ . '/../assets/constants/constants.php';
 

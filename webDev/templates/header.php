@@ -10,12 +10,13 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.5
  * @see templates/footer.php, Auth\User, Auth\CSRF, Logger
  * @todo Better style it, more links
  */
 
-declare(strict_types=1);
+use WebDev\Bootstrap;
+Bootstrap::init();
 
 // only start session if its requested
 if ($startSession === true){
@@ -23,13 +24,6 @@ if ($startSession === true){
 }
 
 use WebDev\Auth\CSRF;
-use WebDev\Auth\User;
-
-// logging
-use WebDev\Logging\Enum\Loggers;
-use WebDev\Logging\Enum\LoggerType;
-use WebDev\Logging\Enum\LogLevel;
-use WebDev\Logging\Logger;
 
 // function to check for header to set correct active class
 
@@ -55,23 +49,6 @@ function matchHeader(string $title): int {
 
 // get active val
 $activeVal = matchHeader($title);
-
-// if a link was clicked
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['linkClicked']) && $_POST['linkClicked'] == "true") {
-        // Check if user is logged in before accessing session data
-        if (isset($_SESSION[User::SESSION_ID_KEY])) {
-            Logger::log(
-                "User (ID: {$_SESSION[User::SESSION_ID_KEY]}) has performed an action.",
-                LogLevel::INFO,
-                LoggerType::NORMAL,
-                Loggers::CMD
-            );
-            User::load($_SESSION[User::SESSION_ID_KEY])->recordActivity();
-        }
-    }
-}
-
 ?>
 
 <!-- html -->
@@ -138,48 +115,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ';
         }
 ?>
-<script>
 
-// todo: separatate JS (or maybe switch to TS) into separate files
-async function sendData(url, data){
-    try{
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams(data).toString()
-        });
-
-        // if the network response wasnt ok, throw new error
-        if (!response.ok) throw new error("Network response was not okay.");
-    }
-    catch (error){
-        console.log('Error: ', error);
-    }
-}
-
-const links = document.getElementsByClassName("links");
-
-[...links].forEach(link => {
-    link.addEventListener('click', e => {
-        // Prevent default navigation
-        e.preventDefault();
-        
-        // Get the URL we want to navigate to
-        const href = link.getAttribute('href');
-        
-        // Send AJAX request and wait for it to complete
-        sendData(window.location.pathname, { linkClicked: "true" })
-            .then(() => {
-                // Navigate after logging completes
-                window.location.href = href;
-            })
-            .catch(() => {
-                // Navigate even if logging fails
-                window.location.href = href;
-            });
-    });
-});
-
-</script>
+<script type="module" src="/assets/js/header.js"></script>

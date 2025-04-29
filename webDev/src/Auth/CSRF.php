@@ -7,9 +7,9 @@
  * and prevent unauthorized actions on behalf of authenticated users.
  *
  * @file CSRF.php
- * @since 0.1.0
+ * @since 0.2.3
  * @package Auth
- * @version 0.3.4
+ * @version 0.7.1
  * @see Logger, ValidationException
  * @todo Add support for token rotation
  */
@@ -38,7 +38,7 @@ use WebDev\Logging\Enum\Loggers;
  * Provides methods to generate and validate CSRF tokens for secure form submissions.
  *
  * @package Auth
- * @since 0.1.0
+ * @since 0.2.3
  * @see Logger, ValidationException
  * @todo Add support for token rotation
  */

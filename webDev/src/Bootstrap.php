@@ -8,24 +8,68 @@
  * - More features coming soon
  *
  * @file Bootstrap.php
- * @since 0.2.5
+ * @since 0.4.2
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.3
  * @see ConfigurationException, FileException, LogicException
  * @todo Add more initialization logic as needed
  */
+
+declare(strict_types=1);
 
 namespace WebDev;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Default encoding
+mb_internal_encoding('UTF-8');
+mb_http_output('UTF-8');
+
+// Session security
+ini_set('session.cookie_httponly', '1');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.cookie_secure', '1');
+
+// Memory limits
+ini_set('memory_limit', '256M');
+
+// Timezone fallback before .env loads
+date_default_timezone_set('Europe/Prague');
+
+// Error handling based on environment
+if (getenv('APP_ENV') === 'development'){
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+    error_reporting(E_ALL);
+} 
+else {
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+    error_reporting(E_ALL & ~E_DEPRECATED);
+}
+
+// External dependencies
 use Dotenv\Dotenv;
+
+// Internal PHP
 use Exception;
+
+// Custom exceptions
 use WebDev\Exception\ConfigurationException;
 use WebDev\Exception\FileException;
 use WebDev\Exception\LogicException;
+use webdev\Exception\AppException;
+
+// Logger
+use WebDev\Logging\Enum\Loggers;
+use WebDev\Logging\Enum\LoggerType;
+use WebDev\Logging\Enum\LogLevel;
+use WebDev\Logging\Logger;
+
+// Database
+use WebDev\Database\Database;
 
 /**
  * Handles application bootstrapping and environment setup.
@@ -36,18 +80,18 @@ use WebDev\Exception\LogicException;
  * - More features coming soon
  *
  * @package FlightSimWeb
- * @since 0.2.5
+ * @since 0.4.2
  * @see ConfigurationException, FileException, LogicException
  * @todo Add more initialization logic as needed
  */
 class Bootstrap {
     /**
-     * @var string|null Current timezone used in the application
+     * @var ?string Current timezone used in the application
      */
     public static ?string $timeZone = null;
 
     /**
-     * @var Bootstrap|null Singleton instance
+     * @var ?Bootstrap Singleton instance
      */
     public static ?Bootstrap $instance = null;
 
@@ -83,6 +127,28 @@ class Bootstrap {
     private function __construct(){}
 
     /**
+     * Set security headers for all responses
+     */
+    private static function setSecurityHeaders(): void {
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Content-Type-Options: nosniff');
+        header('X-XSS-Protection: 1; mode=block');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Permissions-Policy: geolocation=()');
+    }
+
+    /**
+     * Initialize core services (DB, Logger, etc.)
+     */
+    private static function initCoreServices(): void {
+        // Initialize database connection
+        Database::init();
+
+        // Initialize logger
+        Logger::init();
+    }
+
+    /**
      * Loads environment variables using Dotenv.
      *
      * @return void
@@ -109,11 +175,13 @@ class Bootstrap {
 
         // load necessary data from the .env file
         $appTimezone = $_ENV['APP_TIMEZONE'];
+        $appEnv = $_ENV['APP_ENV'];
         // more in the future
 
         // get an array of missing values (value for now but future proof)
         $missing = array_filter([
-            'APP_TIMEZONE' => $appTimezone
+            'APP_TIMEZONE' => $appTimezone,
+            'APP_ENV' => $appEnv
         ], fn(string $value) => !$value);
 
         // if anything is missing, throw an expection that displays all the missing key variables
@@ -148,6 +216,71 @@ class Bootstrap {
         }
     }
 
+    private static function setGlobalExceptionHandler(): void {
+        set_exception_handler(function (\Throwable $ae){
+            if (AppException::globalHandle($ae)){ // appException or its subclasses
+                header('Location: /'); // for now
+                exit;
+            }
+            else { // anything but appException and its subclasses
+                Logger::log(
+                    $ae->getMessage(),
+                    LogLevel::WARNING,
+                    LoggerType::NORMAL,
+                    Loggers::CMD
+                );
+            }
+        });
+    }
+
+    private static function shutdownHandler(): void {
+        register_shutdown_function(function(){
+            $error = error_get_last();
+            if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR])){
+                Logger::log(
+                    "Fatal Error: {$error['message']} in {$error['file']} on line {$error['line']}",
+                    LogLevel::FAILURE,
+                    LoggerType::NORMAL,
+                    Loggers::CMD
+                );
+            }
+        });
+    }
+
+    private static function validateEnvironment(): void {
+        if (version_compare(PHP_VERSION, '8.2.0', '<')){
+            throw new ConfigurationException(
+                "Unsupported PHP version",
+                500,
+                "PHP 8.0.0 or higher required",
+                "System Configuration",
+                "Current version: " . PHP_VERSION,
+                null
+            );
+        }
+
+        $requiredExtensions = ['pdo', 'mbstring'];
+        foreach ($requiredExtensions as $ext){
+            if (!extension_loaded($ext)){
+                throw new ConfigurationException(
+                    "Missing required PHP extension: $ext",
+                    500,
+                    "Extension not loaded",
+                    "System Configuration",
+                    "Please install $ext extension",
+                    null
+                );
+            }
+        }
+
+        Logger::log(
+            "Environment validated. PHP version: " . PHP_VERSION,
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+    }
+
     /**
      * Internal bootstrapper that performs setup logic.
      * Called once via init().
@@ -158,13 +291,28 @@ class Bootstrap {
         // construct the class
         self::$instance = new self();
 
+        // ensure correct env
+        self::validateEnvironment();
+
         // load env vars from .env
         self::loadEnv();
 
         // set the default timezone
         self::timezone();
 
-        // other things added soon 
+        // set security headers
+        self::setSecurityHeaders();
+
+        // set the global exception handler
+        self::setGlobalExceptionHandler();
+
+        // set the reset handler
+        self::shutdownHandler();
+
+        // init core services
+        self::initCoreServices();
+
+        // other things added soon
     }
 
     /**

@@ -1,21 +1,53 @@
+/**
+ * School Admin Page JS logic for dynamic table and action form loading.
+ *
+ * Handles AJAX requests for table and action selection, input sanitization, and form submission
+ * on the school admin page. Integrates with constants and the unified ajaxHandler utility.
+ *
+ * @file adminSchool.js
+ * @since 0.7.2
+ * @author Robkoo
+ * @license TBD
+ * @version 0.7.2.1
+ * @see ../constants/constants.js, ./utils/ajaxHandler.js, /webDev/api/adminSchoolAjax.php
+ * @todo Add user feedback for errors, loading indicators, and support for more actions.
+ */
+
 import constsPromise from '../constants/constants.js';
 import ajaxHandler from './utils/ajaxHandler.js';
 
-// Helper to sanitize input
+/**
+ * Sanitize user input to prevent injection of special characters.
+ *
+ * @param {string} input - The input string to sanitize.
+ * @returns {string} The sanitized string.
+ *
+ * @example
+ * const safe = sanitizeInput('<script>alert(1)</script>');
+ * // safe === 'scriptalert(1)/script'
+ */
 function sanitizeInput(input){
     return input.replace(/[<>"'`]/g, "");
 }
 
-// Main async IIFE to use awaited consts
 (async () => {
     // await constants
     const consts = await constsPromise;
 
-    // AJAX wrapper for table select
+    /**
+     * Send AJAX request to update the static table display.
+     *
+     * @param {string} value - The selected table name.
+     * @returns {Promise<void>}
+     * @throws {Error} If the AJAX request fails.
+     *
+     * @example
+     * await tableSelect('users');
+     */
     async function tableSelect(value){
         try {
             const result = await ajaxHandler.send(
-                '/api/adminSchoolAjax.php',
+                '/api/adminSchoolAjax',
                 {
                     action: 'getValue',
                     value: value
@@ -32,12 +64,21 @@ function sanitizeInput(input){
         }
     }
 
-    // AJAX wrapper for action select
+    /**
+     * Send AJAX request to update the action form display.
+     *
+     * @param {string} value - The selected action (add, edit, delete).
+     * @returns {Promise<void>}
+     * @throws {Error} If the AJAX request fails.
+     *
+     * @example
+     * await actionSelect('add');
+     */
     async function actionSelect(value){
         try {
             const tableName = document.getElementById(consts.adminSchool.content.staticTable.select).value;
             const result = await ajaxHandler.send(
-                '/api/adminSchoolAjax.php',
+                '/api/adminSchoolAjax',
                 {
                     action: 'tableActionChoice',
                     value: value,
@@ -71,7 +112,15 @@ function sanitizeInput(input){
     const defaultAction = document.getElementById(consts.adminSchool.content.actionTable.select).value;
     actionSelect(defaultAction);
 
-    // Submit button for action form
+    /**
+     * Handle submit button click for the action form.
+     *
+     * @returns {Promise<void>}
+     * @throws {Error} If the AJAX request fails.
+     *
+     * @example
+     * // Triggered by button click
+     */
     document.getElementById("submitActionForm").addEventListener("click", async function (){
         // Example: get input values
         const username = sanitizeInput(document.getElementById("username")?.value || "");

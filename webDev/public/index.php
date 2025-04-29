@@ -10,12 +10,13 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.3
  * @see templates/header.php, templates/footer.php
  * @todo Add more landing page features
  */
+use WebDev\Bootstrap;
 
-declare(strict_types=1);
+Bootstrap::init();
 
 // only start session if its requested
 $startSession = false;

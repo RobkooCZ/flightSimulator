@@ -1,11 +1,10 @@
-# PHP Documentation Standards
+## 📄 PHP Documentation Standards
 
 This file outlines general documentation practices for PHP files, classes, and methods.
 
 ---
 
-## File-Level DocBlock
-Place this at the top of every PHP file.
+### File-Level DocBlock (PHP)
 
 ```php
 /**
@@ -18,7 +17,7 @@ Place this at the top of every PHP file.
  * @since Which version did this file appear in
  * @package [logical grouping, e.g., Auth, Logger, FlightSimWeb]
  * @author Robkoo
- * @license TBD - decide before public release
+ * @license TBD
  * @version [e.g., 0.3.6]
  * @see [related files or classes] (optional)
  * @todo [future tasks] (optional)
@@ -27,8 +26,7 @@ Place this at the top of every PHP file.
 
 ---
 
-## Class-Level DocBlock
-Place this directly above the class declaration.
+### Class-Level DocBlock (PHP)
 
 ```php
 /**
@@ -49,8 +47,7 @@ class YourClass {
 
 ---
 
-## Method-Level DocBlock
-Use this above each function/method.
+### Method-Level DocBlock (PHP)
 
 ```php
 /**
@@ -58,8 +55,10 @@ Use this above each function/method.
  *
  * @param [type] $paramName [description of the parameter]
  * @return [type] [description of what it returns, with structure if needed]
- * @throws [ExceptionType] if [condition] (only if the method or function it uses throw exceptions)
+ * @throws [ExceptionType] if [condition] (only if the method itself, functions it uses or methods it uses throw exceptions)
  *
+ * ### Example
+ * 
  * ```php
  * $result = $yourClass->yourMethod($param);
  * // Example structure (if returning an array, object, etc.):
@@ -81,19 +80,97 @@ public function yourMethod([type] $paramName): [returnType] {
 
 ---
 
-## @package Guidelines
+### @package Guidelines (PHP)
+
 Use `@package` to organize code into logical groups. Examples:
 
-- `FlightSimWeb` – for general web-related code
-- `FlightSimGame` – for C engine bindings
-- `Logger`, `Auth`, `API`, etc. – for subsystems
-
-Helps readability, doc generation, and overall project structure.
+- `FlightSimWeb` – for general web-related code  
+- `FlightSimGame` – for C engine bindings  
+- `Logger`, `Auth`, `API`, etc. – for subsystems  
 
 ---
 
-## General guidelines
-- Keep it brief but informative
-- Skip tags that aren’t relevant (like `@throws` if nothing throws)
-- Use `@todo` generously for tracking ideas
-- Stick to this format unless you really need custom stuff
+### General Guidelines (PHP)
+
+- Keep it brief but informative  
+- Skip tags that aren’t relevant  
+- Use `@todo` generously for tracking ideas  
+- Stick to this format unless there's a solid reason not to  
+
+---
+
+## 📜 JavaScript Documentation Standards (JSDoc)
+
+Document JS functions, classes, and files using this JSDoc format:
+
+---
+
+### File-Level JSDoc (JS)
+
+```js
+/**
+ * [Short summary of what this file does]
+ *
+ * @file [filename.js]
+ * @since [version (e.g. 0.7.3)]
+ * @package [logical grouping, e.g., Constants, AJAX, e.g.]
+ * @author Robkoo
+ * @license TBD
+ * @version [current version the file is on]
+ * @see [related files/modules] (optional)
+ * @todo [future improvements or tasks] (optional)
+ */
+```
+
+---
+
+### Function-Level JSDoc (JS)
+
+```js
+/**
+ * [What the function does]
+ *
+ * @param {Type} paramName - [Description of the parameter]
+ * @param {Type} [optionalParam] - [Optional param, include square brackets]
+ * @returns {Type} [What the function returns]
+ * @throws {ErrorType} [Condition that causes it] (if applicable)
+ *
+ * @example
+ * const result = yourFunction(arg);
+ * console.log(result); // expected output
+ */
+function yourFunction(paramName) {
+    // ...
+}
+```
+
+---
+
+### Class-Level JSDoc (JS)
+
+```js
+/**
+ * [What the class does]
+ *
+ * @class
+ * @classdesc [Optional longer description of the class behavior or purpose]
+ * @example
+ * const obj = new YourClass();
+ */
+class YourClass {
+    /**
+     * @param {Type} param - [Constructor param]
+     */
+    constructor(param) {
+        // ...
+    }
+}
+```
+
+---
+
+### General Guidelines (JS)
+
+- Be consistent with types and structure  
+- Always use `@example` if logic is non-trivial  
+- `@typedef` or `@callback` can be used for complex structures

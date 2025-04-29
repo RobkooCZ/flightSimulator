@@ -6,11 +6,11 @@
  * such as invalid input or authentication errors. It sets a session message and logs the error.
  *
  * @file UserException.php
- * @since 0.2.1
+ * @since 0.6
  * @package Exception
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see AppException, ExceptionType, PHPException
  * @todo Add more user error context if needed
  */
@@ -38,7 +38,7 @@ use WebDev\Logging\Enum\Loggers;
  * or authentication errors. It sets a session message and logs the error.
  *
  * @package Exception
- * @since 0.2.1
+ * @since 0.4
  * @see AppException, ExceptionType, PHPException
  * @todo Add more user error context if needed
  */

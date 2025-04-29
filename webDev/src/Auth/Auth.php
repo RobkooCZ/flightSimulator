@@ -6,11 +6,11 @@
  * such as user login, logout, session management, and validation.
  *
  * @file Auth.php
- * @since 0.1.0
+ * @since 0.3
  * @package Auth
- * @version 0.3.4
+ * @version 0.7.1
  * @author Robkoo
- * @license TBD - decide before public release
+ * @license TBD
  * @see Database, Logger, User
  * @todo Add support for multi-factor authentication
  */
@@ -45,8 +45,7 @@ use WebDev\Logging\Enum\Loggers;
  * Handles authentication-related functionality such as user login, logout, session management, and validation.
  *
  * @package Auth
- * @since 0.1.0
- * @version 0.3.4
+ * @since 0.3
  * @see Database, Logger, User
  * @todo Add password recovery functionality
  */

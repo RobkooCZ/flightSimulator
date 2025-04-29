@@ -8,11 +8,11 @@
  * type-safe exception handling and ensures that exceptions are consistently categorized.
  *
  * @file ExceptionType.php
- * @since 0.2.1
+ * @since 0.6
  * @package Exception\Enum
- * @author TODO
- * @license TODO
- * @version 0.3.4
+ * @author Robkoo
+ * @license TBD
+ * @version 0.7.1
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more exception types if needed
  */
@@ -30,7 +30,7 @@ namespace WebDev\Exception\Enum;
  * type-safe exception handling and ensures that exceptions are consistently categorized.
  *
  * @package Exception\Enum
- * @since 0.2.1
+ * @since 0.4
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more exception types if needed
  */

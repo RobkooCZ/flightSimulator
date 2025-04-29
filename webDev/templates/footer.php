@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.5
  * @see templates/header.php
  * @todo Add more footer content and links
  */
@@ -22,7 +22,11 @@ if ($showFooter === true) {
     echo '
         <footer>
             Made by Robkoo
+            <span class="footerVersion">Alpha v0.7.5</span>
         </footer>
+        <style>
+            
+        </style>
     ';
 }
 ?>

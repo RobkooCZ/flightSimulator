@@ -7,11 +7,11 @@
  * including the reason, expected state, and actual state.
  *
  * @file LogicException.php
- * @since 0.2.1
+ * @since 0.6
  * @package Exception
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see AppException, ExceptionType
  * @todo Add more logic error context if needed
  */
@@ -45,7 +45,7 @@ use WebDev\Logging\Enum\Loggers;
  * - Supports exception chaining to preserve the original exception context.
  *
  * @package Exception
- * @since 0.2.1
+ * @since 0.4
  * @see AppException, ExceptionType
  * @todo Add more logic error context if needed
  */
@@ -85,7 +85,7 @@ final class LogicException extends AppException {
         string $reason,
         ?string $expectedState = null,
         ?string $actualState = null,
-        ?Throwable $previous = null
+        ?Throwable $previous = null,
     ){
         parent::__construct($message, $code, ExceptionType::LOGIC_EXCEPTION, $previous);
 
@@ -114,14 +114,16 @@ final class LogicException extends AppException {
 
         // Log the logic exception details
         Logger::log(
-            "[LOGIC ERROR] " . $this->getMessage() .
+            "[LOGIC] " . $this->getMessage() .
             " | Function: $fnName" .
             " | Reason: " . $this->reason .
             " | Expected State: " . $this->expectedState .
             " | Actual State: " . $this->actualState,
             LogLevel::ERROR,
             LoggerType::EXCEPTION,
-            Loggers::CMD
+            Loggers::CMD,
+            $this->line,
+            $this->file
         );
     }
 }

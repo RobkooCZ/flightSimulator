@@ -7,9 +7,9 @@
  * session handling, and database persistence.
  *
  * @file User.php
- * @since 0.1.0
+ * @since 0.7
  * @package Auth
- * @version 0.3.4
+ * @version 0.7.1
  * @see Database, Auth, Logger
  * @todo Implement user preferences
  */
@@ -47,7 +47,7 @@ use WebDev\Logging\Enum\Loggers;
  * It implements a registry pattern for caching user instances to reduce database queries.
  *
  * @package Auth
- * @since 0.1.0
+ * @since 0.7
  * @see Database, Auth, Logger
  * @todo Implement user preferences
  */

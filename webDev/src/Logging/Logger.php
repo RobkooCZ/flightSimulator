@@ -7,11 +7,11 @@
  * singleton instances.
  *
  * @file Logger.php
- * @since 0.2.2
+ * @since 0.5
  * @package Logger
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see LogLevel, Loggers, LoggerType, ConsoleLogger, FileLogger
  * @todo Add file-based logging implementation
  */
@@ -20,7 +20,10 @@ declare(strict_types=1);
 
 namespace WebDev\Logging;
 
+// custom exception
 use WebDev\Exception\LogicException;
+
+// logging enums
 use WebDev\Logging\Enum\LogLevel;
 use WebDev\Logging\Enum\Loggers;
 use WebDev\Logging\Enum\LoggerType;
@@ -37,7 +40,7 @@ if (!defined('STDOUT')){
  * singleton instances.
  *
  * @package Logger
- * @since 0.2.2
+ * @since 0.5
  * @see LogLevel, Loggers, LoggerType, ConsoleLogger, FileLogger
  * @todo Add file-based logging implementation
  */
@@ -62,6 +65,11 @@ class Logger {
      * @var ConsoleLogger|null
      */
     public ?ConsoleLogger $cl = null;
+
+    /**
+     * @var bool Tracks if logger has been initialized.
+     */
+    private static bool $initialized = false;
 
     /**
      * @var string The minimum log level for logging messages to the console.
@@ -104,6 +112,59 @@ class Logger {
     private function __construct(){
         $this->fl = FileLogger::getInstance();
         $this->cl = ConsoleLogger::getInstance();
+    }
+
+    /**
+     * Initialize the logging system.
+     *
+     * Sets up log directories, configures log levels, and ensures
+     * the logging system is ready for use.
+     *
+     * @throws LogicException If logger is already initialized
+     * @return void
+     */
+    public static function init(): void {
+        if (self::$initialized) {
+            throw new LogicException(
+                message: "Logger already initialized.",
+                reason: "init() should only be called once during bootstrap."
+            );
+        }
+
+        // FILE/FOLDER SETUP WOULD GO HERE
+        // TODO: FILE LOGGER
+
+        // Set minimum log level from environment or default
+        $minLevel = $_ENV['LOG_LEVEL'] ?? self::MIN_LOG_LEVEL;
+        if (!in_array($minLevel, array_column(LogLevel::cases(), 'name'))) {
+            throw new LogicException(
+                message: "Invalid log level: $minLevel",
+                reason: "Log level must be one of: " . implode(', ', array_column(LogLevel::cases(), 'name'))
+            );
+        }
+
+        // Get instance to initialize loggers
+        $instance = self::getInstance();
+        
+        // Initialize console logger
+        if ($instance->cl === null) {
+            $instance->cl = ConsoleLogger::getInstance();
+        }
+
+        // Initialize file logger
+        if ($instance->fl === null) {
+            $instance->fl = FileLogger::getInstance();
+        }
+
+        self::$initialized = true;
+
+        // Log successful initialization
+        self::log(
+            "Logger initialized successfully. Min level: $minLevel.",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::ALL
+        );
     }
 
     /**

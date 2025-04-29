@@ -7,11 +7,11 @@
  * the error, including the query, database type, error code, and error message.
  *
  * @file DatabaseException.php
- * @since 0.2.1
+ * @since 0.6
  * @package Exception
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see AppException, ExceptionType
  * @todo Add more database error context if needed
  */
@@ -47,7 +47,7 @@ use WebDev\Logging\Enum\Loggers;
  * - Supports exception chaining for preserving the original exception context.
  *
  * @package Exception
- * @since 0.2.1
+ * @since 0.4
  * @see AppException, ExceptionType
  * @todo Add more database error context if needed
  */

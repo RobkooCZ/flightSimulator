@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.5
  * @see Bootstrap, AppException, Logger
  * @todo Add dynamic route support, improve error handling, and static file types
  */
@@ -19,29 +19,13 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use WebDev\Bootstrap;
 
-// Exception handler
-use WebDev\Exception\AppException;
+Bootstrap::init();
 
 // Logger
 use WebDev\Logging\Logger;
 use WebDev\Logging\Enum\LogLevel;
 use WebDev\Logging\Enum\LoggerType;
 use WebDev\Logging\Enum\Loggers;
-
-// make sure AppException and all its subclasses are loaded
-AppException::init();
-
-set_exception_handler(function (Throwable $ae){
-    if (AppException::globalHandle($ae)){ // appException or its subclasses
-        exit;
-    }
-    else { // anything but appException and its subclasses
-        error_log($ae->getMessage()); // temporary
-    }
-});
-
-// init the app stuff
-Bootstrap::init();
 
 // function to serve static files
 function serveStaticFile($filePath): never {
@@ -122,7 +106,7 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/pages/login.php';  // UPDATED: php → pages
+            include __DIR__ . '/pages/login.php';
             break;
         case '/register':
             Logger::log(
@@ -131,7 +115,7 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/pages/register.php';  // UPDATED: php → pages
+            include __DIR__ . '/pages/register.php';
             break;
         case '/logout':
             Logger::log(
@@ -140,7 +124,7 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/pages/logout.php';  // UPDATED: php → pages
+            include __DIR__ . '/pages/logout.php';
             break;
         
         // admin
@@ -173,7 +157,7 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/pages/actionScript.php';  // UPDATED: php/Functions → pages
+            include __DIR__ . '/pages/actionScript.php';
             break;
 
         // auth (register, login, and logout functionality)
@@ -184,10 +168,10 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/pages/auth.php';  // UPDATED: php → pages
+            include __DIR__ . '/pages/auth.php';
             break;
 
-        case '/api/adminSchoolAjax.php':
+        case '/api/adminSchoolAjax':
             Logger::log(
                 "Routing to adminSchoolAjax.php.",
                 LogLevel::INFO,
@@ -195,6 +179,16 @@ function handleRequest($uri): void {
                 Loggers::CMD
             );
             include __DIR__ . '/api/adminSchoolAjax.php';
+            break;
+        
+        case '/api/headerAjax':
+            Logger::log(
+                "Routing to headerAjax.php.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            include __DIR__ . '/api/headerAjax.php';
             break;
         
         // static files

@@ -10,12 +10,16 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.3
  * @see TableRenderer, Table, Database, AuthorizationException, AppException, User
  * @todo Add more admin features and validation
  */
 
 declare(strict_types=1);
+
+use WebDev\Bootstrap;
+
+Bootstrap::init();
 
 // start session and set a variable to not start it in header.php
 session_start();
@@ -48,17 +52,6 @@ use WebDev\Exception\AuthorizationException;
 use WebDev\Auth\User;
 
 AppException::init();
-
-set_exception_handler(function (Throwable $ae){
-    if ($ae instanceof AppException){ // appException or its subclasses
-        AppException::globalHandle($ae);
-        header('Location: /'); // for now
-        exit;
-    }
-    else { // anything but appException and its subclasses
-        error_log($ae->getMessage());
-    }
-});
 
 if (!isset($_SESSION['id']) || !in_array($_SESSION['id'], [1, 2])){
     throw new AuthorizationException(
