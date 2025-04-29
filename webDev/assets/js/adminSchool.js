@@ -5,9 +5,9 @@
  * on the school admin page. Integrates with constants and the unified ajaxHandler utility.
  *
  * @file adminSchool.js
- * @version TBD
+ * @version 0.7.2
  * @author Robkoo
- * @license TBD
+ * @license 0.7.2.1
  * @see ../constants/constants.js, ./utils/ajaxHandler.js, /webDev/api/adminSchoolAjax.php
  * @todo Add user feedback for errors, loading indicators, and support for more actions.
  */

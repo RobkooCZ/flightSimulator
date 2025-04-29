@@ -7,11 +7,11 @@
  * singleton instances.
  *
  * @file Logger.php
- * @since 0.2.2
+ * @since 0.5
  * @package Logger
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see LogLevel, Loggers, LoggerType, ConsoleLogger, FileLogger
  * @todo Add file-based logging implementation
  */
@@ -40,7 +40,7 @@ if (!defined('STDOUT')){
  * singleton instances.
  *
  * @package Logger
- * @since 0.2.2
+ * @since 0.5
  * @see LogLevel, Loggers, LoggerType, ConsoleLogger, FileLogger
  * @todo Add file-based logging implementation
  */

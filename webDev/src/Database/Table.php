@@ -6,11 +6,11 @@
  * It uses a singleton pattern to ensure only one instance per table is created.
  *
  * @file Table.php
- * @since 0.3.4
+ * @since 0.1
  * @package Database
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see Database
  * @todo Add more table utility methods
  */
@@ -43,7 +43,7 @@ use WebDev\Logging\Enum\Loggers;
  * Uses a singleton pattern to ensure only one instance per table is created.
  *
  * @package Database
- * @since 0.3.4
+ * @since 0.2
  * @see Database
  * @todo Add more table utility methods
  */

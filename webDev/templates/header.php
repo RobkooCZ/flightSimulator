@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see templates/footer.php, Auth\User, Auth\CSRF, Logger
  * @todo Better style it, more links
  */

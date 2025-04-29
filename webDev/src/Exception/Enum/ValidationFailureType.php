@@ -7,11 +7,11 @@
  * This provides a structured way to handle validation errors and ensures that they are consistently categorized.
  *
  * @file ValidationFailureType.php
- * @since 0.2.1
+ * @since 0.6
  * @package Exception\Enum
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more validation failure types if needed
  */
@@ -29,7 +29,7 @@ namespace WebDev\Exception\Enum;
  * validation errors and ensures that they are consistently categorized.
  *
  * @package Exception\Enum
- * @since 0.2.1
+ * @since 0.4
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more validation failure types if needed
  */

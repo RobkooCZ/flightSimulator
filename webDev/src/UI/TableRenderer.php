@@ -8,11 +8,11 @@
  * logging system for traceability.
  *
  * @file TableRenderer.php
- * @since 0.2.1
+ * @since 0.1
  * @package UI
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see Table, Logger, RoleManager, ConfigurationException, ValidationException, DatabaseException, PHPException
  * @todo Add more rendering options and validation
  */
@@ -49,7 +49,7 @@ use WebDev\Database\Table;
  * Implements a per-table singleton pattern and integrates with the logging system for traceability.
  *
  * @package UI
- * @since 0.2.1
+ * @since 0.2
  * @see Table, Logger, RoleManager, ConfigurationException, ValidationException, DatabaseException, PHPException
  * @todo Add more rendering options and validation
  */

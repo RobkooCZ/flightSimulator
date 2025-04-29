@@ -6,9 +6,9 @@
  * It provides methods to establish a connection to the database and perform various database operations.
  *
  * @file Database.php
- * @since 0.2
+ * @since 0.1
  * @package Database
- * @version 0.3.4
+ * @version 0.7.1
  * @author Robkoo
  * @license TBD
  * @see PDO, Logger

@@ -10,13 +10,10 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.3
  * @see templates/header.php, templates/footer.php
  * @todo Add more landing page features
  */
-
-declare(strict_types=1);
-
 use WebDev\Bootstrap;
 
 Bootstrap::init();

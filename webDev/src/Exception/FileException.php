@@ -7,11 +7,11 @@
  * the file path, action, error message, and error code.
  *
  * @file FileException.php
- * @since 0.2.1
+ * @since 0.6
  * @package Exception
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see AppException, ExceptionType
  * @todo Add more file error context if needed
  */
@@ -45,7 +45,7 @@ use WebDev\Logging\Enum\Loggers;
  * - Supports exception chaining to preserve the original exception context.
  *
  * @package Exception
- * @since 0.2.1
+ * @since 0.4
  * @see AppException, ExceptionType
  * @todo Add more file error context if needed
  */

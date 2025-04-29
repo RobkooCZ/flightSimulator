@@ -6,11 +6,11 @@
  * The values of the enums must match exactly as they are stored in the database.
  *
  * @file Status.php
- * @since 0.3.0
+ * @since 0.6
  * @package Database\Enum
  * @author TODO
  * @license TODO
- * @version 0.3.4
+ * @version 0.7.1
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more statuses if needed
  */
@@ -25,7 +25,7 @@ namespace WebDev\Database\Enum;
  * This enum contains the possible values of the enum in the database alongside a method to check whether a string is a valid status enum or not.
  *
  * @package Database\Enum
- * @since 0.3.0
+ * @since 0.6
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more statuses if needed
  */

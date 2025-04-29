@@ -6,11 +6,11 @@
  * It is used to categorize authentication-related actions, such as registering a new user, logging in, or logging out.
  *
  * @file AuthenticationType.php
- * @since 0.3.4
+ * @since 0.6
  * @package Exception\Enum
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more authentication types if needed
  */
@@ -28,7 +28,7 @@ namespace WebDev\Exception\Enum;
  * authentication actions and ensures that they are consistently categorized.
  *
  * @package Exception\Enum
- * @since 0.3.4
+ * @since 0.4
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more authentication types if needed
  */

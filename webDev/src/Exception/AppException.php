@@ -7,11 +7,11 @@
  * specific exception types for the application.
  *
  * @file AppException.php
- * @since 0.2.1
+ * @since 0.4
  * @package Exception
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see ExceptionType, ConfigurationException, Logger
  * @todo Expand with more granular exception handling as needed
  */
@@ -43,7 +43,7 @@ use WebDev\Exception\ConfigurationException;
  * Subclasses should extend this class to define specific exception types.
  *
  * @package Exception
- * @since 0.2.1
+ * @since 0.4
  * @see ExceptionType, ConfigurationException, Logger
  * @todo Expand with more granular exception handling as needed
  */

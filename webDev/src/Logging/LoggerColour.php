@@ -6,11 +6,11 @@
  * ANSI color codes for terminal output, using the LogColours enum.
  *
  * @file LoggerColour.php
- * @since 0.2.2
+ * @since 0.6
  * @package Logger
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see LogColours, LogLevel
  * @todo Add more mappings or styles if needed
  */
@@ -26,7 +26,7 @@ use WebDev\Logging\Enum\LogLevel;
  * Utility class for retrieving color codes based on log levels.
  *
  * @package Logger
- * @since 0.2.2
+ * @since 0.5
  * @see LogColours, LogLevel
  * @todo Add more mappings or styles if needed
  */

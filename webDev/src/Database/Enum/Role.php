@@ -6,11 +6,11 @@
  * The values of the enums must match exactly as they are stored in the database.
  *
  * @file Role.php
- * @since 0.3.0
+ * @since 0.6
  * @package Database\Enum
  * @author Robkoo
  * @license TODO
- * @version 0.3.4
+ * @version 0.7.1
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more roles if needed
  */
@@ -26,7 +26,7 @@ namespace WebDev\Database\Enum;
  * The values of the enums must match exactly as they are stored in the database.
  *
  * @package Database\Enum
- * @since 0.3.0
+ * @since 0.6
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more roles if needed
  */

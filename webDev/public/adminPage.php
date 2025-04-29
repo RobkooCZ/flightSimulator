@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.3
  * @see TableRenderer, Table, Database, AuthorizationException, AppException, User
  * @todo Add more admin features and validation
  */

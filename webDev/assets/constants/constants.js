@@ -7,9 +7,11 @@
  * integration with backend PHP constants.
  *
  * @file constants.js
- * @version 0.3.6
+ * @since 0.7.2
+ * @package Constants
  * @author Robkoo
  * @license TBD
+ * @version 0.7.2.1
  * @see ./constants.json, ../js/utils/ajaxHandler.js, /webDev/assets/constants/constants.php
  * @todo Add caching strategies, support for environment-specific constants, and validation.
  */

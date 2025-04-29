@@ -5,9 +5,9 @@
  * Ensures all requests and responses follow a consistent structure for easier debugging and integration with PHP APIs.
  *
  * @file ajaxHandler.js
- * @version TBD
+ * @version 0.7.2
  * @author Robkoo
- * @license TBD
+ * @license 0.7.2.1
  * @see /webDev/assets/js/utils/ajaxHandler.js, /webDev/src/API/ApiResponse.php
  * @todo Add support for custom response types (e.g., text, blob), request timeouts, and progress events.
  */

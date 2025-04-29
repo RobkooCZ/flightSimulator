@@ -7,11 +7,11 @@
  * appropriate formatting and colors.
  *
  * @file ConsoleLogger.php
- * @since 0.2.2
+ * @since 0.6
  * @package Logger
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see LogLevel, LogColours, LoggerColour, TextStyle
  * @todo Add more formatting options if needed
  */
@@ -37,7 +37,7 @@ if (!defined('STDOUT')){
  * appropriate formatting and colors.
  *
  * @package Logger
- * @since 0.2.2
+ * @since 0.5
  * @see LogLevel, LogColours, LoggerColour, TextStyle
  * @todo Add more formatting options if needed
  */

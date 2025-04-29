@@ -6,11 +6,11 @@
  * Validates CSRF tokens, manages user sessions, and redirects with messages as needed.
  *
  * @file auth.php
- * @since 0.3.4
+ * @since 0.3.1
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.3
  * @see Auth, User, CSRF, AppException, Logger
  * @todo Add more granular error handling and logging
  */

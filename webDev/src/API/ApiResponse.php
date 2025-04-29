@@ -6,11 +6,11 @@
  * Integrates with backend constants to ensure consistent response keys across the application.
  *
  * @file ApiResponse.php
- * @since TBD
+ * @since 0.7.2
  * @package API
  * @author Robkoo
  * @license TBD
- * @version TBD
+ * @version 0.7.2.1
  * @see /webDev/assets/constants/constants.php, /webDev/api/adminSchoolAjax.php
  * @todo Add support for additional response metadata and logging.
  */
@@ -27,7 +27,7 @@ use WebDev\Assets\ConstantsLoader;
  * Use this class to send all AJAX responses in a consistent structure.
  *
  * @package API
- * @since TBD
+ * @since 0.7.2
  * @see ConstantsLoader
  */
 class ApiResponse {

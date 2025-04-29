@@ -6,18 +6,17 @@
  * Processes POST requests for admin/school admin interfaces.
  *
  * @file actionScript.php
- * @since 0.3.4
+ * @since 0.1
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.3
  * @see Database, User, AppException, DatabaseException, PHPException
  * @todo Add more actions (edit, delete), validation, and error handling
  */
 
 use WebDev\Bootstrap;
 Bootstrap::init();
- 
 
 use WebDev\Auth\User;
 use WebDev\Database\Database;

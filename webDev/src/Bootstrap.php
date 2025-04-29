@@ -8,11 +8,11 @@
  * - More features coming soon
  *
  * @file Bootstrap.php
- * @since TBD
+ * @since 0.4.2
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version TBD
+ * @version 0.7.3
  * @see ConfigurationException, FileException, LogicException
  * @todo Add more initialization logic as needed
  */
@@ -80,7 +80,7 @@ use WebDev\Database\Database;
  * - More features coming soon
  *
  * @package FlightSimWeb
- * @since 0.2.5
+ * @since 0.4.2
  * @see ConfigurationException, FileException, LogicException
  * @todo Add more initialization logic as needed
  */

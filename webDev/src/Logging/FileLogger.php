@@ -6,11 +6,11 @@
  * for file-based logging, though the actual implementation is pending.
  *
  * @file FileLogger.php
- * @since 0.2.2
+ * @since 0.6
  * @package Logger
  * @author Robkoo
  * @license TBD
- * @version 0.3.4
+ * @version 0.7.1
  * @see Logger, ConsoleLogger
  * @todo Implement file-based logging methods
  */
@@ -28,7 +28,7 @@ use WebDev\Exception\LogicException;
  * for file-based logging, though the actual implementation is pending.
  *
  * @package Logger
- * @since 0.2.2
+ * @since 0.5
  * @see Logger, ConsoleLogger
  * @todo Implement file-based logging methods
  */

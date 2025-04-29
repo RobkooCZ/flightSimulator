@@ -55,8 +55,10 @@ class YourClass {
  *
  * @param [type] $paramName [description of the parameter]
  * @return [type] [description of what it returns, with structure if needed]
- * @throws [ExceptionType] if [condition] (only if the method or function it uses throw exceptions)
+ * @throws [ExceptionType] if [condition] (only if the method itself, functions it uses or methods it uses throw exceptions)
  *
+ * ### Example
+ * 
  * ```php
  * $result = $yourClass->yourMethod($param);
  * // Example structure (if returning an array, object, etc.):
@@ -110,9 +112,11 @@ Document JS functions, classes, and files using this JSDoc format:
  * [Short summary of what this file does]
  *
  * @file [filename.js]
- * @version [e.g., 0.3.6]
+ * @since [version (e.g. 0.7.3)]
+ * @package [logical grouping, e.g., Constants, AJAX, e.g.]
  * @author Robkoo
- * @license TBD - decide before public release
+ * @license TBD
+ * @version [current version the file is on]
  * @see [related files/modules] (optional)
  * @todo [future improvements or tasks] (optional)
  */
@@ -169,4 +173,4 @@ class YourClass {
 
 - Be consistent with types and structure  
 - Always use `@example` if logic is non-trivial  
-- `@typedef` or `@callback` can be used for complex structures  
+- `@typedef` or `@callback` can be used for complex structures
