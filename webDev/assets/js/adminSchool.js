@@ -5,9 +5,10 @@
  * on the school admin page. Integrates with constants and the unified ajaxHandler utility.
  *
  * @file adminSchool.js
- * @version 0.7.2
+ * @since 0.7.2
  * @author Robkoo
- * @license 0.7.2.1
+ * @license TBD
+ * @version 0.7.2.1
  * @see ../constants/constants.js, ./utils/ajaxHandler.js, /webDev/api/adminSchoolAjax.php
  * @todo Add user feedback for errors, loading indicators, and support for more actions.
  */
@@ -46,7 +47,7 @@ function sanitizeInput(input){
     async function tableSelect(value){
         try {
             const result = await ajaxHandler.send(
-                '/api/adminSchoolAjax.php',
+                '/api/adminSchoolAjax',
                 {
                     action: 'getValue',
                     value: value
@@ -77,7 +78,7 @@ function sanitizeInput(input){
         try {
             const tableName = document.getElementById(consts.adminSchool.content.staticTable.select).value;
             const result = await ajaxHandler.send(
-                '/api/adminSchoolAjax.php',
+                '/api/adminSchoolAjax',
                 {
                     action: 'tableActionChoice',
                     value: value,

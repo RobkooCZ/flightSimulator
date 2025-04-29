@@ -49,10 +49,24 @@ It also includes a short name for the update.
         - [0.7.2.1](#version-0721---25042025) – "JavaScript documentation standards"
     - [0.7.3](#version-073---28042025) – "Bootstrap & Security overhaul"
     - [0.7.4](#version-074---29042025) - "Changelog & version fix"
+    - [0.7.5](#version-075---29042025) - "Header AJAX and PHP backend separation"
 
 ---
 
 ## ALPHA VERSIONS
+
+### [VERSION 0.7.5] - 29.04.2025
+
+#### Changed
+- Moved AJAX logic from header.php to a separate JS file
+    > (note: I should've done this in Alpha v0.7.2)
+- Moved PHP AJAX receiving backend to a separate files
+    > (note: also should've been done in Alpha v0.7.2)
+
+#### Fixed
+- Wrong comments in JS files
+
+---
 
 ### [VERSION 0.7.4] - 29.04.2025
 

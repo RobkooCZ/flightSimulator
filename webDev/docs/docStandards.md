@@ -17,7 +17,7 @@ This file outlines general documentation practices for PHP files, classes, and m
  * @since Which version did this file appear in
  * @package [logical grouping, e.g., Auth, Logger, FlightSimWeb]
  * @author Robkoo
- * @license TBD - decide before public release
+ * @license TBD
  * @version [e.g., 0.3.6]
  * @see [related files or classes] (optional)
  * @todo [future tasks] (optional)

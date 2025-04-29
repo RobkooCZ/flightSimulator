@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.3
+ * @version 0.7.5
  * @see Bootstrap, AppException, Logger
  * @todo Add dynamic route support, improve error handling, and static file types
  */
@@ -171,7 +171,7 @@ function handleRequest($uri): void {
             include __DIR__ . '/pages/auth.php';
             break;
 
-        case '/api/adminSchoolAjax.php':
+        case '/api/adminSchoolAjax':
             Logger::log(
                 "Routing to adminSchoolAjax.php.",
                 LogLevel::INFO,
@@ -179,6 +179,16 @@ function handleRequest($uri): void {
                 Loggers::CMD
             );
             include __DIR__ . '/api/adminSchoolAjax.php';
+            break;
+        
+        case '/api/headerAjax':
+            Logger::log(
+                "Routing to headerAjax.php.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            include __DIR__ . '/api/headerAjax.php';
             break;
         
         // static files
