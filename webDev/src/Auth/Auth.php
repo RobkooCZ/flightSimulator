@@ -8,7 +8,7 @@
  * @file Auth.php
  * @since 0.3
  * @package Auth
- * @version 0.7.1
+ * @version 0.7.6
  * @author Robkoo
  * @license TBD
  * @see Database, Logger, User
@@ -461,6 +461,8 @@ class Auth {
      * $auth->logout();
      * ```
      * 
+     * @throws DatabaseException If setting the failedLoginAttempts to zero fails.
+     * 
      * @return void
      */
     final public function logout(): void {
@@ -472,6 +474,22 @@ class Auth {
         );
 
         if (session_status() === PHP_SESSION_ACTIVE){
+            // set the failedLoginAttempts to 0
+            if (isset($_SESSION[User::SESSION_ID_KEY])){
+                $id = $_SESSION[User::SESSION_ID_KEY];
+
+                // get the user object
+                $lUser = User::load($id);
+
+                // try to set the failed attempts to zero, if it fails, throw an exception
+                if (!$lUser->setFailedAttemptsToZero()){
+                    throw new DatabaseException(
+                        "Failed to set failedLoginAttempts to zero.",
+                        500
+                    );
+                }
+            }
+
             session_unset();
             session_destroy();
 

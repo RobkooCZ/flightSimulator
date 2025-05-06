@@ -50,10 +50,39 @@ It also includes a short name for the update.
     - [0.7.3](#version-073---28042025) – "Bootstrap & Security overhaul"
     - [0.7.4](#version-074---29042025) - "Changelog & version fix"
     - [0.7.5](#version-075---29042025) - "Header AJAX and PHP backend separation"
+    - [0.7.6](#version-076---06052025) - "User data handling expansion"
 
 ---
 
 ## ALPHA VERSIONS
+
+### [VERSION 0.7.6] - 06.05.2025
+
+### Added
+- Methods in `Users` to:
+    - retrieve the user's IPv4 address
+    - validate the user's IPv4 address
+    - add it to the database and check if the database IP is the same or different than the user's IPv4 address
+- New class `UserAgent`, which:
+    - has methods to:
+        - retrieve user agent data
+        - parse user agent data
+        - save it into the database (table userAgents) if not previously saved
+        - log any new user agent data
+    - holds UA data in a singleton pattern for each logged in user
+- Getters in `Users` to be able to get the new properties
+- *Basic* anti bot and anti script defense in `router.php`
+- one method to update the db with one query after login (IP, status, failed logins, last login, last activity)
+- lastLoginAt and failedLoginAttempts functionality
+    - very basic right now, failedLoginAttempts doesn't time you out or anything so far
+- on logout reset failedLoginAttempts
+- safeguards for the new functionality (checking failedLoginAttempts from the db call and more)
+- logging suspicious UA/IP 
+
+### Fixed
+- a bug where if you selected a new table on `adminSchoolPage.php`, it wouldn't accordingly update the action form below
+
+---
 
 ### [VERSION 0.7.5] - 29.04.2025
 

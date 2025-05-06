@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.5
+ * @version 0.7.6
  * @see Bootstrap, AppException, Logger
  * @todo Add dynamic route support, improve error handling, and static file types
  */
@@ -20,6 +20,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use WebDev\Bootstrap;
 
 Bootstrap::init();
+Bootstrap::blockScriptsAndBots();
 
 // Logger
 use WebDev\Logging\Logger;

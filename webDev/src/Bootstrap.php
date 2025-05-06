@@ -12,7 +12,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.3
+ * @version 0.7.6
  * @see ConfigurationException, FileException, LogicException
  * @todo Add more initialization logic as needed
  */
@@ -55,12 +55,12 @@ use Dotenv\Dotenv;
 
 // Internal PHP
 use Exception;
-
+use WebDev\Auth\UserAgent;
 // Custom exceptions
 use WebDev\Exception\ConfigurationException;
 use WebDev\Exception\FileException;
 use WebDev\Exception\LogicException;
-use webdev\Exception\AppException;
+use WebDev\Exception\AppException;
 
 // Logger
 use WebDev\Logging\Enum\Loggers;
@@ -326,5 +326,15 @@ class Bootstrap {
 
         // if it is NULL, call private boot function that initializes key things
         self::boot();
+    }
+
+    public static function blockScriptsAndBots(): void {
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        if (UserAgent::detectScript($userAgent)['isScript'] ||
+            UserAgent::detectBot($userAgent)['isBot']) {
+            header('Content-Type: text/plain');
+            echo "Automated access is not allowed.";
+            exit;
+        }
     }
 }

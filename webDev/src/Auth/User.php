@@ -9,7 +9,7 @@
  * @file User.php
  * @since 0.7
  * @package Auth
- * @version 0.7.1
+ * @version 0.7.6
  * @see Database, Auth, Logger
  * @todo Implement user preferences
  */
@@ -57,7 +57,7 @@ class User {
      **************************************/
     
     /**
-     * @var array Registry of cached User objects indexed by user ID
+     * @var array<string,int|User> Registry of cached User objects indexed by user ID
      */
     private static array $userRegistry = [];
     
@@ -84,12 +84,17 @@ class User {
     /**
      * @var string Session key for last activity timestamp
      */
-    public const SESSION_LAST_AA_KEY = 'laa'; // Last Activity At
+    public const SESSION_LAST_AA_KEY = 'laa';// Last Activity At
     
     /**
      * @var string Standard date format for database operations
      */
     private const TIME_FORMAT = "Y-m-d H:i:s";
+
+    /**
+     * @var int
+     */
+    private const MAX_FAILED_LOGIN_ATTEMPTS = 5;
 
     /**************************************
      * INSTANCE PROPERTIES
@@ -114,6 +119,11 @@ class User {
      * @var string User's status (e.g., 'active', 'inactive', 'deleted')
      */
     private string $status;
+
+    /**
+     * @var DateTime Timestamp when the user last logged in
+     */
+    private DateTime $lastLoginAt;
     
     /**
      * @var ?DateTime Timestamp of user's last activity
@@ -129,11 +139,30 @@ class User {
      * @var DateTime Timestamp when the user was last updated
      */
     private DateTime $updatedAt;
-    // private array $preferences; todo: implement user preferences
+
+    private int $failedLoginAttempts;
+
+    /**
+     * The user agent for this specific object.
+     *
+     * @var UserAgent
+     */
+    private UserAgent $userAgent;
+
+    // private array $preferences;todo: implement user preferences
+
+    /**
+     * The ipv4 adress of the user.
+     *
+     * Null if it couldn't be retrieved, otherwise contains the ipv4 adress.
+     * 
+     * @var ?string
+     */
+    private ?string $ipv4 = null;
 
     /**************************************
      * CONSTRUCTOR & FACTORY METHODS
-     **************************************/
+     **************************************/    
     
     /**
      * Private constructor to create a User instance from database data.
@@ -142,6 +171,7 @@ class User {
      * `load()` for creating User instances, maintaining the registry pattern.
      * 
      * @param array $userData Associative array of user data from the database
+     * @throws DatabaseException If setting the failedLoginAttempts to zero fails.
      */
     private function __construct(array $userData){
         Logger::log(
@@ -152,16 +182,40 @@ class User {
         );
 
         $this->id = (int)$userData['id'];
+        $this->ipv4 = $userData['ipAddress'];
         $this->username = $userData['username'];
         $this->role = $userData['role'];
         $this->status = $userData['status'];
         
+        // check if the failedLoginAttempts from the db is not zero
+        if ((int)$userData['failedLoginAttempts'] !== 0){
+            if (!$this->setFailedAttemptsToZero()){
+                throw new DatabaseException(
+                    "Failed to set failedLoginAttempts to zero.",
+                    500
+                );
+            }
+
+            // set the local variable to zero
+            $this->failedLoginAttempts = 0;
+        }
+        else { // it is zero
+            $this->failedLoginAttempts = (int)$userData['failedLoginAttempts'];
+        }
+
+        if (!$userData['lastLoginAt']){
+            $this->lastLoginAt = new DateTime();
+        }
+
         // Convert date strings to DateTime objects
-        $this->lastActivityAt = $userData['lastActivityAt'] 
+        $this->lastActivityAt = $userData['lastActivityAt']
             ? new DateTime($userData['lastActivityAt'])
             : null;
         $this->createdAt = new DateTime($userData['createdAt']);
         $this->updatedAt = new DateTime($userData['updatedAt']);
+
+        // Put the current User's UA into the variable
+        $this->userAgent = UserAgent::for($this->id);
     }
     
     /**
@@ -174,7 +228,7 @@ class User {
      * - Validating role and status values
      * - Validating date formats
      * 
-     * @param array $userData Associative array of user data from database
+     * @param array<string, int|string> $userData Associative array of user data from database
      * @return bool True if data is valid, false otherwise
      */
     private static function validateUserData(array $userData): bool {
@@ -186,7 +240,7 @@ class User {
         );
 
         // Required fields
-        $requiredFields = ['id', 'username', 'role', 'status', 'lastActivityAt', 'createdAt', 'updatedAt'];
+        $requiredFields = ['id', 'username', 'ipAddress', 'role', 'status', 'failedLoginAttempts', 'lastLoginAt', 'lastActivityAt', 'createdAt', 'updatedAt'];
         
         // Check if all required fields exist
         foreach ($requiredFields as $field){
@@ -202,7 +256,7 @@ class User {
         }
         
         // id must be an integer or numeric string
-        if (!is_numeric($userData['id'])) {
+        if (!is_numeric($userData['id'])){
             Logger::log(
                 "Invalid user ID: '{$userData['id']}' - not numeric",
                 LogLevel::ERROR,
@@ -213,7 +267,7 @@ class User {
         }
 
         // username must pass validation
-        if (!Auth::validateUser($userData['username'])) {
+        if (!Auth::validateUser($userData['username'])){
             Logger::log(
                 "Invalid username: '{$userData['username']}' for user ID: {$userData['id']}",
                 LogLevel::ERROR,
@@ -223,8 +277,28 @@ class User {
             return false;
         }
 
+        // ip must be a valid ipv4 
+        // also handle the case where the ipv4 is null from the database (don't set it but log it)
+        if (is_null($userData['ipAddress'])){
+            Logger::log(
+                "IP address from database is NULL for user ID: {$userData['id']}",
+                LogLevel::NOTICE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+        elseif (!self::validateIpv4($userData['ipAddress'])){
+            Logger::log(
+                "Invalid IP address: '{$userData['ipAddress']}' for user ID: {$userData['id']}",
+                LogLevel::ERROR,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            return false;
+        }
+
         // role must be valid
-        if (!Role::validateRole($userData['role'])) {
+        if (!Role::validateRole($userData['role'])){
             Logger::log(
                 "Invalid role: '{$userData['role']}' for user ID: {$userData['id']}",
                 LogLevel::ERROR,
@@ -235,7 +309,7 @@ class User {
         }
 
         // status must be valid
-        if (!Status::validateStatus($userData['status'])) {
+        if (!Status::validateStatus($userData['status'])){
             Logger::log(
                 "Invalid status: '{$userData['status']}' for user ID: {$userData['id']}",
                 LogLevel::ERROR,
@@ -244,9 +318,40 @@ class User {
             );
             return false;
         }
+
+        // Validate failedLoginAttempts
+        if (!is_numeric($userData['failedLoginAttempts'])){
+            Logger::log(
+            "Invalid failedLoginAttempts: '{$userData['failedLoginAttempts']}' - not numeric",
+            LogLevel::ERROR,
+            LoggerType::NORMAL,
+            Loggers::CMD
+            );
+            return false;
+        }
+
+        $failedLoginAttempts = (int)$userData['failedLoginAttempts'];
+
+        if ($failedLoginAttempts < 0 || $failedLoginAttempts > self::MAX_FAILED_LOGIN_ATTEMPTS){
+            Logger::log(
+                "failedLoginAttempts out of valid range (0-" . self::MAX_FAILED_LOGIN_ATTEMPTS . "): '$failedLoginAttempts'",
+                LogLevel::WARNING,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+
+        if ($failedLoginAttempts !== 0){
+            Logger::log(
+                "failedLoginAttempts is not zero: '$failedLoginAttempts'",
+                LogLevel::WARNING,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
         
         // Date validations - check if they're valid datetime strings
-        $dateFields = ['lastActivityAt', 'createdAt', 'updatedAt'];
+        $dateFields = ['lastLoginAt', 'lastActivityAt', 'createdAt', 'updatedAt'];
         foreach ($dateFields as $dateField){
             // Allow null for lastActivityAt
             if ($dateField === 'lastActivityAt' && $userData[$dateField] === null){
@@ -272,6 +377,7 @@ class User {
             LoggerType::NORMAL,
             Loggers::CMD
         );
+        
         return true;
     }
     
@@ -332,7 +438,7 @@ class User {
             $userData = $db->query(
                 $query,
                 ['id' => $id]
-            )[0]; // access the first row of data (the only row)
+            )[0];// access the first row of data (the only row)
         }
         catch (PDOException|DatabaseException $e){
             Logger::log(
@@ -386,7 +492,7 @@ class User {
             );
         }
 
-        // valid data, create a new instance and add it to the registry
+        // the data is valid, create a new instance and add it to the registry
         self::$userRegistry[$id] = [
             'time' => $currentTime,
             'obj' => new self($userData)
@@ -403,9 +509,293 @@ class User {
         return self::$userRegistry[$id]['obj'];
     }
 
+    /**
+     * Load a user by username from the database or registry cache.
+     * 
+     * This method implements the registry pattern, first checking the cache
+     * for a valid user instance before querying the database. If found in
+     * the database, the user is validated, cached, and returned.
+     * 
+     * ### Example:
+     * ```php
+     * try {
+     *     $user = User::loadUsername('john_doe');
+     *     echo "Loaded user: " . $user->getUsername();
+     * }
+     * catch (DatabaseException $e){
+     *     echo "Failed to load user: " . $e->getMessage();
+     * }
+     * ```
+     * 
+     * @param string $username The username to load
+     * @return User The user object
+     * @throws DatabaseException If user cannot be loaded or data is invalid
+     */
+    public static function loadUsername(string $username): User {
+        // get current time
+        $currentTime = time();
+
+        // if the provided username is already added and is no older than USER_CACHE_TTL
+        foreach (self::$userRegistry as $cachedUser){
+            if ($cachedUser['obj']->getUsername() === $username && $currentTime - $cachedUser['time'] < self::USER_CACHE_TTL){
+                // return the cached object
+                Logger::log(
+                    "Using cached user with Username: $username",
+                    LogLevel::DEBUG,
+                    LoggerType::NORMAL,
+                    Loggers::CMD
+                );
+                return $cachedUser['obj'];
+            }
+        }
+
+        // either the provided username isn't added or it's older than USER_CACHE_TTL
+        Logger::log(
+            "Loading user with Username: $username from database",
+            LogLevel::DEBUG,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        // get database instance
+        $db = Database::getInstance();
+
+        // query to select everything
+        $query = "SELECT * FROM users WHERE username = :username LIMIT 1";
+
+        // get the data using query method from Database class
+        try {
+            $userData = $db->query(
+                $query,
+                ['username' => $username]
+            )[0]; // access the first row of data (the only row)
+        } catch (PDOException|DatabaseException $e){
+            Logger::log(
+                "Database error while loading user Username: $username - " . $e->getMessage(),
+                LogLevel::ERROR,
+                LoggerType::EXCEPTION,
+                Loggers::CMD,
+                __LINE__,
+                __FILE__
+            );
+            throw new DatabaseException(
+                "PDO Database error.",
+                500, // internal server error
+                $e,
+                $query,
+                $e->getCode(),
+                $e->getMessage()
+            );
+        }
+
+        // if the returned array is empty, something went wrong
+        if (empty($userData)){
+            Logger::log(
+                "No user found with Username: $username",
+                LogLevel::ERROR,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            throw new DatabaseException(
+                "Query failed to yield any result.",
+                404, // not found
+                null,
+                $query
+            );
+        }
+
+        // everything good so far, proceed with validation
+        if (self::validateUserData($userData) === false){
+            // data isn't valid, throw an exception
+            Logger::log(
+                "Invalid user data returned from database for Username: $username",
+                LogLevel::ERROR,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            throw new DatabaseException(
+                "Query yielded invalid data.",
+                400, // bad request
+                null,
+                $query
+            );
+        }
+
+        // the data is valid, create a new instance and add it to the registry
+        self::$userRegistry[$userData['id']] = [
+            'time' => $currentTime,
+            'obj' => new self($userData)
+        ];
+
+        Logger::log(
+            "User loaded successfully from database - ID: {$userData['id']}, Username: $username",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        // return the obj
+        return self::$userRegistry[$userData['id']]['obj'];
+    }
+
     /**************************************
      * SESSION & AUTH METHODS
      **************************************/
+
+    /**
+     * Compare provided IPv4 and the IPv4 from the database.
+     *
+     * @param string $ipv4
+     * @return ?bool True if the IPv4 addresses match, false if they don't. Null if the provided `$ipv4` isn't a valid IPv4 address.
+     */
+    private function compareIpv4db(string $ipv4): ?bool {
+        // first validate the provided argument (you can never be safe enough)
+        if (!self::validateIpv4($ipv4)){
+            // spoiler: that's how the logs will look next update ;) (unless i change my mind)
+            Logger::log("Invalid IPv4 address provided: $ipv4", LogLevel::WARNING, LoggerType::NORMAL, Loggers::CMD);
+            return null;
+        }
+
+        // get database instance
+        /**
+         * @var Database
+         */
+        $db = Database::getInstance();
+
+        // query
+        /**
+         * @var string
+         */
+        $query = "SELECT ipAddress FROM users WHERE id = :id";
+
+        // execute the query
+        /**
+         * Associative array containing the found IP address.
+         * @var array<string,string>
+         */
+        $queryResult = $db->query(
+            $query,
+            [
+                'id' => $this->id
+            ]
+        )[0]; // access the first result
+
+        /**
+         * @var string
+         */
+        $dbIp = $queryResult['ipAddress'];
+
+        // strcmp returns 0 if the two provided strings are exactly the same
+        if (strcmp($ipv4, $dbIp) === 0){
+            // ip addresses are equal
+            return true;
+        }
+        else {
+            Logger::log(
+                "IP address mismatch for user ID: {$this->id}. Provided: $ipv4, Database: $dbIp",
+                LogLevel::WARNING,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            return false;
+        }
+    }
+
+    /**
+     * Validate a provided IPv4 address.
+     * 
+     * This method checks whether the provided string is a valid IPv4 address (format 0-255.0-255.0-255.0-255) or not.
+     *
+     * @param string $ipv4 The IP to check
+     * @return bool True if the provided string is a valid IPv4 address, false otherwise
+     */
+    private static function validateIpv4(string $ipv4): bool {
+        // return true if the provided IP is valid
+        if (filter_var($ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) return true;
+        return false;
+    }
+
+    /**
+     * Retrieve the IPv4 address of the user.
+     * 
+     * This method attempts to determine the user's IPv4 address by checking
+     * various server environment variables. If no valid address is found,
+     * it returns null.
+     * 
+     * @return ?string The IPv4 address or null if not available
+     */
+    private static function retrieveIpv4(): ?string {
+        /**
+         * Array containing the trusted IPs
+         * 
+         * @var array<int,string>
+         */
+        $trustedIps = [
+            '127.0.0.1' // localhost
+        ];
+
+        /**
+         * Variable that holds the return value. Either null or a valid IPv4 adress.
+         * 
+         * @var ?string
+         */
+        $ipv4 = null;
+
+        /**
+         * Array containing the headers the method checks for the IPv4 adress.
+         * 
+         * @var array<int,string>
+         */
+        $headers = [
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR'
+        ];
+    
+        // loop through all the headers
+        foreach ($headers as $key){
+            // if the server variable isn't empty for a specific header
+            if (!empty($_SERVER[$key])){
+                // get the ip list of the server superglobal at the specific header
+                $ipList = explode(',', $_SERVER[$key]);
+
+                // loop through all the ips in that list and return the first valid one
+                foreach ($ipList as $ip){
+                    // strip whitespace
+                    $ip = trim($ip);
+                    
+                    // if the IP is ::1 (thats localhost) change it to 127.0.0.1 to pass the filter.
+                    if ($ip = "::1") $ip = "127.0.0.1";
+
+                    // validate the provided IP with the IPV4 filter flag
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)){
+                        $ipv4 = $ip;
+                        
+                        // ip found, check if its trusted
+                        if (!in_array($ipv4, $trustedIps, true)){
+                            Logger::log(
+                                "User with untrusted IPv4 adress: $ipv4",
+                                LogLevel::WARNING,
+                                LoggerType::NORMAL,
+                                Loggers::CMD
+                            );
+                        }
+
+                        // break out either way
+                        break 2;// break out of this foreach and out of the outer foreach
+                    }
+                }
+            }
+        }
+    
+        // return the ip adress or null
+        return $ipv4 ?: null;
+    }
+
+   
     
     /**
      * Get the currently logged in user from session.
@@ -593,6 +983,15 @@ class User {
     }
 
     /**
+     * Get the user's IPv4 address.
+     * 
+     * @return string User's IPv4 address
+     */
+    public function getIpv4(): string {
+        return $this->ipv4;
+    }
+
+    /**
      * Get the user's role.
      * 
      * @return string User's role (e.g., 'admin', 'user', 'owner')
@@ -608,6 +1007,28 @@ class User {
      */
     public function getStatus(): string {
         return $this->status;
+    }
+
+    /**
+     * Get the user's failed login attempts.
+     * 
+     * This method is useless as the failedAttempts var is always set to 0 after successful login.
+     * 
+     * @deprecated 0.7.6
+     *
+     * @return int The failed login attempts (always 0).
+     */
+    public function getFailedLoginAttempts(): int {
+        return $this->failedLoginAttempts;
+    }
+
+    /**
+     * Get the timestamp of the user's last login.
+     * 
+     * @return DateTime Timestamp of user's last login
+     */
+    public function getLastLoginAt(): DateTime {
+        return $this->lastLoginAt;
     }
 
     /**
@@ -697,7 +1118,7 @@ class User {
      * @return bool True if the user has been active within the specified time frame
      */
     public function isOnline(int $minutes = 15): bool {
-        $threshold = time() - ($minutes * 60); // Convert minutes to seconds
+        $threshold = time() - ($minutes * 60);// Convert minutes to seconds
         $isOnline = $this->lastActivityAt && $this->lastActivityAt->getTimestamp() >= $threshold;
         
         Logger::log(
@@ -732,7 +1153,7 @@ class User {
      */
     public function hasRole(string $role): bool {
         // validate the role 
-        if (!Role::validateRole($role)) {
+        if (!Role::validateRole($role)){
             Logger::log(
                 "Invalid role check: '$role' for user ID: {$this->id}",
                 LogLevel::WARNING,
@@ -809,7 +1230,7 @@ class User {
             ]
         );
 
-        if ($result) {
+        if ($result){
             Logger::log(
                 "Activity recorded successfully for user ID: {$this->id}",
                 LogLevel::DEBUG,
@@ -820,6 +1241,241 @@ class User {
         else {
             Logger::log(
                 "Failed to record activity for user ID: {$this->id}",
+                LogLevel::WARNING,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Reset the user's failed login attempts to zero and update the database.
+     *
+     * Sets the user's failed login attempts to zero in the object, updates the registry cache,
+     * and persists the change to the database. Logs the outcome for auditing and debugging.
+     *
+     * @return bool True if the database update was successful, false otherwise
+     *
+     * ### Example
+     * ```php
+     * $user->setFailedAttemptsToZero();
+     * // failedLoginAttempts is now 0 in the object, registry, and database
+     * ```
+     */
+    public function setFailedAttemptsToZero(): bool {
+        Logger::log(
+            "Resetting failed login attempts for user ID: {$this->id}, Username: {$this->username}",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        $this->failedLoginAttempts = 0;
+
+        self::$userRegistry[$this->id] = [
+            'time' => time(),
+            'obj' => $this
+        ];
+
+        $db = Database::getInstance();
+        $query = "UPDATE users SET failedLoginAttempts = :failedLoginAttempts WHERE id = :id";
+
+        $result = $db->execute(
+            $query,
+            [
+                'failedLoginAttempts' => 0,
+                'id' => $this->id
+            ]
+        );
+
+        if ($result){
+            Logger::log(
+                "Failed login attempts reset successfully for user ID: {$this->id}, Username: {$this->username}",
+                LogLevel::SUCCESS,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+        else {
+            Logger::log(
+                "Failed to reset failed login attempts for user ID: {$this->id}, Username: {$this->username}",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Update the database after a successful login.
+     *
+     * Updates the user's status, failed login attempts, last login, and last activity timestamps
+     * in both the object and the database in a single query. Also updates the registry cache.
+     * Logs the operation and its result.
+     *
+     * @return bool True if the update was successful, false otherwise
+     *
+     * ### Example
+     * ```php
+     * $user->updateDbAfterLogin();
+     * // User's login and activity timestamps, status, and failed attempts are updated in DB and object
+     * ```
+     */
+    public function updateDbAfterLogin(): bool {
+        Logger::log(
+            "Starting updateDbAfterLogin for user ID: {$this->id}, Username: {$this->username}",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        /**
+         * @var bool
+         */
+        $result = true; // assume success until proven otherwise
+
+        /**
+         * @var Database
+         */
+        $db = Database::getInstance();
+
+        /**
+         * @var string
+         */
+        $currentDate = date(self::TIME_FORMAT);
+
+        /**
+         * @var int
+         */
+        $timestamp = strtotime($currentDate);
+
+        // set the variables in this instance
+        $this->ipv4 = self::retrieveIpv4();
+        $this->failedLoginAttempts = 0;
+        $this->lastActivityAt = new DateTime($currentDate);
+        $this->lastLoginAt = new DateTime($currentDate);
+        $this->status = "active";
+
+        // update the static registry with the new instance and current timestamp
+        self::$userRegistry[$this->id] = [
+            'time' => $timestamp,
+            'obj' => $this
+        ];
+
+        // prepare the query to update the database in one go
+        /**
+         * @var string
+         */
+        $query = "UPDATE users
+                  SET ipAddress = :ipAddress,
+                      status = :status,
+                      failedLoginAttempts = :failedLoginAttempts,
+                      lastLoginAt = :lastLoginAt,
+                      lastActivityAt = :lastActivityAt
+                  WHERE id = :id";
+
+        /**
+         * Success flag for the execute method.
+         * @var bool
+         */
+        $queryResult = $db->execute(
+            $query,
+            [
+                'ipAddress' => $this->ipv4,
+                'status' => $this->status,
+                'failedLoginAttempts' => $this->failedLoginAttempts,
+                'lastLoginAt' => $this->lastLoginAt->format(self::TIME_FORMAT),
+                'lastActivityAt' => $this->lastActivityAt->format(self::TIME_FORMAT),
+                'id' => $this->id
+            ]
+        );
+
+        if ($queryResult){
+            $result = true;
+            Logger::log(
+                "Database update successful for user ID: {$this->id}, Username: {$this->username}",
+                LogLevel::SUCCESS,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+        else {
+            $result = false;
+            Logger::log(
+                "Database update failed for user ID: {$this->id}, Username: {$this->username}",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Increment the user's failed login attempts and update the database.
+     *
+     * Increments the failed login attempts counter in the object, updates the registry,
+     * and persists the change to the database. If the maximum allowed attempts is reached,
+     * returns null. Logs the operation and its result.
+     *
+     * @return ?bool True if update was successful, false if not, null if max attempts reached
+     *
+     * ### Example
+     * ```php
+     * $user->incrementFailedLogin();
+     * // failedLoginAttempts is incremented and updated in DB and object
+     * ```
+     */
+    public function incrementFailedLogin(): ?bool {
+        Logger::log(
+            "Incrementing failed login attempts for user ID: {$this->id}, Username: {$this->username} (current: {$this->failedLoginAttempts})",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        if ($this->failedLoginAttempts++ >= self::MAX_FAILED_LOGIN_ATTEMPTS){
+            Logger::log(
+                "User ID: {$this->id}, Username: {$this->username} has reached the maximum failed login attempts (" . self::MAX_FAILED_LOGIN_ATTEMPTS . ")",
+                LogLevel::WARNING,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            return null;
+        }
+
+        self::$userRegistry[$this->id] = [
+            'time' => time(),
+            'obj' => $this
+        ];
+
+        $db = Database::getInstance();
+        $query = "UPDATE users SET failedLoginAttempts = :failedLoginAttempts WHERE id = :id";
+
+        $result = $db->execute(
+            $query,
+            [
+                'failedLoginAttempts' => $this->failedLoginAttempts,
+                'id' => $this->id
+            ]
+        );
+
+        if ($result){
+            Logger::log(
+                "failedLoginAttempts updated successfully for user ID: {$this->id}, Username: {$this->username} (now: {$this->failedLoginAttempts})",
+                LogLevel::DEBUG,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+        else {
+            Logger::log(
+                "Failed to update failedLoginAttempts for user ID: {$this->id}, Username: {$this->username}",
                 LogLevel::WARNING,
                 LoggerType::NORMAL,
                 Loggers::CMD
@@ -854,7 +1510,7 @@ class User {
         );
 
         // check if the provided status is valid
-        if (!Status::validateStatus($status)) {
+        if (!Status::validateStatus($status)){
             Logger::log(
                 "Invalid status: '$status' for user ID: {$this->id}",
                 LogLevel::WARNING,
@@ -893,7 +1549,7 @@ class User {
             ]
         );
 
-        if ($result) {
+        if ($result){
             Logger::log(
                 "Status updated successfully for user ID: {$this->id} to '$status'",
                 LogLevel::SUCCESS,
@@ -938,7 +1594,7 @@ class User {
         );
 
         // check if the provided role is valid
-        if (!Role::validateRole($role)) {
+        if (!Role::validateRole($role)){
             Logger::log(
                 "Invalid role: '$role' for user ID: {$this->id}",
                 LogLevel::WARNING,
@@ -977,7 +1633,7 @@ class User {
             ]
         );
 
-        if ($result) {
+        if ($result){
             Logger::log(
                 "Role updated successfully for user ID: {$this->id} to '$role'",
                 LogLevel::SUCCESS,
@@ -1053,7 +1709,7 @@ class User {
             ]
         );
 
-        if ($result) {
+        if ($result){
             Logger::log(
                 "User data saved successfully for ID: {$this->id}",
                 LogLevel::SUCCESS,

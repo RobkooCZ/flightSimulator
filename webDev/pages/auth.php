@@ -10,12 +10,12 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.3
+ * @version 0.7.6
  * @see Auth, User, CSRF, AppException, Logger
  * @todo Add more granular error handling and logging
  */
 
- use WebDev\Bootstrap;
+use WebDev\Bootstrap;
 Bootstrap::init();
 
 // Database
@@ -24,9 +24,10 @@ use WebDev\Database\Database;
 // Auth classes
 use WebDev\Auth\CSRF;
 use WebDev\Auth\Auth;
+use WebDev\Auth\User;
 
-// Exception handling
-use WebDev\Exception\AppException;
+// Exceptions
+use WebDev\Exception\AuthenticationException;
 
 // Logger
 use WebDev\Logging\Logger;
@@ -38,16 +39,6 @@ $csrf = CSRF::getInstance(); // CSRF
 
 // Log entry point
 Logger::log("auth.php script started.", LogLevel::INFO, LoggerType::NORMAL);
-
-// load the appexception class and all its subclasses
-AppException::init();
-
-// global handler for any thrown exceptions
-set_exception_handler(function (Throwable $ae){
-    if (AppException::globalHandle($ae)){ // appException or its subclasses
-        exit;
-    } 
-});
 
 /**
  * Redirects the user to a specified URL with an optional message.
@@ -149,15 +140,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
                 // set session data
                 $newUser->storeInSession();
 
-                // login counts as an activity
-                $newUser->recordActivity();
+                // one method to update everything necessary in the db at once
+                $newUser->updateDbAfterLogin();
 
                 redirect("/", "Login successful!");
             }
-            catch (Exception $e){
-                redirect('/login', "Invalid username or password.");
-            }
+            catch (AuthenticationException $ae){ // the user entered wrong password
+                $fUser = User::loadUsername($username);
 
+                // increment the failed login count
+                $success = $fUser->incrementFailedLogin();
+                if ($success === null){ // user has logged in too much
+                    // implement a lockout (5 mins)
+                    // for now just redirect to homepage
+                    redirect('/');
+                }
+
+                redirect('/login', "Invalid username or password."); // generic message
+            }
+            catch (Exception $e){ // everything else
+                redirect('/login', "Invalid username or password."); // generic message
+            }
+            
             break;
 
         case 'Invalid':
