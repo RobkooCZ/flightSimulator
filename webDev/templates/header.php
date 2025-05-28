@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.5
+ * @version 0.7.7
  * @see templates/footer.php, Auth\User, Auth\CSRF, Logger
  * @todo Better style it, more links
  */
@@ -24,16 +24,28 @@ if ($startSession === true){
 }
 
 use WebDev\Auth\CSRF;
+use WebDev\Auth\User;
+use WebDev\Utilities\FileHandler;
 
 // function to check for header to set correct active class
 
+/**
+ * Based on the provided title we return the number of the page we're currently on.
+ *
+ * @param string $title The title of the page
+ * @return int The page id.
+ */
 function matchHeader(string $title): int {
     // 0 - not found
     // 1 - main page
     // 2 - home
     // 3 - admin
     // 4 - school admin
+    // 5 - profile
 
+    /**
+     * @var int
+     */
     $returnVal = 0; // default not found
     
     $returnVal = match($title){
@@ -41,6 +53,7 @@ function matchHeader(string $title): int {
         'Home' => 2,
         'Admin Page' => 3,
         'School Admin Page' => 4,
+        'Profile' => 5,
         default => 0, // if it wasnt found
     };
 
@@ -49,6 +62,16 @@ function matchHeader(string $title): int {
 
 // get active val
 $activeVal = matchHeader($title);
+
+// get user pfp if the user is logged in
+if (isset($_SESSION[User::SESSION_ID_KEY])){
+    // user id
+    $uid = $_SESSION[User::SESSION_ID_KEY];
+
+    // get the profile picture path
+    $handler = new FileHandler($uid); // could be linkHandler, both share the same load method from the Handler parent class
+    $path = $handler->load();
+}
 ?>
 
 <!-- html -->
@@ -79,6 +102,7 @@ $activeVal = matchHeader($title);
                         </div>
                         ';
                         
+                        // save the admin link into a variable if the user id is 1 or 2
                         if (!empty($_SESSION['id']) && in_array($_SESSION['id'], [1, 2])){
                             $adminPage = '<a href="/admin" ' . ($activeVal === 3 ? 'class="active links"' : 'class="links"') . '>Admin Page</a>';
                         } 
@@ -91,21 +115,27 @@ $activeVal = matchHeader($title);
                             $adminPage .= '<a href="/adminSchool" ' . ($activeVal === 4 ? 'class="active links"' : 'class="links"') . '>School Admin Page</a>';
                         }
                         
-
-                        if (isset($_SESSION['username'])){
+                        // user logged in
+                        if (isset($_SESSION['id'])){
                             echo '
                                 <div class="rightSide">
-                                    <p id="loggedInAs">Logged in as <b>' . $_SESSION['username'] . '</b></p>'
-                                    . $adminPage .
-                                    '<a href="/auth?action=logout&csrf_token=' . CSRF::getInstance()->getToken() . '" class="links">Logout</a>
+                                    ' . $adminPage . '
+                                </div>
+
+                                <div id="dropdown">
+                                    <a id="profile"><img src="' . $path . '"></a>
+                                    <div id="dropdownContent">
+                                        <a href="/profile">Profile</a>
+                                        <a href="/auth?action=logout&csrf_token=' . CSRF::getInstance()->getToken() . '" class="">Logout</a>
+                                    </div>
                                 </div>
                             ';
                         } 
-                        else {
+                        else { // user not logged in
                             echo '
                                 <div class="rightSide">
-                                    <a href="/login">Login</a>
-                                    <a href="/register">Register</a>
+                                    <a href="/login" class="links">Login</a>
+                                    <a href="/register" class="links">Register</a>
                                 </div>
                             ';
                         }

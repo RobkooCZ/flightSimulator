@@ -1,0 +1,327 @@
+/* Main content flex container */
+#content {
+    display: flex;
+    justify-content: center;
+    align-items: stretch; /* Ensures children stretch to same height */
+    flex-direction: row;
+    width: 95%;
+    margin: 1vh auto;
+    gap: var(--gap-size);
+    min-height: 60vh; 
+}
+
+/* for all the content divs in this page */
+#left, #top, #bottom {
+    background-color: var(--div-bg-color);
+    color: var(--div-color);
+    border: var(--div-border);
+    border-radius: var(--border-radius);
+}
+
+/* LEFT 'ASIDE' ELEMENT STYLING */
+
+#content #left {
+    padding-top: var(--padding-size);
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 0;
+}
+
+#content #left #bioDiv {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#content #left #bioDiv #bio {
+    padding: 0 var(--padding-size) 0 var(--padding-size);
+}
+
+/* all the children of the element with #left */
+#content #left > * {
+    margin: 0.5vh;
+}
+
+#content #left #pfpContainer {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+#content #left #pfpContainer > * {
+    position: absolute; /* puts them on top of each other */
+    width: inherit;
+    height: inherit;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: opacity 0.2s;
+}
+
+#content #left #pfpContainer #pfp {
+    z-index: 1;
+    background-color: antiquewhite; /* temp */
+}
+
+#content #left #pfpContainer #hoverImg {
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+#content #left #pfpContainer:hover #pfp {
+    opacity: 0.5;
+}
+
+#content #left #pfpContainer:hover #hoverImg {
+    opacity: 1;
+    cursor: pointer;
+}
+
+#content #right {
+    display: flex;
+    flex-direction: column;
+    flex: 2 1 0;
+    gap: var(--vertical-gap-size);
+    min-height: 0;
+}
+
+/* TOP RIGHT DIV */
+
+#content #right #top {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: var(--vertical-gap-size);
+    padding-bottom: var(--padding-size);
+}
+
+#content #right #top > div {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+    gap: var(--vertical-gap-size);
+    width: 100%;
+}
+
+#content #right #top label {
+    min-width: 10%;
+    width: 40%;
+    text-align: right;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+#content #right #top input[type="text"],
+#content #right #top textarea {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: calc(var(--padding-size) / 4);
+}
+
+#content #right #top #usernameChangeDiv,
+#content #right #top #bioChangeDiv {
+    width: 50%;
+}
+
+#content #right #top #bioChangeDiv #bioChange {
+    padding-bottom: 20%;
+    width: 100%;
+    min-height: 100px;
+    resize: vertical;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.5;
+}
+
+#content #right #top #updateTitle {
+    padding-top: var(--padding-size);
+    margin: 0;
+    text-align: center;
+}
+
+#content #right #top #submitChangeDiv {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* BOTTOM RIGHT DIV */
+
+#content #right #bottom {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+#content #right #bottom #statisticsContent {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#content #right #bottom #iconNavBar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#content #right #bottom #iconNavBar > * {
+    padding: var(--padding-size);
+    padding-bottom: calc(var(--padding-size)/2);
+    padding-top: calc(var(--padding-size)/2);
+    background-color: var(--header-bg-color);
+    cursor: pointer;
+}
+
+#content #right #bottom #iconNavBar > *:hover {
+    background-color: var(--link-hover-bg-color);
+    color: var(--link-hover-color);
+}
+
+
+#content #right #bottom #iconNavBar > *:first-child {
+    border-bottom-left-radius: var(--border-radius);
+}
+
+#content #right #bottom #iconNavBar > *:last-child {
+    border-bottom-right-radius: var(--border-radius);
+}
+
+#content #right #bottom #statisticsContent {
+    flex: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#content #right #bottom #statisticsContent > * {
+    display: none;
+}
+
+#iconNavBar a.selected {
+    color: var(--navbar-active-color) !important;
+    background-color: var(--button-hover-color) !important;
+    cursor: initial !important;
+    pointer-events: none;
+}
+
+#content #right #bottom #statisticsContent > .visible {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+
+/* modal styling */
+
+#modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#modal #modalContent {
+    background: var(--div-bg-color);
+    padding: var(--padding-size);
+    border-radius: 1rem;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+#modal #modalContent #title {
+    margin-bottom: 0;
+    text-align: center;
+    border-bottom: var(--border);
+}
+
+#modal #modalContent #close {
+    cursor: pointer;
+    top: 1vh;
+    right: 1vh;
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    filter: var(--modal-close-invert);
+}
+
+#modal #modalContent #message {
+    width: 90%;
+    text-align: center;
+    margin: 2vh auto 1vh auto; /* add some margin for spacing */
+}
+
+#modal #modalContent #description {
+    width: 90%;
+    text-align: center;
+    margin: 2vh auto 1vh auto; /* add some margin for spacing */
+    position: static;
+    left: unset;
+    bottom: unset;
+    transform: unset;
+}
+
+/* sourceInput styling */
+
+#modal #modalContent #sourceInput {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: var(--vertical-gap-size);
+}
+
+#modal #modalContent #sourceInput #imageNavbar .navSelected {
+    background-color: var(--header-bg-color);
+}
+
+#modal #modalContent #sourceInput #buttonInput {
+    width: 20%;
+}
+
+#modal #modalContent #sourceInput #imageNavbar {
+    width: 90%;
+    text-align: center;
+    margin: 2vh auto 1vh auto; /* add some margin for spacing */
+}
+
+#modal #modalContent #sourceInput #imageNavbar > * {
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 0;
+    border: none;
+    border-bottom: var(--border);
+    padding: calc(var(--padding-size) / 3);
+    padding-bottom: calc(var(--padding-size) / 2);
+    text-decoration: none;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    background-color: var(--navbar-active-bg-color);
+}
+
+#modal #modalContent #sourceInput #imageNavbar > *:hover {
+    background-color: var(--button-hover-color);
+}
+
+.inputDivHide {
+    display: none;
+}

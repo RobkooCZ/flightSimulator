@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.3
+ * @version 0.7.7
  * @see TableRenderer, Table, Database, AuthorizationException, AppException, User
  * @todo Add more admin features and validation
  */
@@ -65,7 +65,7 @@ $title = 'School Admin Page';
 $show = true; // set show to true to show the top navbar
 include __DIR__ . '/../templates/header.php';
 
-require_once __DIR__ . '/../assets/constants/constants.php';
+require_once __DIR__ . '/../assets/constants/ConstantsLoader.php';
 ?>
 
 <!-- HTML STRUCTURE -->

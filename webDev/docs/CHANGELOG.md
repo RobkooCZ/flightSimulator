@@ -51,10 +51,43 @@ It also includes a short name for the update.
     - [0.7.4](#version-074---29042025) - "Changelog & version fix"
     - [0.7.5](#version-075---29042025) - "Header AJAX and PHP backend separation"
     - [0.7.6](#version-076---06052025) - "User data handling expansion"
+    - [0.7.7](#version-077---12052025) - "Profile Tab Addition"
 
 ---
 
 ## ALPHA VERSIONS
+
+### [VERSION 0.7.7] - 28.05.2025
+
+### Added
+- profile tab
+    - contains data about the user
+    - forms to change some data
+    - statistics about the game (none yet as the game isn't nearly done)
+- profile picture functionality with either a link to an image or an image
+- classes with methods to handle the upload,validation and storage of profile pictures
+- styling for the profile page
+- AJAX-based profile picture upload (file and link support)
+- backend endpoint for profile picture upload (`profileAjax.php`)
+- improved documentation and code comments for profile-related files
+- fallback/default profile picture if none is set
+- modal for profile picture upload with validation and error messages
+- A character limit to the username.
+    - Minimum length: 3 characters
+    - Maximum length: 20 characters
+- Input fields to change your username or bio
+- Bio
+- validation checks on both the frontend and backend for data changing
+
+### Changed
+- header reworked to now include profile and logout under the user's profile picture in the navbar
+    - on pfp click, dropdown shows with those options
+- improved file structure for profile page assets
+- updated profile page to use new AJAX and backend logic for profile picture
+- improved error handling and logging for profile picture upload
+
+### Fixed
+- bug where backend would not always return JSON on error
 
 ### [VERSION 0.7.6] - 06.05.2025
 

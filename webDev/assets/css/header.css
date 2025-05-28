@@ -27,10 +27,6 @@ header nav .rightSide {
     margin-left: auto;
     display: flex;
     height: 100%;
-
-    & #loggedInAs {
-        margin-right: var(--gap-size);
-    }
 }
 
 nav a.active {
@@ -38,7 +34,7 @@ nav a.active {
     background-color: var(--navbar-active-bg-color);
 }
 
-header a {
+header .links {
     color: var(--link-color);
     text-decoration: none;
     padding: 0 var(--padding-size);
@@ -49,17 +45,80 @@ header a {
     height: 100%;
 }
 
-header a:first-child {
+header .links:first-child {
     border-top-left-radius: var(--border-radius);
     border-bottom-left-radius: var(--border-radius);
 }
 
-header a:last-child {
+header .links:last-child {
     border-top-right-radius: var(--border-radius);
     border-bottom-right-radius: var(--border-radius);
 }
 
-header a:hover {
+header .links:hover {
     color: var(--link-hover-color);
     background-color: var(--link-hover-bg-color);
+}
+
+/* profile picture dropdown styling */
+
+header #dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* link styling */
+header #dropdown a#profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 calc(var(--padding-size) / 2);
+}
+
+/* pfp image styling */
+header #dropdown a#profile img {
+    border-radius: 50%;
+    object-fit: cover;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
+
+/* div with links */
+header #dropdown #dropdownContent {
+    display: none;
+    position: absolute;
+    right: 0; /* Align to right edge of parent #dropdown */
+    background-color: var(--div-bg-color);
+    min-width: 160px;
+    box-shadow: var(--box-shadow);
+    z-index: 10;
+    border-radius: var(--border-radius);
+    border: var(--div-border);
+}
+
+/* links inside dropdown */
+header #dropdown #dropdownContent > a {
+    color: var(--div-color); /* Use theme color instead of hardcoded black */
+    padding: var(--padding-size) var(--padding-size);
+    text-decoration: none;
+    display: block;
+}
+
+/* Add hover effect for dropdown items */
+header #dropdown #dropdownContent > a:hover {
+    background-color: var(--link-hover-bg-color);
+    color: var(--link-hover-color);
+}
+
+/* First and last items should have rounded corners */
+header #dropdown #dropdownContent > a:first-child {
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+}
+
+header #dropdown #dropdownContent > a:last-child {
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
 }

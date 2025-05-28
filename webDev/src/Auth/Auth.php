@@ -8,7 +8,7 @@
  * @file Auth.php
  * @since 0.3
  * @package Auth
- * @version 0.7.6
+ * @version 0.7.7
  * @author Robkoo
  * @license TBD
  * @see Database, Logger, User
@@ -58,7 +58,22 @@ class Auth {
     /**
      * @var Database $db Connection to the database.
      */
-    private Database $db; 
+    private Database $db;
+
+    /**
+     * @var int
+     */
+    private const MIN_USERNAME_LENGTH = 3;
+
+    /**
+     * @var int
+     */
+    private const MAX_USERNAME_LENGTH = 20;
+
+    /**
+     * @var int
+     */
+    private const MAX_BIO_LENGTH = 512;
 
     /**
      * Prevent unserialize attacks.
@@ -170,10 +185,10 @@ class Auth {
      * ```
      * 
      * @param string $user The username to validate.
-     * @return bool True if the username is valid.
+     * @return true True if the username is valid.
      * @throws ValidationException If the username is invalid.
      */
-    final public static function validateUser(string $user): bool {
+    final public static function validateUser(string $user): true {
         Logger::log(
             "Validating username: $user",
             LogLevel::DEBUG,
@@ -181,10 +196,33 @@ class Auth {
             Loggers::CMD
         );
 
+        // check if it meets the min length requirements
+        if (strlen($user) < self::MIN_USERNAME_LENGTH){
+            Logger::log(
+                sprintf("Username too short: %s. Min length: %d", $user, self::MIN_USERNAME_LENGTH),
+                LogLevel::WARNING,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            throw new ValidationException("Username too short.", 0, ValidationFailureType::INVALID_USERNAME);
+        }
+
+        // check if it meets the max length requirements
+        if (strlen($user) > self::MAX_USERNAME_LENGTH){
+            Logger::log(
+                sprintf("Username too long: %s. Max length: %d", $user, self::MAX_USERNAME_LENGTH),
+                LogLevel::WARNING,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            throw new ValidationException(message: "Username too short.", failureType: ValidationFailureType::INVALID_USERNAME);
+        }
+
+        // check if it contains only valid characters   
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $user)){
             Logger::log(
                 "Validation failed for username: $user",
-                LogLevel::FAILURE,
+                LogLevel::WARNING,
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
@@ -302,6 +340,45 @@ class Auth {
             LoggerType::NORMAL,
             Loggers::CMD
         );
+    }
+
+    /**
+     * Validates the provided bio.
+     *
+     * @param string $bio
+     * @return true True if the provided bio is valid.
+     * @throws ValidationException If the bio is invalid.
+     */
+    final public static function validateBio(string $bio): true {
+        // check if it contains atleast a single character
+        if (strlen($bio) < 0){
+            throw new ValidationException(
+                message: "No bio provided.",
+                code: 422,
+                failureType: ValidationFailureType::BIO_TOO_SHORT
+            );
+        }
+
+        // check if it is smaller than the max length
+        if (strlen($bio) > self::MAX_BIO_LENGTH){
+            throw new ValidationException(
+                message: sprintf("Bio too long. Max length: %d", self::MAX_BIO_LENGTH),
+                code: 422,
+                failureType: ValidationFailureType::BIO_TOO_LONG
+            );
+        }
+
+        // check for script tags to prevent XSS
+        if (preg_match('/<script.*?>/i', $bio)){ // check the script tags
+            throw new ValidationException(
+                message: "Bio contains forbidden content.",
+                code: 422,
+                failureType: ValidationFailureType::BIO_CONTAINS_SCRIPT_TAGS
+            );
+        }
+
+        // all good, return true
+        return true;
     }
 
     /**

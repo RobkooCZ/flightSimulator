@@ -1,2 +1,4 @@
 .env
 todo.md
+# ignore only files in the profile pictures directory
+assets/images/icons/pfps/*

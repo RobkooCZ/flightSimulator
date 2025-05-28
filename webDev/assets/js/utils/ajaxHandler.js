@@ -8,7 +8,7 @@
  * @since 0.7.2
  * @author Robkoo
  * @license TBD
- * @version 0.7.2.1
+ * @version 0.7.7
  * @see /webDev/assets/js/utils/ajaxHandler.js, /webDev/src/API/ApiResponse.php
  * @todo Add support for custom response types (e.g., text, blob), request timeouts, and progress events.
  */
@@ -286,17 +286,24 @@ export default class ajaxHandler {
         // make a const object holding the options (method, headers and others)
         const options = {
             method,
-            headers,
-            credentials: 'same-origin'
+            credentials: 'same-origin',
+            headers: {...headers}
         };
 
-        // if the method is POST
-        if (method === 'POST'){
-            // if the header for content type is form data, do not convert the data to json
+        // If sending FormData, remove Content-Type so browser sets it 
+        if (method === 'POST' && data.body instanceof FormData){
+            options.body = data.body;
+            // Remove Content-Type header for FormData
+            if (options.headers['Content-Type']){
+                delete options.headers['Content-Type'];
+            }
+        } 
+        else if (method === 'POST'){
+            // Handle JSON or urlencoded
             if (headers['Content-Type'] === 'application/x-www-form-urlencoded'){
                 options.body = new URLSearchParams(data).toString();
             }
-            else { // if it's anything else, convert the data to json
+            else {
                 options.body = JSON.stringify(data);
             }
         }
@@ -304,21 +311,30 @@ export default class ajaxHandler {
         // send the data and wait for the response
         const response = await fetch(url, options);
 
-        // if the response wasn't okay, throw an error
+        /**
+         * @var {object} responseData Json response structure
+         */
+        let responseData;
+
+        // attempt to fetch the json response regardless of whether it was successful or not
+        try {
+            responseData = await response.json();
+        }
+        catch (e){
+            responseData = { message: "Unknown error occured, please try again.", error: e };
+        }
+        
+        // if it wasn't, throw the error with the provided message
         if (!response.ok){
-            throw new Error('Failed to send data using fetch().');
+            // either send the php-backend provided error message or a generic default one
+            const error = new Error(responseData.message || "Internal server error. Please try again.");
+
+            // either send the php-backend provided backend error message or a generic default one
+            error.backendMessage = responseData.error || "Failed to send data using fetch()";
+            throw error;
         }
-
-        // response was okay, wait for the response data
-        // it WILL be always json, as long as the PHP backend always uses the standardised `ApiResponse` class
-        const result = await response.json();
-
-        // if the response data transfer failed, throw an error 
-        if (!result.success){
-            throw new Error(result.message || 'Request failed.');
-        }
-
-        // return the result data
-        return result;
+        
+        // if it was, return the response data
+        return responseData;
     }
 }

@@ -9,7 +9,13 @@
     /* Body */
     --body-bg-color: #f0f0f0;
     --text-color: #333;
+    --text-color-rgb: 51, 51, 51;
     --link-color: #333;
+
+    /* Content div */
+    --div-bg-color: #f0f0f0;
+    --div-color: #333;
+    --div-border: 1px solid #ccc;
 
     /* Borders and Shadows */
     --border-radius: 0.5rem;
@@ -17,10 +23,16 @@
     --border-color: #ccc;
     --box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.3);
 
+    /* Focus */
+    --focus-border-color: #007bff;
+
     /* Spacing */
     --gap-size: 1.25rem;
     --vertical-gap-size: 2vh;
     --padding-size: 1rem;
+
+    /* Button */
+    --button-padding: calc(var(--padding-size) / 2) var(--padding-size);
 
     /* Hover Effects */
     --transition-time: 0.3s;
@@ -31,6 +43,7 @@
 
     /* Modal */
     --modal-padding: 2vh;
+    --modal-close-invert: invert(0); /* no invert */
 
     /* Status Colors */
     --success-color: #28a745;
@@ -57,15 +70,27 @@ body.dark-theme {
     --header-text-color: #fff;
     --body-bg-color: #444;
     --text-color: #f0f0f0;
+    --text-color-rgb: 240, 240, 240;
     --link-color: #ddd;
     --border: 0.1rem solid white;
     --border-color: #555;
-    
+
+    /* Content div */
+    --div-bg-color: #555;
+    --div-color: #f0f0f0;
+    --div-border: 1px solid #666;
+
     /* Hover Effects */
     --button-hover-color: #444;
     --button-hover-bg-color: #ddd;
     --link-hover-color: #444;
     --link-hover-bg-color: #ddd;
+
+    /* Focus */
+    --focus-border-color: #000;
+
+    /* Modal */
+    --modal-close-invert: invert(1); /* invert */
 
     /* Navbar */
     --navbar-active-color: #ddd;
@@ -79,18 +104,30 @@ body.dark-theme {
     --hover-color: #333;
 }
 
-/* Custom Theme (For Girlfriend) */
+/* Custom Theme */
 body.custom-theme {
     --header-bg-color: #ffcccb;
     --header-border-color: #ff6666;
     --header-text-color: #ff6666;
     --body-bg-color: #ffcccb;
     --text-color: #ff6666;
+    --text-color-rgb: 255, 102, 102;
     --link-color: #ff6666;
     --link-hover-color: #ffcccb;
     --link-hover-bg-color: #ff6666;
     --border: 0.1rem solid #ff6666;
     --border-color: #ff9999;
+
+    /* Content div */
+    --div-bg-color: #ffcccb;
+    --div-color: #ff6666;
+    --div-border: 1px solid #ff9999;
+
+    /* Focus */
+    --focus-border-color: #cc0000;
+
+    /* Modal */
+    --modal-close-invert: invert(1); /* invert */
 
     /* Navbar */
     --navbar-active-color: #ff6666;
@@ -110,17 +147,9 @@ body {
     color: var(--text-color);
     transition: background-color var(--transition-time), color var(--transition-time);
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-}
-
-a {
-    color: var(--link-color);
-    text-decoration: none;
-    transition: color var(--transition-time), background-color var(--transition-time);
-}
-
-a:hover {
-    color: var(--link-hover-color);
-    background-color: var(--link-hover-bg-color);
+    
+    /* Dynamic fade var - its color will be based on the theme */
+    --fade: rgba(var(--text-color-rgb), 0.5);
 }
 
 .content {
@@ -149,6 +178,11 @@ a:hover {
 
 /* Buttons */
 button {
+    order: var(--border);
+    background-color: var(--button-bg-color);
+    color: var(--button-color);
+    padding: var(--button-padding);
+    cursor: pointer;
     border-radius: var(--border-radius);
     transition: background-color var(--transition-time), color var(--transition-time);
 }
@@ -216,4 +250,40 @@ button:hover {
     }
 
     cursor: pointer;
+}
+
+/* Text/font general styles */
+
+.fade {
+    color: var(--fade);
+}
+
+.italicFade {
+    color: var(--fade);
+    font-style: italic;
+}
+
+/* Input fields / textarea styles */
+
+input, textarea {
+    border: var(--border);
+    border-radius: calc(var(--border-radius) / 2); /* light radius */
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* when its selected */
+input:focus, textarea:focus {
+    outline: none;
+    box-shadow: var(--box-shadow);
+    border-color: var(--focus-border-color);
+}
+
+/* General classes */
+.displayBlock {
+    display: block !important;
+}
+
+.displayNone {
+    display: none;
 }

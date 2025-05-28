@@ -39,3 +39,30 @@ const links = document.getElementsByClassName("links");
         }
     });
 });
+
+// on pfp click, show the dropdown
+/**
+ * @type {HTMLElement|false} User's profile that functions as a dropdown when clicked.
+ */
+const profile = document.getElementById("profile");
+
+/**
+ * @type {HTMLElement|false} The dropdown content.
+ */
+const dropdownContent = document.getElementById("dropdownContent");
+
+// For opening the dropdown
+profile.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent closing immediately due to document listener
+    dropdownContent.classList.toggle("displayBlock");
+});
+
+// Close dropdown when clicking anywhere else on the page
+document.addEventListener('click', (e) => {
+    // Check if dropdown is open and click wasn't inside the dropdown content
+    if (dropdownContent.classList.contains("displayBlock") && // if it is opened
+        !dropdownContent.contains(e.target) && // if the user didn't click on the dropdown
+        e.target !== profile){ // or on the profile picture
+        dropdownContent.classList.remove("displayBlock"); // close it
+    }
+});

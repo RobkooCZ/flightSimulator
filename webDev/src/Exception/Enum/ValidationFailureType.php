@@ -11,7 +11,7 @@
  * @package Exception\Enum
  * @author Robkoo
  * @license TBD
- * @version 0.7.1
+ * @version 0.7.7
  * @see https://www.php.net/manual/en/language.enumerations.php
  * @todo Add more validation failure types if needed
  */
@@ -36,7 +36,8 @@ namespace WebDev\Exception\Enum;
 enum ValidationFailureType: string {
     // Username-related validation failures
     case INVALID_USERNAME = 'InvalidUsername'; // Username contains invalid characters
-    case USERNAME_TOO_SHORT = 'UsernameTooShort'; // Username is shorter than the minimum length
+    case USERNAME_TOO_SHORT = 'UsernameTooShort'; // Username is shorter than the minimum length (<3)
+    case USERNAME_TOO_LONG = 'UsernameTooLong'; // Username is too long (>20)
     case USERNAME_NOT_UNIQUE = 'UsernameNotUnique'; // Username is already taken
 
     // Password-related validation failures
@@ -46,6 +47,11 @@ enum ValidationFailureType: string {
     case PASSWORD_MISSING_NUMBER = 'PasswordMissingNumber'; // Password lacks a numeric digit
     case PASSWORD_MISSING_SPECIAL_CHAR = 'PasswordMissingSpecialCharacter'; // Password lacks a special character
     case PASSWORDS_MISMATCHED = 'PasswordsMismatched'; // Passwords do not match
+
+    // Bio-related validation failures
+    case BIO_CONTAINS_SCRIPT_TAGS = 'BioScriptTags';
+    case BIO_TOO_SHORT = 'BioTooShort';
+    case BIO_TOO_LONG = 'BioTooLong';
 
     // CSRF token-related validation failures
     case CSRF_EXPIRED = 'CSRFExpired'; // CSRF token has expired

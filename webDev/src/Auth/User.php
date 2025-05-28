@@ -9,7 +9,7 @@
  * @file User.php
  * @since 0.7
  * @package Auth
- * @version 0.7.6
+ * @version 0.7.7
  * @see Database, Auth, Logger
  * @todo Implement user preferences
  */
@@ -32,7 +32,7 @@ use WebDev\Database\Enum\Role;
 // Exceptions
 use WebDev\Exception\DatabaseException;
 use WebDev\Exception\PHPException;
-
+use WebDev\Exception\ValidationException;
 // Logger
 use WebDev\Logging\Logger;
 use WebDev\Logging\Enum\LogLevel;
@@ -84,7 +84,12 @@ class User {
     /**
      * @var string Session key for last activity timestamp
      */
-    public const SESSION_LAST_AA_KEY = 'laa';// Last Activity At
+    public const SESSION_LAST_AA_KEY = 'laa'; // Last Activity At
+
+    /**
+     * @var string Session key for created at timestamp
+     */
+    public const SESSION_CREATED_AT_KEY = 'cak';
     
     /**
      * @var string Standard date format for database operations
@@ -109,6 +114,13 @@ class User {
      * @var string User's username
      */
     private string $username;
+
+    /**
+     * The User's bio. Null if none was set.
+     *
+     * @var ?string
+     */
+    private ?string $bio = null;
     
     /**
      * @var string User's role (e.g., 'admin', 'user', 'owner')
@@ -182,11 +194,13 @@ class User {
         );
 
         $this->id = (int)$userData['id'];
-        $this->ipv4 = $userData['ipAddress'];
         $this->username = $userData['username'];
+        $this->bio = $userData['bio'];
         $this->role = $userData['role'];
         $this->status = $userData['status'];
         
+        $this->ipv4 = $userData['ipAddress'];
+
         // check if the failedLoginAttempts from the db is not zero
         if ((int)$userData['failedLoginAttempts'] !== 0){
             if (!$this->setFailedAttemptsToZero()){
@@ -240,7 +254,7 @@ class User {
         );
 
         // Required fields
-        $requiredFields = ['id', 'username', 'ipAddress', 'role', 'status', 'failedLoginAttempts', 'lastLoginAt', 'lastActivityAt', 'createdAt', 'updatedAt'];
+        $requiredFields = ['id', 'username', 'bio', 'ipAddress', 'role', 'status', 'failedLoginAttempts', 'lastLoginAt', 'lastActivityAt', 'createdAt', 'updatedAt'];
         
         // Check if all required fields exist
         foreach ($requiredFields as $field){
@@ -266,10 +280,15 @@ class User {
             return false;
         }
 
-        // username must pass validation
-        if (!Auth::validateUser($userData['username'])){
+        try {
+            // username must pass validation
+            Auth::validateUser($userData['username']);
+
+            // bio must pass validation
+            Auth::validateBio($userData['bio'] ?? "none");
+        } catch (ValidationException $ve) {
             Logger::log(
-                "Invalid username: '{$userData['username']}' for user ID: {$userData['id']}",
+                "Validation error: {$ve->getMessage()} for user ID: {$userData['id']}",
                 LogLevel::ERROR,
                 LoggerType::NORMAL,
                 Loggers::CMD
@@ -519,7 +538,7 @@ class User {
      * ### Example:
      * ```php
      * try {
-     *     $user = User::loadUsername('john_doe');
+     *     $user = User::loadUsername('sjohn_doe');
      *     echo "Loaded user: " . $user->getUsername();
      * }
      * catch (DatabaseException $e){
@@ -794,8 +813,6 @@ class User {
         // return the ip adress or null
         return $ipv4 ?: null;
     }
-
-   
     
     /**
      * Get the currently logged in user from session.
@@ -911,6 +928,10 @@ class User {
             $_SESSION[self::SESSION_LAST_AA_KEY] = $this->lastActivityAt->format(self::TIME_FORMAT);
         }
 
+        if ($this->createdAt instanceof DateTime){
+            $_SESSION[self::SESSION_CREATED_AT_KEY] = $this->createdAt->format(self::TIME_FORMAT);
+        }
+
         Logger::log(
             "User session data stored successfully",
             LogLevel::DEBUG,
@@ -958,6 +979,64 @@ class User {
             LoggerType::NORMAL,
             Loggers::CMD
         );
+    }
+
+    /**
+     * Check if the provided ID exists in the database.
+     *
+     * @param int $uid The ID to check for 
+     * @return bool True if the ID exists in the database, false otherwise.
+     * @throws DatabaseException If anything in the `query()` method fails.
+     */
+    public static function exists(int $uid): bool {
+        // get db instance
+        $db = Database::getInstance();
+
+        // prepare query
+        $query = "SELECT id FROM users WHERE id = :id LIMIT 1";
+
+        // execute the query and check for the result
+        $result = $db->query(
+            $query,
+            [
+                'id' => $uid
+            ]
+        );
+
+        // if the result is empty, that means there isn't a user with the provided id
+        if (empty($result)) return false;
+
+        // the id exists in the database
+        return true; 
+    }
+
+    /**
+     * Check if the provided username exists in the database.
+     *
+     * @param string $username The username to check for.
+     * @return bool True if the username exists in the database, false otherwise.
+     * @throws DatabaseException If anything in the `query()` method fails.
+     */
+    public static function existsUsername(string $username): bool {
+        // get db instance
+        $db = Database::getInstance();
+
+        // prepare query
+        $query = "SELECT id FROM users WHERE username = :username LIMIT 1";
+
+        // execute the query and check for the result
+        $result = $db->query(
+            $query,
+            [
+                'username' => $username
+            ]
+        );
+
+        // if the result is empty, that means there isn't a user with the provided username
+        if (empty($result)) return false;
+
+        // the id exists in the database
+        return true; 
     }
     
     /**************************************
@@ -1178,6 +1257,28 @@ class User {
     /**************************************
      * DATA MANIPULATION METHODS
      **************************************/
+
+    public static function fetchBio(int $id = 0): string|false {
+        // get db instance
+        $db = Database::getInstance();
+
+        // prepare query
+        $query = "SELECT bio FROM users WHERE id = :id LIMIT 1";
+
+        // execute the query and check for the result
+        $result = $db->query(
+            $query,
+            [
+                'id' => $id
+            ]
+        );
+
+        // if we don't get a result, no bio was found
+        if (empty($result)) return false;
+        
+        // we got a bio. return the bio or "No bio provided" if none exists in the db.
+        return $result[0]['bio'] ?? "No bio provided.";
+    }
     
     /**
      * Record current user activity.
@@ -1560,6 +1661,177 @@ class User {
         else {
             Logger::log(
                 "Failed to update status for user ID: {$this->id} to '$status'",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Update the username.
+     * 
+     * This method updates the user's username in both the object instance
+     * and the database after validating the provided username.
+     * 
+     * ### Example usage:
+     * ```php
+     * $user->setUsername('newUsername');
+     * // User's username is now updated
+     * ```
+     * 
+     * @param string $username New username
+     * @return bool True if update was successful, false if validation fails
+     * @throws DatabaseException If database update fails
+     */
+    public function setUsername(string $username): bool {
+        Logger::log(
+            "Attempting to change username for user ID: {$this->id}, Username: {$this->username} to '$username'",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        // check if the provided username is valid
+        if (!Auth::validateUser($username)){
+            Logger::log(
+                "Invalid username: '$username' for user ID: {$this->id}",
+                LogLevel::WARNING,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            return false;
+        }
+
+        // update the updatedAt local var
+        $currentDate = date(self::TIME_FORMAT);
+        $this->updatedAt = new DateTime($currentDate);
+
+        // set the local variable in the object
+        $this->username = $username;
+
+        // update the static registry
+        self::$userRegistry[$this->id] = [
+            'time' => time(), // current timestamp
+            'obj' => $this // updated object
+        ];
+
+        // update the username in the database alongside updatedAt
+        $query = "UPDATE users SET username = :username, updatedAt = :updatedAt WHERE id = :id";
+
+        // get db instance
+        $db = Database::getInstance();
+
+        // execute the query and return the bool success
+        $result = $db->execute(
+            $query,
+            [
+                'username' => $username,
+                'updatedAt' => $currentDate,
+                'id' => $this->id
+            ]
+        );
+
+        if ($result){
+            Logger::log(
+                "Username updated successfully for user ID: {$this->id} to '$username'",
+                LogLevel::SUCCESS,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+        else {
+            Logger::log(
+                "Failed to update username for user ID: {$this->id} to '$username'",
+                LogLevel::FAILURE,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Update the bio.
+     * 
+     * This method updates the user's bio in both the object instance
+     * and the database after validating the provided bio.
+     * 
+     * ### Example usage:
+     * ```php
+     * $user->setBio('This is my new bio');
+     * // User's bio is now updated
+     * ```
+     * 
+     * @param string $bio New bio
+     * @return bool True if update was successful, false if validation fails
+     * @throws DatabaseException If database update fails
+     */
+    public function setBio(string $bio): bool {
+        Logger::log(
+            "Attempting to change bio for user ID: {$this->id}, Username: {$this->username} to '$bio'",
+            LogLevel::INFO,
+            LoggerType::NORMAL,
+            Loggers::CMD
+        );
+
+        // Validate the provided bio
+        try {
+            Auth::validateBio($bio);
+        }
+        catch (ValidationException $ve){
+            Logger::log(
+                "Invalid bio: '$bio' for user ID: {$this->id}.",
+                LogLevel::WARNING,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            return false;
+        }
+
+        // update the updatedAt local var
+        $currentDate = date(self::TIME_FORMAT);
+        $this->updatedAt = new DateTime($currentDate);
+
+        // set the local variable in the object
+        $this->bio = $bio;
+
+        // update the static registry
+        self::$userRegistry[$this->id] = [
+            'time' => time(), // current timestamp
+            'obj' => $this // updated object
+        ];
+
+        // update the bio in the database alongside updatedAt
+        $query = "UPDATE users SET bio = :bio, updatedAt = :updatedAt WHERE id = :id";
+
+        // get db instance
+        $db = Database::getInstance();
+
+        // execute the query and return the bool success
+        $result = $db->execute(
+            $query,
+            [
+                'bio' => $bio,
+                'updatedAt' => $currentDate,
+                'id' => $this->id
+            ]
+        );
+
+        if ($result){
+            Logger::log(
+                "Bio updated successfully for user ID: {$this->id}",
+                LogLevel::SUCCESS,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+        }
+        else {
+            Logger::log(
+                "Failed to update bio for user ID: {$this->id}",
                 LogLevel::FAILURE,
                 LoggerType::NORMAL,
                 Loggers::CMD
