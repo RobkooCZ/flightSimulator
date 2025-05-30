@@ -47,7 +47,7 @@ use WebDev\Logging\Enum\Loggers;
  *
  * @package Exception
  * @since 0.4
- * @see AppException, ExceptionType, ValidationFailureType
+ * @see AppException,ExceptionType,ValidationFailureType
  * @todo Add more validation error context if needed
  */
 final class ValidationException extends AppException {

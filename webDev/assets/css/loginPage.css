@@ -1,67 +1,411 @@
+/* ===== BODY BACKGROUND ===== */
 body {
-    background-color: var(--body-bg-color);
+    background: linear-gradient(135deg, var(--body-bg-color) 0%, var(--header-bg-color) 100%);
     color: var(--text-color);
-    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
 }
-    
+
+/* Add subtle animated background pattern */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 25% 25%, rgba(var(--text-color-rgb), 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(var(--text-color-rgb), 0.05) 0%, transparent 50%);
+    animation: backgroundFloat 20s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes backgroundFloat {
+    0%, 100% { 
+        transform: translate(0, 0) rotate(0deg); 
+        opacity: 0.3;
+    }
+    50% { 
+        transform: translate(-10px, -10px) rotate(1deg); 
+        opacity: 0.5;
+    }
+}
+
+/* ===== LOGIN MODAL CONTAINER ===== */
 .loginModal {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    width: auto;
-    height: auto;
-    position: fixed;
-    padding: var(--modal-padding);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border: var(--border);
-    border-radius: var(--border-radius);
+    width: 100%;
+    max-width: 400px;
+    min-height: 500px;
+    background-color: var(--div-bg-color);
+    border: var(--div-border);
+    border-radius: calc(var(--border-radius) * 2);
+    box-shadow: 
+        var(--box-shadow),
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: 3rem 2rem;
+    position: relative;
+    z-index: 10;
+    backdrop-filter: blur(20px);
+    animation: modalSlideIn 0.6s ease-out;
 }
 
-.loginModal form{
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Add subtle gradient border */
+.loginModal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-color), var(--navbar-active-color));
+    border-radius: calc(var(--border-radius) * 2) calc(var(--border-radius) * 2) 0 0;
+}
+
+/* ===== LOGIN MODAL TITLE ===== */
+.loginModal h2 {
+    margin: 0 0 2rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    text-align: center;
+    letter-spacing: 2px;
+    position: relative;
+}
+
+.loginModal h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-color), var(--navbar-active-color));
+    border-radius: 2px;
+}
+
+/* ===== LOGIN FORM ===== */
+.loginModal form {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
     flex-direction: column;
-    gap: 1vh;
+    gap: 1.5rem;
     width: 100%;
 }
 
-.loginModal input[type="text"], .loginModal input[type="password"] {
-    width: 90%;
+/* ===== FORM INPUTS ===== */
+.loginModal input[type="text"], 
+.loginModal input[type="password"] {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all var(--transition-time) ease;
+    box-sizing: border-box;
+    position: relative;
 }
 
+.loginModal input[type="text"]:focus, 
+.loginModal input[type="password"]:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 
+        0 0 0 3px rgba(var(--text-color-rgb), 0.1),
+        var(--box-shadow);
+    transform: translateY(-2px);
+    background-color: var(--div-bg-color);
+}
+
+.loginModal input[type="text"]:hover, 
+.loginModal input[type="password"]:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+}
+
+/* ===== REMEMBER ME CONTAINER ===== */
 .rememberMeContainer {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: flex-start;
     width: 100%;
-    margin-top: 1vh;
-    margin-bottom: 1vh;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    transition: all var(--transition-time) ease;
+}
+
+.rememberMeContainer:hover {
+    transform: translateX(2px);
 }
 
 .rememberMeContainer input[type="checkbox"] {
-    margin-right: 0.2vw;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--background-color);
+    cursor: pointer;
+    transition: all var(--transition-time) ease;
+    position: relative;
+    margin: 0;
+    flex-shrink: 0;
 }
 
-.loginModal input {
-    background-color: var(--body-bg-color);
+.rememberMeContainer input[type="checkbox"]:checked {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: scale(1.1);
+}
+
+.rememberMeContainer input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.rememberMeContainer input[type="checkbox"]:hover {
+    border-color: var(--accent-color);
+    transform: scale(1.05);
+}
+
+.rememberMeContainer label {
+    font-weight: 500;
+    cursor: pointer;
     color: var(--text-color);
-    border: var(--border);
-    border-radius: var(--border-radius);
-    padding: var(--padding-size);
+    transition: color var(--transition-time) ease;
+    user-select: none;
 }
 
+.rememberMeContainer label:hover {
+    color: var(--accent-color);
+}
+
+/* ===== MESSAGE STYLING ===== */
+.loginModal form p {
+    text-align: center;
+    margin: 0;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    min-height: 1.5rem;
+    transition: all var(--transition-time) ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.4;
+}
+
+/* Style messages based on content */
+.loginModal form p:not(:empty) {
+    background-color: rgba(var(--failure-color-rgb), 0.1);
+    color: var(--failure-color);
+    border: 1px solid rgba(var(--failure-color-rgb), 0.3);
+    animation: messageSlideIn 0.4s ease-out;
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== SUBMIT BUTTON ===== */
 .loginModal input[type="submit"] {
     width: 100%;
-    transition: all var(--transition-time);
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--navbar-active-color) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-time) ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(var(--text-color-rgb), 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.loginModal input[type="submit"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
 }
 
 .loginModal input[type="submit"]:hover {
-    background-color: var(--button-hover-bg-color);
-    color: var(--button-hover-color);
-    transition: all var(--transition-time);
-    cursor: pointer;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 
+        0 8px 25px rgba(var(--text-color-rgb), 0.3),
+        0 0 0 3px rgba(var(--accent-color), 0.2);
+    background: linear-gradient(135deg, var(--navbar-active-color) 0%, var(--accent-color) 100%);
+}
+
+.loginModal input[type="submit"]:hover::before {
+    left: 100%;
+}
+
+.loginModal input[type="submit"]:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+/* ===== REGISTER LINK ===== */
+.loginModal form label[for="register"] {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+.loginModal form label[for="register"] a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all var(--transition-time) ease;
+    position: relative;
+}
+
+.loginModal form label[for="register"] a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--accent-color);
+    transition: width var(--transition-time) ease;
+}
+
+.loginModal form label[for="register"] a:hover {
+    color: var(--navbar-active-color);
+    transform: translateY(-1px);
+}
+
+.loginModal form label[for="register"] a:hover::after {
+    width: 100%;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .loginModal {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+        max-width: calc(100vw - 2rem);
+        min-height: 450px;
+    }
+    
+    .loginModal h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .loginModal form {
+        gap: 1.25rem;
+    }
+    
+    .loginModal input[type="text"], 
+    .loginModal input[type="password"] {
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body::before {
+        animation: none; /* Disable animation on very small screens for performance */
+    }
+    
+    .loginModal {
+        margin: 0.5rem;
+        padding: 1.5rem 1rem;
+        border-radius: var(--border-radius);
+    }
+    
+    .loginModal h2 {
+        font-size: 1.6rem;
+        letter-spacing: 1px;
+    }
+    
+    .loginModal input[type="text"], 
+    .loginModal input[type="password"],
+    .loginModal input[type="submit"] {
+        padding: 0.75rem 1rem;
+    }
+    
+    .rememberMeContainer {
+        gap: 0.5rem;
+    }
+    
+    .rememberMeContainer input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    body::before {
+        animation: none;
+    }
+}
+
+/* ===== FOCUS VISIBLE FOR KEYBOARD NAVIGATION ===== */
+.loginModal input:focus-visible,
+.loginModal label:focus-visible,
+.rememberMeContainer input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
 }

@@ -8,7 +8,7 @@
  * @since 0.7.2
  * @author Robkoo
  * @license TBD
- * @version 0.7.2.1
+ * @version 0.7.6
  * @see ../constants/constants.js, ./utils/ajaxHandler.js, /webDev/api/adminSchoolAjax.php
  * @todo Add user feedback for errors, loading indicators, and support for more actions.
  */
@@ -99,6 +99,7 @@ function sanitizeInput(input){
     // Event listeners for select changes
     document.getElementById(consts.adminSchool.content.staticTable.select).addEventListener("change", function (){
         tableSelect(this.value);
+        actionSelect(this.value);
     });
 
     document.getElementById(consts.adminSchool.content.actionTable.select).addEventListener("change", function (){
@@ -122,7 +123,7 @@ function sanitizeInput(input){
      * // Triggered by button click
      */
     document.getElementById("submitActionForm").addEventListener("click", async function (){
-        // Example: get input values
+        // get input values
         const username = sanitizeInput(document.getElementById("username")?.value || "");
         const password = sanitizeInput(document.getElementById("password")?.value || "");
         const role = sanitizeInput(document.getElementById("role")?.value || "");

@@ -2,16 +2,16 @@
 /**
  * Loads and provides access to global constants from a shared JSON file.
  *
- * This file defines the `ConstantsLoader` class for loading and retrieving
+ * Defines the `ConstantsLoader` class for loading and retrieving
  * configuration constants from `constants.json` for use throughout the codebase.
- * It also exports a `$consts` object for convenient access to key constants.
+ * Also exports a `$consts` object for convenient access to key constants.
  *
- * @file constants.php
+ * @file ConstantsLoader.php
  * @since 0.7.2
  * @package Constants
  * @author Robkoo
  * @license TBD
- * @version 0.7.4
+ * @version 0.7.8
  * @see constants.json, constants.js
  * @todo Expand `$consts` as new constants are added to the JSON file.
  */
@@ -26,11 +26,10 @@ namespace WebDev\Assets;
  * Provides static methods to fetch deeply nested configuration values
  * and to export key constant objects for use in PHP code.
  *
- * @package FlightSimWeb
+ * @package Constants
  * @since 0.7.2
  * @see constants.json
  * @throws \Exception if the configuration file cannot be read or decoded,
- *         or if a requested key is missing.
  */
 class ConstantsLoader {
     const CONSTANTS_FILE_PATH = __DIR__ . '/constants.json';
@@ -122,12 +121,21 @@ class ConstantsLoader {
 
         return json_decode(json_encode(self::$data['api']['ajaxApi']), false);
     }
+
+    public static function getUserPreferences(): object {
+        if (empty(self::$data)){
+            self::loadJson();
+        }
+
+        return json_decode(json_encode(self::$data['database']['userPreferences']), false);
+    }
 }
 
 // Exported constants object for convenient use elsewhere in PHP.
 // mostly doesn't work. sometimes does. PHPs way of handling global vars like this SUCKS.
 $consts = (object)[
     'adminSchool' => ConstantsLoader::getAdminSchool(),
-    'apiAjax' => ConstantsLoader::getApiAjax()
+    'apiAjax' => ConstantsLoader::getApiAjax(),
+    'userPreferences' => ConstantsLoader::getUserPreferences()
     // more in the future will be added as the consts file will be expanded
 ];

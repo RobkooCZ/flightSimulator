@@ -1,5 +1,529 @@
+/* ===== LANDING PAGE BODY ===== */
 body {
-    background-color: var(--body-bg-color);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== HERO BANNER SECTION ===== */
+#bannerImg {
+    background: url(../images/banner/banner.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* Parallax effect */
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    padding: 2rem;
+    /* Add dark overlay for better text readability */
+    background-blend-mode: overlay;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Add a subtle gradient overlay for even better text contrast */
+#bannerImg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg, 
+        rgba(0, 0, 0, 0.3) 0%, 
+        rgba(0, 0, 0, 0.1) 50%, 
+        rgba(0, 0, 0, 0.3) 100%
+    );
+    z-index: 1;
+}
+
+/* Ensure content appears above overlay */
+#bannerImg > * {
+    position: relative;
+    z-index: 2;
+}
+
+#bannerImg #title {
+    font-size: 5rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+    text-shadow: 
+        2px 2px 4px rgba(0,0,0,0.8),
+        0 0 20px rgba(0,0,0,0.5);
+    letter-spacing: 3px;
+    animation: fadeInUp 1s ease-out;
+}
+
+#bannerImg #description {
+    font-size: 1.8rem;
+    color: #ffffff;
+    margin: 0 0 3rem 0;
+    opacity: 0.95;
+    max-width: 700px;
+    font-weight: 300;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+    animation: fadeInUp 1s ease-out 0.3s both;
+}
+
+#bannerImg #wishlist {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    border: none;
+    padding: 1.2rem 3rem;
+    font-size: 1.3rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+    animation: fadeInUp 1s ease-out 0.6s both;
+}
+
+#bannerImg #wishlist:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 25px rgba(255, 107, 53, 0.6);
+    background: linear-gradient(135deg, #ff8560 0%, #ffa500 100%);
+}
+
+/* ===== SOCIAL PROOF SECTION ===== */
+#socialProof {
+    background: linear-gradient(135deg, var(--div-bg-color) 0%, var(--header-bg-color) 100%);
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+#socialProof .statsContainer {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    text-align: center;
+}
+
+#socialProof .statsContainer .stat {
+    padding: 1.5rem 1rem;
+    background-color: var(--div-bg-color);
+    border-radius: var(--border-radius);
+    border: var(--div-border);
+    box-shadow: var(--box-shadow);
+    transition: transform 0.3s ease;
+}
+
+#socialProof .statsContainer .stat:hover {
+    transform: translateY(-3px);
+}
+
+#socialProof .statsContainer .stat .statNumber {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--accent-color, #007acc);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+#socialProof .statsContainer .stat .statLabel {
+    font-size: 0.9rem;
     color: var(--text-color);
-    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+}
+
+/* ===== FEATURES SECTION ===== */
+#featuresBox {
+    padding: 5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 3rem;
+    background-color: var(--body-bg-color);
+}
+
+#featuresBox .feature {
+    background-color: var(--div-bg-color);
+    border: var(--div-border);
+    border-radius: var(--border-radius);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: var(--box-shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+#featuresBox .feature::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #007acc, #4a9eff);
+}
+
+#featuresBox .feature:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+}
+
+#featuresBox .feature h3 {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin: 0 0 1.5rem 0;
+    font-weight: 600;
+}
+
+#featuresBox .feature .progressBar {
+    width: 100%;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0 0.5rem 0;
+}
+
+#featuresBox .feature .progressBar .progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #007acc, #4a9eff);
+    border-radius: 4px;
+    transition: width 2s ease-in-out;
+    animation: progressLoad 2s ease-in-out forwards;
+}
+
+#featuresBox .feature .progressBar .progressFill[data-progress="5"] { width: 5%; }
+#featuresBox .feature .progressBar .progressFill[data-progress="30"] { width: 30%; }
+#featuresBox .feature .progressBar .progressFill[data-progress="75"] { width: 75%; }
+
+#featuresBox .feature .progressText {
+    font-size: 0.9rem;
+    color: var(--accent-color, #007acc);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+#featuresBox .feature .gaugeContainer {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+}
+
+#featuresBox .feature .gaugeContainer .gauge {
+    background: radial-gradient(circle, #1a1a1a 0%, #2d2d2d 70%, #404040 100%);
+    border: 3px solid #555;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    box-shadow: 
+        inset 0 0 20px rgba(0,0,0,0.5),
+        0 4px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    animation: gaugeGlow 3s ease-in-out infinite;
+    animation-delay: 2s;
+}
+
+#featuresBox .feature .gaugeContainer .gauge:hover {
+    transform: scale(1.05);
+    box-shadow: 
+        inset 0 0 25px rgba(0,0,0,0.6),
+        0 6px 20px rgba(0,0,0,0.4);
+}
+
+/* Add subtle glow ring */
+#featuresBox .feature .gaugeContainer .gauge::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #007acc, #4a9eff, #007acc);
+    z-index: -1;
+    opacity: 0.6;
+}
+
+/* Add tick marks around the gauge */
+#featuresBox .feature .gaugeContainer .gauge::after {
+    content: '';
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    background: 
+        radial-gradient(circle, transparent 45%, #666 46%, #666 47%, transparent 48%),
+        conic-gradient(from 0deg, transparent 0deg, #666 2deg, transparent 4deg, transparent 28deg, #666 30deg, transparent 32deg, transparent 58deg, #666 60deg, transparent 62deg, transparent 88deg, #666 90deg, transparent 92deg, transparent 118deg, #666 120deg, transparent 122deg, transparent 148deg, #666 150deg, transparent 152deg, transparent 178deg, #666 180deg, transparent 182deg, transparent 208deg, #666 210deg, transparent 212deg, transparent 238deg, #666 240deg, transparent 242deg, transparent 268deg, #666 270deg, transparent 272deg, transparent 298deg, #666 300deg, transparent 302deg, transparent 328deg, #666 330deg, transparent 332deg, transparent 358deg);
+    pointer-events: none;
+}
+
+#featuresBox .feature .gaugeContainer .gauge .gaugeLabel {
+    font-size: 0.7rem;
+    color: #cccccc;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+#featuresBox .feature .gaugeContainer .gauge .gaugeDisplay {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #00ff88;
+    text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+    font-family: 'Courier New', monospace;
+    line-height: 1;
+}
+
+/* Different colors for different gauge types */
+#featuresBox .feature .gaugeContainer .gauge:nth-child(1) .gaugeDisplay {
+    color: #00aaff; /* Blue for altitude */
+    text-shadow: 0 0 8px rgba(0, 170, 255, 0.5);
+}
+
+#featuresBox .feature .gaugeContainer .gauge:nth-child(2) .gaugeDisplay {
+    color: #ffaa00; /* Orange for speed */
+    text-shadow: 0 0 8px rgba(255, 170, 0, 0.5);
+}
+
+#featuresBox .feature p {
+    color: var(--text-color);
+    line-height: 1.6;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* ===== FAQ SECTION ===== */
+#faqSection {
+    padding: 5rem 2rem;
+    background-color: var(--div-bg-color);
+    border-top: 1px solid var(--border-color);
+}
+
+#faqSection h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: var(--text-color);
+    margin: 0 0 3rem 0;
+    font-weight: 700;
+}
+
+#faqSection .faqContainer {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#faqSection .faqContainer .faqItem {
+    background-color: var(--body-bg-color);
+    border: var(--div-border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    transition: all 0.3s ease;
+}
+
+#faqSection .faqContainer .faqItem:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+#faqSection .faqContainer .faqItem .faqQuestion {
+    padding: 1.5rem 2rem;
+    background-color: var(--header-bg-color);
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#faqSection .faqContainer .faqItem .faqAnswer {
+    padding: 1.5rem 2rem;
+    color: var(--text-color);
+    line-height: 1.6;
+    opacity: 0.9;
+    background-color: var(--div-bg-color);
+}
+
+/* ===== ROUTE BUTTONS SECTION ===== */
+#routeButtons {
+    padding: 3rem 2rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--div-bg-color) 0%, var(--header-bg-color) 100%);
+    margin-top: auto;
+    border-top: 1px solid var(--border-color);
+}
+
+#routeButtons button {
+    background-color: var(--button-bg-color);
+    color: var(--button-color);
+    border: var(--button-border);
+    padding: 1.2rem 2.5rem;
+    margin: 0 1rem;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#routeButtons button:hover {
+    background-color: var(--button-hover-bg-color);
+    color: var(--button-hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes progressLoad {
+    from { width: 0%; }
+}
+
+@keyframes gaugeGlow {
+    0% { 
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 4px 15px rgba(0,0,0,0.3);
+    }
+    50% { 
+        box-shadow: inset 0 0 25px rgba(0,0,0,0.6), 0 6px 25px rgba(0, 122, 204, 0.3);
+    }
+    100% { 
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 4px 15px rgba(0,0,0,0.3);
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    #bannerImg {
+        min-height: 60vh;
+        background-attachment: scroll; /* Better mobile performance */
+    }
+    
+    #bannerImg #title {
+        font-size: 3rem;
+        letter-spacing: 2px;
+    }
+    
+    #bannerImg #description {
+        font-size: 1.3rem;
+        margin-bottom: 2rem;
+    }
+    
+    #bannerImg #wishlist {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+    
+    #socialProof .statsContainer {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    #socialProof .statsContainer .stat {
+        padding: 1rem;
+    }
+    
+    #socialProof .statsContainer .stat .statNumber {
+        font-size: 2rem;
+    }
+    
+    #featuresBox {
+        padding: 3rem 1rem;
+        gap: 2rem;
+    }
+    
+    #featuresBox .feature {
+        padding: 2rem 1.5rem;
+    }
+    
+    #featuresBox .feature .gaugeContainer .gauge {
+        width: 80px;
+        height: 80px;
+    }
+    
+    #featuresBox .feature .gaugeContainer .gauge .gaugeDisplay {
+        font-size: 0.85rem;
+    }
+    
+    #featuresBox .feature .gaugeContainer .gauge .gaugeLabel {
+        font-size: 0.6rem;
+    }
+    
+    #featuresBox .feature .gaugeContainer {
+        gap: 1rem;
+    }
+    
+    #faqSection {
+        padding: 3rem 1rem;
+    }
+    
+    #faqSection .faqContainer .faqItem .faqQuestion,
+    #faqSection .faqContainer .faqItem .faqAnswer {
+        padding: 1rem 1.5rem;
+    }
+    
+    #routeButtons button {
+        display: block;
+        margin: 0.5rem auto;
+        width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    #bannerImg #title {
+        font-size: 2.5rem;
+    }
+    
+    #featuresBox {
+        grid-template-columns: 1fr;
+    }
+    
+    #featuresBox .feature .gaugeContainer {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    #featuresBox .feature .gaugeContainer .gauge {
+        width: 90px;
+        height: 90px;
+    }
 }

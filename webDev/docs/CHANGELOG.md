@@ -50,10 +50,107 @@ It also includes a short name for the update.
     - [0.7.3](#version-073---28042025) – "Bootstrap & Security overhaul"
     - [0.7.4](#version-074---29042025) - "Changelog & version fix"
     - [0.7.5](#version-075---29042025) - "Header AJAX and PHP backend separation"
+    - [0.7.6](#version-076---06052025) - "User data handling expansion"
+    - [0.7.7](#version-077---28052025) - "Profile Tab Addition"
+    - [0.7.8](#version-078---30052025) - "Huge Front-End Update"
 
 ---
 
 ## ALPHA VERSIONS
+
+### [VERSION 0.7.8] - 30.05.2025
+
+### Added
+- a logo (finally...)
+- a simple check on the profile page to prevent access when not logged in
+- a home page which only logged in users can access
+    - as of right now doesn't contain much
+    - only templates/prototypes for when the game will actually be playable and the home page would gain meaning
+    - info about the server (again, dummy for now)
+- box shadow to profile divs
+- proper, standardized styling for the home page
+- added general styling to the table in the admin page
+- a proper landing page
+    - hero section
+    - features section
+    - FAQ
+    - buttons for navigation
+
+### Changed
+- Improved the footer to show more info, such as game and website versions, links to other stuff and miscellaneous info
+- Improved `theme.css`
+    - Better grouped vars
+    - Some new vars
+    - Different, better colors
+        - themes were modified, the dark theme was changed the most for a more darker-blue style
+    - Better general styles
+- Improved styling across all public pages
+- Tweaked the HTML structure to compliment the new styles
+
+### Fixed
+- Fixed an issue where the `antiquewhite` color would show in the profile picture instead of the div background color
+- Fixed issues with styling in the CGT theme
+- Fixed a bug where `AdminSchoolAjax.php` couldn't find the constants file.
+
+### [VERSION 0.7.7] - 28.05.2025
+
+#### Added
+- profile tab
+    - contains data about the user
+    - forms to change some data
+    - statistics about the game (none yet as the game isn't nearly done)
+- profile picture functionality with either a link to an image or an image
+- classes with methods to handle the upload,validation and storage of profile pictures
+- styling for the profile page
+- AJAX-based profile picture upload (file and link support)
+- backend endpoint for profile picture upload (`profileAjax.php`)
+- improved documentation and code comments for profile-related files
+- fallback/default profile picture if none is set
+- modal for profile picture upload with validation and error messages
+- A character limit to the username.
+    - Minimum length: 3 characters
+    - Maximum length: 20 characters
+- Input fields to change your username or bio
+- Bio
+- validation checks on both the frontend and backend for data changing
+
+#### Changed
+- header reworked to now include profile and logout under the user's profile picture in the navbar
+    - on pfp click, dropdown shows with those options
+- improved file structure for profile page assets
+- updated profile page to use new AJAX and backend logic for profile picture
+- improved error handling and logging for profile picture upload
+
+#### Fixed
+- bug where backend would not always return JSON on error
+
+### [VERSION 0.7.6] - 06.05.2025
+
+#### Added
+- Methods in `Users` to:
+    - retrieve the user's IPv4 address
+    - validate the user's IPv4 address
+    - add it to the database and check if the database IP is the same or different than the user's IPv4 address
+- New class `UserAgent`, which:
+    - has methods to:
+        - retrieve user agent data
+        - parse user agent data
+        - save it into the database (table userAgents) if not previously saved
+        - log any new user agent data
+    - holds UA data in a singleton pattern for each logged in user
+- Getters in `Users` to be able to get the new properties
+- *Basic* anti bot and anti script defense in `router.php`
+- one method to update the db with one query after login (IP, status, failed logins, last login, last activity)
+- lastLoginAt and failedLoginAttempts functionality
+    - very basic right now, failedLoginAttempts doesn't time you out or anything so far
+- on logout reset failedLoginAttempts
+- safeguards for the new functionality (checking failedLoginAttempts from the db call and more)
+- logging suspicious UA/IP 
+
+#### Fixed
+- a bug where if you selected a new table on `adminSchoolPage.php`, it wouldn't accordingly update the action form below
+
+---
 
 ### [VERSION 0.7.5] - 29.04.2025
 

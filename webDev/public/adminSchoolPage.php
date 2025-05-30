@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.3
+ * @version 0.7.8
  * @see TableRenderer, Table, Database, AuthorizationException, AppException, User
  * @todo Add more admin features and validation
  */
@@ -19,6 +19,11 @@ use WebDev\Bootstrap;
 
 Bootstrap::init();
 
+/**
+ * Flag to start the session (or not).
+ * @var bool
+ */
+$startSession = false;
 session_start();
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -50,56 +55,74 @@ if (!isset($_SESSION['id']) || $_SESSION['id'] !== 1){
     );
 }
 
-// start session and set a variable to not start it in header.php
-$startSession = false;
-
-// DO show the header and footer
+/**
+ * Flag to show the navbar.
+ * @var bool
+ */
 $showHeader = true;
+
+/**
+ * Flag to show the footer.
+ * @var bool
+ */
 $showFooter = true;
 
 // include header and the stylesheet for the current page
-// adminPage = name of the stylesheet
-// title = title of the page
+
 $stylesheet = 'schoolAdminPage';
+
+/**
+ * Title of the website.
+ * @var string
+ */
 $title = 'School Admin Page';
 $show = true; // set show to true to show the top navbar
 include __DIR__ . '/../templates/header.php';
 
-require_once __DIR__ . '/../assets/constants/constants.php';
+require_once __DIR__ . '/../assets/constants/ConstantsLoader.php';
 ?>
 
 <!-- HTML STRUCTURE -->
 
+<div class="adminPageHeader">
+    <h1>School Admin Dashboard</h1>
+    <p class="subtitle">Advanced Database Management System</p>
+</div>
+
 <div id="<?= $consts->adminSchool->content->name ?>">
-    <section id="<?= $consts->adminSchool->content->staticTable->name ?>">
-        <label for="<?= $consts->adminSchool->content->staticTable->select ?>">Table:</label>
-        <select
-            name="<?= $consts->adminSchool->content->staticTable->select ?>"
-            id="<?= $consts->adminSchool->content->staticTable->select ?>"
-        >
-            <?php
-                $tableNames = Database::getInstance()->getTableNames();
-                $dropdownHtml = TableRenderer::getTableNamesDropdown($tableNames);
-                echo $dropdownHtml !== false
-                    ? $dropdownHtml
-                    : "<option value='' disabled>Error loading table names</option>";
-            ?>
-        </select>
-        <div id="<?= $consts->adminSchool->content->staticTable->display ?>"></div>
+    <section id="<?= $consts->adminSchool->content->staticTable->name ?>" class="adminSection">
+        <div class="sectionHeader">
+            <label for="<?= $consts->adminSchool->content->staticTable->select ?>">Database Table:</label>
+            <select
+                name="<?= $consts->adminSchool->content->staticTable->select ?>"
+                id="<?= $consts->adminSchool->content->staticTable->select ?>"
+            >
+                <?php
+                    $tableNames = Database::getInstance()->getTableNames();
+                    $dropdownHtml = TableRenderer::getTableNamesDropdown($tableNames);
+                    echo $dropdownHtml !== false
+                        ? $dropdownHtml
+                        : "<option value='' disabled>Error loading table names</option>";
+                ?>
+            </select>
+        </div>
+        <div id="<?= $consts->adminSchool->content->staticTable->display ?>" class="tablePrintout"></div>
     </section>
 
-    <section id="<?= $consts->adminSchool->content->actionTable->name ?>">
-        <label for="<?= $consts->adminSchool->content->actionTable->select ?>">Action:</label>
-        <select
-            name="<?= $consts->adminSchool->content->actionTable->select ?>"
-            id="<?= $consts->adminSchool->content->actionTable->select ?>"
-        >
-            <option value="add">Add</option>
-            <option value="edit">Edit</option>
-            <option value="delete">Delete</option>
-        </select>
-        <div id="<?= $consts->adminSchool->content->actionTable->display ?>"></div>
-        <button type="button" id="submitActionForm">Submit</button>
+    <section id="<?= $consts->adminSchool->content->actionTable->name ?>" class="adminSection">
+        <div class="sectionHeader">
+            <label for="<?= $consts->adminSchool->content->actionTable->select ?>">Database Action:</label>
+            <select
+                name="<?= $consts->adminSchool->content->actionTable->select ?>"
+                id="<?= $consts->adminSchool->content->actionTable->select ?>"
+            >
+                <option value="add">Add Record</option>
+                <option value="edit">Edit Record</option>
+                <option value="delete">Delete Record</option>
+            </select>
+        </div>
+        <div id="<?= $consts->adminSchool->content->actionTable->display ?>" class="tableForm"></div>
+        <button type="button" id="submitActionForm">Execute Action</button>
     </section>
 </div>
 

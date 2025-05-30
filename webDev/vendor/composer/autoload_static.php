@@ -15,6 +15,7 @@ class ComposerStaticInite875ae8441d070d7dda5f4b47a2117aa
     public static $prefixLengthsPsr4 = array (
         'W' => 
         array (
+            'WebDev\\Assets\\' => 14,
             'WebDev\\' => 7,
         ),
         'S' => 
@@ -38,6 +39,10 @@ class ComposerStaticInite875ae8441d070d7dda5f4b47a2117aa
     );
 
     public static $prefixDirsPsr4 = array (
+        'WebDev\\Assets\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/assets/constants',
+        ),
         'WebDev\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',

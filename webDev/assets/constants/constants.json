@@ -11,7 +11,7 @@
                 "name": "actionTable",
                 "select": "actionSelect",
                 "display": "actionDisplay"
-            }
+            }   
         }
     },
 
@@ -27,6 +27,15 @@
                 "message": "message",
                 "error": "error"
             }
+        }
+    },
+
+    "database": {
+        "userPreferences": {
+            "keyColumn": "prefKey",
+            "valueColumn": "value",
+            "theme": "userTheme",
+            "wishlist": "gameWishlistBool"
         }
     }
 }
