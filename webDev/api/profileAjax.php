@@ -10,7 +10,7 @@
  * @package API
  * @author Robkoo
  * @license TBD
- * @version 0.7.7
+ * @version 0.7.8
  * @see WebDev\Utilities\FileHandler, WebDev\API\ApiResponse
  */
 declare(strict_types=1);
@@ -30,6 +30,7 @@ use WebDev\API\ApiResponse;
 use WebDev\Auth\Auth;
 // checking if a user with a specific id exists
 use WebDev\Auth\User;
+use WebDev\Database\UserPreferences;
 use WebDev\Exception\ValidationException;
 // logging
 use WebDev\Logging\Enum\Loggers;
@@ -70,6 +71,9 @@ if (is_null($uid)){
         "Failed to get User ID from session."
     );
 }
+
+// constants
+require_once __DIR__ . '/../assets/constants/ConstantsLoader.php';
 
 // get the action
 /**
@@ -350,6 +354,71 @@ elseif ($action == "update"){ // Profile data change
         ApiResponse::success(
             "User successfully changed both their username and bio.",
             "Successfully changed username and bio!"
+        );
+    }
+}
+elseif ($action == "themeChoice"){ // some request regarding themes
+    /**
+     * The theme choice. Either save or load.
+     * @var string
+     */
+    $themeAction = $_GET['themeAction'];
+
+    if ($themeAction == "save"){
+        // save the theme choice to the database
+        /**
+         * @var string The theme
+         */
+        $theme = $_POST['theme'];
+
+        // attempt to save it
+        /**
+         * The result of the saving.
+         * @var array<string,bool|string> $result
+         */
+        $result = UserPreferences::savePref($_SESSION[User::SESSION_ID_KEY], "userTheme", $theme);
+
+        // if the saving fails
+        if ($result['success'] === false){
+            // send back a failure response
+            ApiResponse::failure(
+                '',
+                400,
+                $result['backendMessage']
+            );
+        }
+
+        // otherwise send back an empty success response
+        ApiResponse::success();
+    }
+    elseif ($themeAction == "load"){ // load the theme
+        // attempt to load the theme choice
+        /**
+         * The theme if it succeeded, false if it hadn't.
+         * @var string|false
+         */
+        $result = UserPreferences::loadPref($_SESSION[User::SESSION_ID_KEY], "userTheme");
+        
+        // if loading from the database failed
+        if ($result === false){
+            // send back a failure response
+            ApiResponse::failure(
+                'Failed to load the user theme from the database.',
+                400,
+                "Failed to load the user theme from the database."
+            );
+        }
+        
+        // otherwise return a success response with the theme
+        ApiResponse::success(
+            $result
+        );
+    }
+    else {
+        ApiResponse::failure(
+            '',
+            400,
+            "Invalid theme action provided."
         );
     }
 }

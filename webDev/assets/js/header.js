@@ -9,7 +9,7 @@
  * @package AJAX
  * @author Robkoo
  * @license TBD
- * @version 0.7.5
+ * @version 0.7.8
  * @see /utils/ajaxHandler.js, /webDev/api/headerAjax.php
  * @todo ---
  */
@@ -22,9 +22,22 @@ const links = document.getElementsByClassName("links");
 // loop throuch each link and add an event listener to it
 // [...links] unravels the HTML object so you can foreach it
 [...links].forEach(link => {
+    // Skip external links or links that should open in new tabs
+    if (link.getAttribute('target') === '_blank' || 
+        (link.getAttribute('href') && link.getAttribute('href').indexOf('http') === 0)){
+        return; // Skip this iteration - don't add event listener
+    }
+
     link.addEventListener('click', async e => {
         e.preventDefault();
         const href = link.getAttribute('href');
+        
+        // validation to ensure href is not null or empty
+        if (!href || href === '#' || href === 'null'){
+            console.warn('Invalid href detected:', href);
+            return;
+        }
+        
         try {
             await ajaxHandler.send(
                 '/api/headerAjax',
@@ -53,6 +66,7 @@ const dropdownContent = document.getElementById("dropdownContent");
 
 // For opening the dropdown
 profile.addEventListener('click', (e) => {
+    e.preventDefault(); // prevent default link behaviour
     e.stopPropagation(); // Prevent closing immediately due to document listener
     dropdownContent.classList.toggle("displayBlock");
 });

@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.3
+ * @version 0.7.8
  * @see TableRenderer, Table, Database, AuthorizationException, AppException, User
  * @todo Add more admin features and validation
  */
@@ -18,21 +18,35 @@
 declare(strict_types=1);
 
 use WebDev\Bootstrap;
-
 Bootstrap::init();
 
-// start session and set a variable to not start it in header.php
-session_start();
+/**
+ * Flag to start the session (or not).
+ * @var bool
+ */
 $startSession = false;
+session_start();
 
-// DO show the header and footer
+/**
+ * Flag to show the navbar.
+ * @var bool
+ */
 $showHeader = true;
+
+/**
+ * Flag to show the footer.
+ * @var bool
+ */
 $showFooter = true;
 
 // include header and the stylesheet for the current page
-// adminPage = name of the stylesheet
-// title = title of the page
+
 $stylesheet = 'adminPage';
+
+/**
+ * Title of the website.
+ * @var string
+ */
 $title = 'Admin Page';
 $show = true; // set show to true to show the top navbar
 include __DIR__ . '/../templates/header.php';
@@ -70,51 +84,61 @@ if (!isset($_SESSION['id']) || !in_array($_SESSION['id'], [1, 2])){
 $db = Database::getInstance();
 
 ?>
+<main>
+    <div class="adminHeader">
+        <h1>Admin Dashboard</h1>
+        <p class="subtitle">Database Table Management System</p>
+    </div>
 
-<form method="POST">
-    <label for="tableName">Pick a table name to show: </label>
-    <select name="tableName">
-        <?php // php script to get the tables names and put them as options
-            // Fetch table names from the database
-            $tableNames = Database::getInstance()->getTableNames();
+    <div class="tableSelectorContainer">
+        <form method="POST">
+            <div class="formGroup">
+                <label for="tableName">Select Database Table:</label>
+                <select name="tableName" id="tableName" required>
+                    <option value="" disabled selected>Choose a table...</option>
+                    <?php
+                        $tableNames = Database::getInstance()->getTableNames();
+                        $dropdownHtml = TableRenderer::getTableNamesDropdown($tableNames);
+                        
+                        if ($dropdownHtml !== false){
+                            echo $dropdownHtml;
+                        }
+                        else {
+                            echo "<option value='' disabled>Error loading table names</option>";
+                        }
+                    ?>
+                </select>
+            </div>
+            
+            <input type="submit" name="submit" value="Show Table Data"> 
+        </form>
+    </div>
 
-            // Render the dropdown options
-            $dropdownHtml = TableRenderer::getTableNamesDropdown($tableNames);
+    <?php if (isset($_POST['submit'])): ?>
+        <div class="tableContainer">
+            <?php
+                $user = User::current();
+                if ($user) $user->recordActivity();
 
-            // Echo the dropdown HTML if it was successfully generated
-            if ($dropdownHtml !== false){
-                echo $dropdownHtml;
-            } 
-            else {
-                echo "<option value='' disabled>Error loading table names</option>";
-            }
-        ?>
-    </select>
-        
-    <br><br>
-    <input type="submit" name="submit" value="Show Table"> 
-</form>
+                $tableName = $_POST['tableName'];
+                $table = Table::getInstance($tableName);
+                $result = $table->selectAll();
+                
+                if (empty($result)){
+                    echo '<div class="emptyState">';
+                    echo '<h3>No Data Found</h3>';
+                    echo '<p>The selected table "' . htmlspecialchars($tableName) . '" is empty.</p>';
+                    echo '</div>';
+                }
+                else {
+                    TableRenderer::getInstance($table)->displayTable($result, true);
+                }
+            ?>
+        </div>
+    <?php endif; ?>
+</main>
 
 <?php
-
-// button was pressed
-if (isset($_POST['submit'])){
-    // record activity
-    $user = User::current();
-    if ($user) $user->recordActivity();
-
-    // get the table name
-    $tableName = $_POST['tableName'];
-
-    // get table object
-    $table = Table::getInstance($tableName);
-
-    // get result
-    $result = $table->selectAll();
-
-    // print table
-    TableRenderer::getInstance($table)->displayTable($result, true);
-}
 
 // include footer
 include __DIR__ . '/../templates/footer.php';

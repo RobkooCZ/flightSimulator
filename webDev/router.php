@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.7
+ * @version 0.7.8
  * @see Bootstrap, AppException, Logger
  * @todo Add dynamic route support, improve error handling, and static file types
  */
@@ -88,15 +88,26 @@ function handleRequest($uri): void {
     );
 
     switch ($uri){
-        // Serve the homepage (index.php)
+        // Serve the landing page
         case '/':
             Logger::log(
-                "Routing to homepage.",
+                "Routing to landing page (landingPage.php).",
                 LogLevel::INFO,
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            include __DIR__ . '/public/index.php';
+            include __DIR__ . '/public/landingPage.php';
+            break;
+
+        // Home page
+        case '/home':
+            Logger::log(
+                "Routing to home page (home.php).",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            include __DIR__ . '/public/home.php';
             break;
 
         // login, register, logout forms
@@ -109,6 +120,7 @@ function handleRequest($uri): void {
             );
             include __DIR__ . '/pages/login.php';
             break;
+
         case '/register':
             Logger::log(
                 "Routing to register page.",
@@ -181,6 +193,7 @@ function handleRequest($uri): void {
             include __DIR__ . '/pages/auth.php';
             break;
 
+        // api
         case '/api/adminSchoolAjax':
             Logger::log(
                 "Routing to adminSchoolAjax.php.",

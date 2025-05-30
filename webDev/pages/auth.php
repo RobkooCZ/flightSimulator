@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.6
+ * @version 0.7.8
  * @see Auth, User, CSRF, AppException, Logger
  * @todo Add more granular error handling and logging
  */
@@ -143,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
                 // one method to update everything necessary in the db at once
                 $newUser->updateDbAfterLogin();
 
-                redirect("/", "Login successful!");
+                redirect("/home", "Login successful!");
             }
             catch (AuthenticationException $ae){ // the user entered wrong password
                 $fUser = User::loadUsername($username);

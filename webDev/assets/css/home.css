@@ -1,0 +1,357 @@
+/* ===== WELCOME MESSAGE (top of page) ===== */
+#welcomeMessage {
+    width: 95%;
+    margin: 0 auto;
+    text-align: left;
+}
+
+/* ===== TWO COLUMN CONTENT CONTAINER ===== */
+#twoColumnContent {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 95%;
+    flex-direction: row;
+    flex: 1 1 0;
+    gap: var(--gap-size);
+    margin: 0 auto;
+}
+
+/* flexibility for left and right columns */
+#twoColumnContent #left, 
+#twoColumnContent #right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--vertical-gap-size);
+}
+
+/* children of the top class */
+#twoColumnContent #left .top,
+#twoColumnContent #right .top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-size);
+    height: auto;
+    max-height: 40%;
+}
+
+/* same styling for all the "blocks" of info */
+#twoColumnContent #left .top #systemStatus,
+#twoColumnContent #left .top #quickStats,
+#twoColumnContent #left #leaderboard,
+#twoColumnContent #right .top #changelog,
+#twoColumnContent #right #statistics {
+    background-color: var(--div-bg-color);
+    color: var(--div-color);
+    border: var(--div-border);
+    border-radius: var(--border-radius);
+    padding: var(--padding-size);
+    box-shadow: var(--box-shadow);
+}
+
+/* ===== LEFT COLUMN CONTENT ===== */
+
+/* ensure the children elements of .top touch the top and bottom */
+#twoColumnContent #left .top {
+    justify-content: space-between;
+}
+
+/* ===== SYSTEM STATUS (left top) ===== */
+#twoColumnContent #left .top #systemStatus {
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--vertical-gap-size);
+    padding: var(--padding-size);
+    flex: 1;
+}
+
+#twoColumnContent #left .top #systemStatus h2 {
+    margin: 0;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+#twoColumnContent #left .top #systemStatus table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+#twoColumnContent #left .top #systemStatus th {
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    opacity: 0.8;
+}
+
+#twoColumnContent #left .top #systemStatus th,
+#twoColumnContent #left .top #systemStatus td {
+    padding: 8px 12px;
+    font-size: 0.9em;
+    line-height: 1.2;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+#twoColumnContent #left .top #systemStatus td {
+    border-bottom: 1px solid transparent;
+}
+
+#twoColumnContent #left .top #systemStatus .statusCell {
+    align-items: baseline;
+}
+
+#twoColumnContent #left .top #systemStatus .statusDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: calc(var(--gap-size) / 3);
+}
+
+#twoColumnContent #left .top #systemStatus .statusDot.online { 
+    background-color: var(--success-color); 
+}
+
+#twoColumnContent #left .top #systemStatus .statusDot.offline { 
+    background-color: var(--failure-color); 
+}
+
+#twoColumnContent #left .top #systemStatus .statusDot.neutral { 
+    background-color: var(--warning-color); 
+}
+
+#twoColumnContent #left .top #systemStatus #userStats {
+    text-align: center;
+    font-size: 0.9em;
+    font-weight: 500;
+    padding: var(--gap-size);
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius);
+    margin-top: var(--gap-size);
+}
+
+/* ===== LEADERBOARD (left bottom) ===== */
+#twoColumnContent #left #leaderboard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-size);
+}
+
+#twoColumnContent #left #leaderboard .ranking {
+    background-color: var(--div-bg-color);
+    border: var(--div-border);
+    border-radius: var(--border-radius);
+    padding: var(--padding-size);
+    box-shadow: var(--box-shadow);
+}
+
+#twoColumnContent #left #leaderboard .ranking h2 {
+    margin: 0 0 var(--gap-size) 0;
+    font-size: 1em;
+    text-align: center;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: calc(var(--gap-size) / 2);
+}
+
+#twoColumnContent #left #leaderboard .ranking ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: rank;
+}
+
+#twoColumnContent #left #leaderboard .ranking li {
+    counter-increment: rank;
+    padding: 6px 12px;
+    margin-bottom: 4px;
+    border-radius: calc(var(--border-radius) / 2);
+    background-color: rgba(255, 255, 255, 0.03);
+    font-size: 0.9em;
+    position: relative;
+    padding-left: 35px;
+}
+
+#twoColumnContent #left #leaderboard .ranking li::before {
+    content: counter(rank);
+    position: absolute;
+    left: 8px;
+    font-weight: bold;
+    color: var(--text-color);
+    width: 20px;
+}
+
+#twoColumnContent #left #leaderboard .ranking li:first-child {
+    background-color: rgba(var(--success-color-rgb), 0.1);
+    border-left: 3px solid var(--success-color);
+}
+
+/* ===== RIGHT COLUMN CONTENT ===== */
+
+/* ===== CHANGELOG (right top) ===== */
+#twoColumnContent #right .top #changelog {
+    background-color: var(--div-bg-color);
+    color: var(--div-color);
+    border: var(--div-border);
+    border-radius: var(--border-radius);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#twoColumnContent #right .top #changelog h2 {
+    margin: 0 0 var(--gap-size) 0;
+    font-size: 1.1em;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: calc(var(--gap-size) / 2);
+}
+
+#twoColumnContent #right .top #changelog #tab {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--gap-size);
+}
+
+#twoColumnContent #right .top #changelog #tab button {
+    flex: 1;
+    padding: 8px 16px;
+    border: none;
+    background-color: transparent;
+    color: var(--text-color);
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+#twoColumnContent #right .top #changelog #tab button:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+#twoColumnContent #right .top #changelog #tab button.active {
+    background-color: var(--div-bg-color);
+    border-bottom: 2px solid var(--accent-color);
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+#twoColumnContent #right .top #changelog #tabContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#twoColumnContent #right .top #changelog #tabContent > div {
+    display: none;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.02);
+    border-radius: var(--border-radius);
+    font-size: 0.85em;
+    line-height: 1.2;
+    max-height: 300px;
+    overflow-y: auto;
+    word-wrap: break-word;
+}
+
+#twoColumnContent #right .top #changelog #tabContent > div.visible {
+    display: block;
+}
+
+#twoColumnContent #right .top #changelog #tabContent #webLog,
+#twoColumnContent #right .top #changelog #tabContent #gameLog {
+    font-family: inherit;
+    color: var(--text-color);
+}
+
+#twoColumnContent #right .top #changelog #tabContent #webLog h1,
+#twoColumnContent #right .top #changelog #tabContent #webLog h2,
+#twoColumnContent #right .top #changelog #tabContent #webLog h3,
+#twoColumnContent #right .top #changelog #tabContent #webLog h4,
+#twoColumnContent #right .top #changelog #tabContent #gameLog h1,
+#twoColumnContent #right .top #changelog #tabContent #gameLog h2,
+#twoColumnContent #right .top #changelog #tabContent #gameLog h3,
+#twoColumnContent #right .top #changelog #tabContent #gameLog h4 {
+    color: var(--text-color);
+    margin: 2px 0 1px 0; 
+    font-weight: 600;
+    font-size: inherit;
+    line-height: 1.1;
+}
+
+#twoColumnContent #right .top #changelog #tabContent #webLog h3,
+#twoColumnContent #right .top #changelog #tabContent #gameLog h3 {
+    font-size: 1em;
+    margin: 4px 0 2px 0;
+}
+
+#twoColumnContent #right .top #changelog #tabContent #webLog h4,
+#twoColumnContent #right .top #changelog #tabContent #gameLog h4 {
+    font-size: 0.9em;
+    margin: 2px 0 1px 0;
+    font-weight: 500;
+}
+
+#twoColumnContent #right .top #changelog #tabContent #webLog ul,
+#twoColumnContent #right .top #changelog #tabContent #webLog ol,
+#twoColumnContent #right .top #changelog #tabContent #gameLog ul,
+#twoColumnContent #right .top #changelog #tabContent #gameLog ol {
+    margin: 0 0 2px 12px;
+    padding: 0;
+}
+
+#twoColumnContent #right .top #changelog #tabContent #webLog li,
+#twoColumnContent #right .top #changelog #tabContent #gameLog li {
+    margin: 0; 
+    line-height: 1.2;
+    padding: 0;
+}
+
+#twoColumnContent #right .top #changelog #tabContent #webLog li ul,
+#twoColumnContent #right .top #changelog #tabContent #webLog li ol,
+#twoColumnContent #right .top #changelog #tabContent #gameLog li ul,
+#twoColumnContent #right .top #changelog #tabContent #gameLog li ol {
+    margin: 0 0 0 10px;
+}
+
+#twoColumnContent #right .top #changelog #tabContent #webLog hr,
+#twoColumnContent #right .top #changelog #tabContent #gameLog hr {
+    margin: 4px 0;
+    border: none;
+    border-top: 1px solid var(--border-color);
+    opacity: 0.3;
+}
+
+#twoColumnContent #right .top #changelog #tabContent > div::-webkit-scrollbar {
+    width: 6px;
+}
+
+#twoColumnContent #right .top #changelog #tabContent > div::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+#twoColumnContent #right .top #changelog #tabContent > div::-webkit-scrollbar-thumb {
+    background: var(--text-color);
+    border-radius: 3px;
+    opacity: 0.5;
+}
+
+#twoColumnContent #right .top #changelog #tabContent > div::-webkit-scrollbar-thumb:hover {
+    opacity: 0.8;
+}
+
+/* ===== BOTTOM SECTION ===== */
+/* Game Status Info Prototype styling will go here when implemented */
+
+/* ===== RESPONSIVE LAYOUT ===== */
+@media screen and (max-width: 768px){
+    #twoColumnContent {
+        flex-direction: column;
+    }
+}

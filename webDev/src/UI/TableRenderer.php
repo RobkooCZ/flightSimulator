@@ -12,7 +12,7 @@
  * @package UI
  * @author Robkoo
  * @license TBD
- * @version 0.7.1
+ * @version 0.7.8
  * @see Table, Logger, RoleManager, ConfigurationException, ValidationException, DatabaseException, PHPException
  * @todo Add more rendering options and validation
  */
@@ -183,7 +183,7 @@ class TableRenderer {
 
         $headerData = $this->table->getTableHeader();
 
-        echo "<table style='border: var(--border)';>"; // Open the table
+        echo "<table class='tablePrintout';>"; // Open the table
         echo "<tr>"; // Open the header row
 
         foreach ($headerData as $header){

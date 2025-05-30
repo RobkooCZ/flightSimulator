@@ -9,11 +9,25 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.7
+ * @version 0.7.8
  */
 declare(strict_types=1);
 
 use WebDev\Auth\User;
+
+/**
+ * Flag to start the session (or not).
+ * @var bool
+ */
+$startSession = false;
+
+session_start();
+
+// immediatelly check whether the user trying to access the site is logged in or not
+if (!isset($_SESSION[User::SESSION_ID_KEY])){
+    header('Location: /');
+    exit;
+}
 
 // for loading the pfp
 use WebDev\Utilities\FileHandler;
@@ -22,18 +36,28 @@ use WebDev\Utilities\FileHandler;
 use WebDev\Bootstrap;
 Bootstrap::init();
 
-// start session and set a variable to not start it in header.php
-session_start();
-$startSession = false;
-
-// DO show the header and footer
+/**
+ * Flag to show the navbar.
+ * @var bool
+ */
 $showHeader = true;
+
+/**
+ * Flag to show the footer.
+ * @var bool
+ */
 $showFooter = true;
 
 // include header and the stylesheet for the current page
 $stylesheet = 'profile';
+
+/**
+ * Title of the website.
+ * @var string
+ */
 $title = 'Profile';
-$show = true; // set show to true to show the top navbar
+
+// include the header
 include __DIR__ . '/../templates/header.php';
 
 // user id
@@ -95,6 +119,22 @@ if ($path === false) $path = ''; // set empty path if it isn't in the db yet
                 <span class="italicFade">Bio:</span>
                 <p id="bio"><?= User::fetchBio($_SESSION[User::SESSION_ID_KEY]) ?></p>
         </div>
+
+        <section id="settings">
+            <h2>Settings</h2>
+            
+            <div id="themeSettingDiv">
+                <label for="themeSelect">Theme: </label>
+                <select name="themeSelect" id="themeSelect">
+                    <option value="light">Light</option>
+                    <option value="dark-theme" selected="selected">Dark</option>
+                    <!-- only show the custom theme if the user is either me or elll -->
+                    <?php if (!empty($_SESSION[User::SESSION_ID_KEY]) && in_array($_SESSION[User::SESSION_ID_KEY], [1, 2])): ?>
+                        <option value="custom-theme">CGT</option>
+                    <?php endif; ?>
+                </select>
+            </div>
+        </section>
     </aside>
 
     <main id="right">

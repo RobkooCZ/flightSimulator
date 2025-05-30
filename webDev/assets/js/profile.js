@@ -10,7 +10,7 @@
  * @package ProfilePage
  * @author Robkoo
  * @license TBD
- * @version 0.7.7
+ * @version 0.7.8
  * @see profile.php
  */
 
@@ -218,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try { // attempt to send it to the endpoint
                 const result = await ajaxHandler.send(
-                    '/api/profile?type=file', 
+                    '/api/profile?action=nav&type=file', 
                     {
                         body: formData
                     }, 
@@ -441,4 +441,66 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         })();
     });
+
+    // settings
+    /**
+     * @type {HTMLElement|false} - The select containing theme options.
+     */
+    const themeSelect = document.getElementById("themeSelect");
+
+    themeSelect.addEventListener('change', async () => {
+        /**
+         * @type {string} Selected value. Empty if `themeSelect` is false.
+         */
+        const selectedValue = themeSelect ? themeSelect.value : "";
+
+        if (selectedValue === "light"){
+            document.body.className = ""; // Removes all classes from the body
+        }
+        else {
+            document.body.className = selectedValue; // Sets the class to the selected theme
+        }
+
+        /**
+         * @type {FormData} The data to send
+         */
+        const data = new FormData();
+        data.append('theme', selectedValue);
+
+        // send the user chosen theme to the backend
+        try {
+            // no need for result
+            await ajaxHandler.send(
+                "/api/profile?action=themeChoice&themeAction=save",
+                {
+                    body: data
+                }
+                // Method (POST) and headers default
+            );
+        }
+        catch (error){
+            console.error("Error response from `profileAjax.php` (Theme sending): ", error.backendMessage);
+        }
+    });
+
+    // load the user prefered theme from the db to correctly set the select
+    (async () => {
+        try {
+            const data = new FormData();
+
+            const result = await ajaxHandler.send(
+                "/api/profile?action=themeChoice&themeAction=load",
+                {
+                    body: data
+                },
+                'GET'
+            );
+            
+            // set the value and default to dark-theme if the HTMLElement wasn't selected properly
+            themeSelect ? themeSelect.value = result.data : 'dark-theme';
+        }
+        catch (error){
+            console.error("Error response from `profileAjax.php` (Theme sending): ", error.backendMessage);
+        }
+    })();
 });

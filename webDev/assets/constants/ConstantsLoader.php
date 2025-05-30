@@ -11,7 +11,7 @@
  * @package Constants
  * @author Robkoo
  * @license TBD
- * @version 0.7.7
+ * @version 0.7.8
  * @see constants.json, constants.js
  * @todo Expand `$consts` as new constants are added to the JSON file.
  */
@@ -121,12 +121,21 @@ class ConstantsLoader {
 
         return json_decode(json_encode(self::$data['api']['ajaxApi']), false);
     }
+
+    public static function getUserPreferences(): object {
+        if (empty(self::$data)){
+            self::loadJson();
+        }
+
+        return json_decode(json_encode(self::$data['database']['userPreferences']), false);
+    }
 }
 
 // Exported constants object for convenient use elsewhere in PHP.
 // mostly doesn't work. sometimes does. PHPs way of handling global vars like this SUCKS.
 $consts = (object)[
     'adminSchool' => ConstantsLoader::getAdminSchool(),
-    'apiAjax' => ConstantsLoader::getApiAjax()
+    'apiAjax' => ConstantsLoader::getApiAjax(),
+    'userPreferences' => ConstantsLoader::getUserPreferences()
     // more in the future will be added as the consts file will be expanded
 ];

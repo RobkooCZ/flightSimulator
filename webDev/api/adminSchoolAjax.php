@@ -11,7 +11,7 @@
  * @package API
  * @author Robkoo
  * @license TBD
- * @version 0.7.7
+ * @version 0.7.8
  * @see /webDev/src/API/ApiResponse.php, /webDev/assets/constants/constants.php, /webDev/public/adminSchoolPage.php
  * @todo Add CSRF protection, more granular error handling, and logging.
  */
@@ -20,7 +20,7 @@ declare(strict_types=1);
 use WebDev\Bootstrap;
 Bootstrap::init();
 
-include __DIR__ . '/../assets/constants/constants.php';
+include __DIR__ . '/../assets/constants/ConstantsLoader.php';
 
 use WebDev\API\ApiResponse;
 

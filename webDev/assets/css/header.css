@@ -1,3 +1,4 @@
+/* ===== HEADER CONTAINER ===== */
 header {
     background-color: var(--header-bg-color);
     border-bottom: 2px solid var(--header-border-color);
@@ -9,31 +10,36 @@ header {
     justify-content: space-between;
     align-items: center;
     height: var(--header-height);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
 }
 
+/* ===== NAVIGATION CONTAINER ===== */
 header nav {
     display: flex;
     height: 100%;
     width: 100%;
     gap: var(--gap-size);
+    align-items: center;
 }
 
 header nav .leftSide {
     display: flex;  
     height: 100%;
+    align-items: center;
+    gap: calc(var(--gap-size) * 1.5); 
 }
 
 header nav .rightSide {
     margin-left: auto;
     display: flex;
     height: 100%;
+    align-items: center;
 }
 
-nav a.active {
-    color: var(--navbar-active-color);
-    background-color: var(--navbar-active-bg-color);
-}
-
+/* ===== NAVIGATION LINKS ===== */
 header .links {
     color: var(--link-color);
     text-decoration: none;
@@ -41,78 +47,155 @@ header .links {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.3s ease, background-color 0.3s ease;
+    transition: all var(--transition-time) ease;
     height: 100%;
-}
-
-header .links:first-child {
-    border-top-left-radius: var(--border-radius);
-    border-bottom-left-radius: var(--border-radius);
-}
-
-header .links:last-child {
-    border-top-right-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
+    font-weight: 500;
+    position: relative;
+    white-space: nowrap;
+    border-radius: var(--border-radius);
 }
 
 header .links:hover {
     color: var(--link-hover-color);
     background-color: var(--link-hover-bg-color);
+    transform: translateY(-1px);
 }
 
-/* profile picture dropdown styling */
+/* ===== ACTIVE NAVIGATION STATE ===== */
+nav a.active {
+    color: var(--navbar-active-color);
+    background-color: var(--navbar-active-bg-color);
+    font-weight: 600;
+}
 
+nav a.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 2px;
+    background-color: var(--navbar-active-color);
+    border-radius: 1px;
+}
+
+/* ===== LOGO STYLING ===== */
+header nav .leftSide a#logoLink {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 calc(var(--padding-size) / 2);
+    transition: all var(--transition-time) ease;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    border: 1px solid transparent;
+}
+
+header nav .leftSide a#logoLink:hover {
+    background-color: var(--link-hover-bg-color);
+    transform: scale(1.05);
+    border-color: var(--border-color);
+}
+
+header nav .leftSide a#logoLink img#logoImg {
+    height: calc(var(--header-height) * 0.7);
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
+    transition: all var(--transition-time) ease;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+header nav .leftSide a#logoLink:hover img#logoImg {
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)) brightness(1.1);
+}
+
+/* ===== PROFILE DROPDOWN ===== */
 header #dropdown {
     position: relative;
     display: inline-block;
+    height: 100%;
+    margin-left: calc(var(--gap-size) / 2);
 }
 
-/* link styling */
 header #dropdown a#profile {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
     padding: 0 calc(var(--padding-size) / 2);
+    transition: all var(--transition-time) ease;
+    border-radius: var(--border-radius);
 }
 
-/* pfp image styling */
+header #dropdown a#profile:hover {
+    background-color: var(--link-hover-bg-color);
+    transform: scale(1.05);
+}
+
 header #dropdown a#profile img {
     border-radius: 50%;
     object-fit: cover;
     width: 40px;
     height: 40px;
     cursor: pointer;
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-time) ease;
 }
 
-/* div with links */
+header #dropdown a#profile:hover img {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(var(--text-color-rgb), 0.1);
+}
+
+/* ===== DROPDOWN CONTENT ===== */
 header #dropdown #dropdownContent {
     display: none;
     position: absolute;
-    right: 0; /* Align to right edge of parent #dropdown */
+    right: 0;
+    top: calc(100% + 5px);
     background-color: var(--div-bg-color);
     min-width: 160px;
     box-shadow: var(--box-shadow);
     z-index: 10;
     border-radius: var(--border-radius);
     border: var(--div-border);
+    overflow: hidden;
+    animation: dropdownSlide 0.2s ease-out;
 }
 
-/* links inside dropdown */
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 header #dropdown #dropdownContent > a {
-    color: var(--div-color); /* Use theme color instead of hardcoded black */
+    color: var(--div-color);
     padding: var(--padding-size) var(--padding-size);
     text-decoration: none;
     display: block;
+    transition: all var(--transition-time) ease;
+    border-bottom: 1px solid var(--border-color);
 }
 
-/* Add hover effect for dropdown items */
+header #dropdown #dropdownContent > a:last-child {
+    border-bottom: none;
+}
+
 header #dropdown #dropdownContent > a:hover {
     background-color: var(--link-hover-bg-color);
     color: var(--link-hover-color);
+    padding-left: calc(var(--padding-size) + 0.25rem);
 }
 
-/* First and last items should have rounded corners */
 header #dropdown #dropdownContent > a:first-child {
     border-top-left-radius: var(--border-radius);
     border-top-right-radius: var(--border-radius);
@@ -121,4 +204,65 @@ header #dropdown #dropdownContent > a:first-child {
 header #dropdown #dropdownContent > a:last-child {
     border-bottom-left-radius: var(--border-radius);
     border-bottom-right-radius: var(--border-radius);
+}
+
+/* ===== VISUAL SEPARATOR ===== */
+header nav .leftSide::after {
+    content: '';
+    width: 1px;
+    height: 60%;
+    background-color: var(--border-color);
+    opacity: 0.3;
+    margin: 0 calc(var(--gap-size) / 2);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    header nav {
+        gap: calc(var(--gap-size) / 2);
+    }
+    
+    header nav .leftSide {
+        gap: var(--gap-size); /* Reduce gap on mobile */
+    }
+    
+    header .links {
+        padding: 0 calc(var(--padding-size) / 1.5);
+        font-size: 0.9rem;
+    }
+    
+    header nav .leftSide a#logoLink img#logoImg {
+        height: calc(var(--header-height) * 0.6);
+        max-width: 120px;
+    }
+    
+    header #dropdown a#profile img {
+        width: 35px;
+        height: 35px;
+    }
+    
+    /* Hide visual separator on mobile */
+    header nav .leftSide::after {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        --header-height: 6vh;
+    }
+    
+    header nav .leftSide {
+        gap: calc(var(--gap-size) / 2); /* Even smaller gap on very small screens */
+    }
+    
+    header .links {
+        padding: 0 calc(var(--padding-size) / 2);
+        font-size: 0.8rem;
+    }
+    
+    header nav .leftSide a#logoLink img#logoImg {
+        height: calc(var(--header-height) * 0.5);
+        max-width: 100px;
+    }
 }

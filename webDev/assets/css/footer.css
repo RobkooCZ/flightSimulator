@@ -1,30 +1,330 @@
+/* ===== FOOTER CONTAINER ===== */
 footer {
-    background-color: var(--header-bg-color);
+    background: linear-gradient(135deg, var(--header-bg-color) 0%, var(--div-bg-color) 100%);
     color: var(--text-color);
-    border: var(--border);
-    border-radius: var(--border-radius);
-    padding: var(--padding-size);
-    box-shadow: var(--box-shadow);
-    text-align: center;
-    font-size: 14px;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    box-shadow: 
+        var(--box-shadow),
+        0 -10px 30px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    margin-top: 3rem;
     position: relative;
-    text-align: center;
-    margin-top: 2em;
-    font-size: 1.1em;
-    /* color: #888; */
+    border-top: 3px solid transparent;
+    background-clip: padding-box;
+    overflow: hidden;
 }
 
-.footerVersion {
-    display: inline-block;
+/* Gradient border effect */
+footer::before {
+    content: '';
     position: absolute;
-    bottom: 10px;
-    left: 10px;
-    padding: 2px 10px;
-    background: #222;
-    color: #fff;
-    border-radius: 6px;
-    font-size: 1em;
-    font-family: monospace;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-color), var(--navbar-active-color), var(--success-color));
+    z-index: 1;
+}
+
+/* ===== MAIN FOOTER CONTENT ===== */
+.footerContainer {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem 2rem 2rem 2rem;
+    flex-wrap: wrap;
+    gap: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* ===== FOOTER SECTIONS ===== */
+.footerSection {
+    flex: 1;
+    min-width: 250px;
+    padding: 0;
+    position: relative;
+}
+
+.footerSection h4 {
+    margin: 0 0 1.5rem 0;
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    font-weight: 600;
     letter-spacing: 1px;
-    vertical-align: middle;
+    text-transform: uppercase;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.footerSection h4::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-color), var(--navbar-active-color));
+    border-radius: 1px;
+}
+
+/* ===== BRANDING SECTION ===== */
+.footerSection.brand .footerLogo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 1rem;
+    color: var(--accent-color);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    letter-spacing: 1px;
+}
+
+.footerSection.brand .versionInfo {
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all var(--transition-time) ease;
+}
+
+.footerSection.brand .versionInfo:hover {
+    transform: translateX(5px);
+}
+
+.footerSection.brand .versionLabel {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    min-width: 80px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.footerSection.brand .footerVersion {
+    display: inline-block;
+    color: white;
+    background: linear-gradient(135deg, var(--accent-color), var(--navbar-active-color));
+    border-radius: calc(var(--border-radius) / 2);
+    font-size: 0.75rem;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 0.25rem 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: all var(--transition-time) ease;
+}
+
+.footerSection.brand .footerVersion:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.footerSection.brand .footerVersion.website {
+    background: linear-gradient(135deg, var(--info-color), var(--accent-color));
+}
+
+.footerSection.brand .footerVersion.game {
+    background: linear-gradient(135deg, var(--success-color), var(--warning-color));
+}
+
+.footerSection.brand .copyright {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    opacity: 0.7;
+    color: var(--text-color);
+    line-height: 1.4;
+}
+
+/* ===== LINKS SECTION ===== */
+.footerSection.footerLinks a {
+    color: var(--link-color);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0;
+    font-weight: 500;
+    transition: all var(--transition-time) ease;
+    position: relative;
+    border-radius: calc(var(--border-radius) / 2);
+    padding-left: 1rem;
+}
+
+.footerSection.footerLinks a::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all var(--transition-time) ease;
+    color: var(--accent-color);
+}
+
+.footerSection.footerLinks a:hover {
+    color: var(--link-hover-color);
+    background-color: var(--link-hover-bg-color);
+    transform: translateX(5px);
+    padding-left: 1.5rem;
+}
+
+.footerSection.footerLinks a:hover::before {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.footerSection.footerLinks a[target="_blank"]::after {
+    content: ' ↗';
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+/* ===== INFO SECTION ===== */
+.footerSection.info p {
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    opacity: 0.9;
+}
+
+.footerSection.info .techStack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.footerSection.info .tech {
+    background: rgba(var(--text-color-rgb), 0.1);
+    color: var(--accent-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: calc(var(--border-radius) / 2);
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(var(--text-color-rgb), 0.2);
+    transition: all var(--transition-time) ease;
+}
+
+.footerSection.info .tech:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--text-color-rgb), 0.2);
+}
+
+/* ===== FOOTER BOTTOM BAR ===== */
+.footerBottom {
+    background: rgba(var(--text-color-rgb), 0.05);
+    border-top: 1px solid rgba(var(--text-color-rgb), 0.1);
+    padding: 1rem 2rem;
+    text-align: center;
+}
+
+.footerBottom p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    color: var(--text-color);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .footerContainer {
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+        gap: 1.5rem;
+    }
+    
+    .footerSection {
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .footerContainer {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem 1rem 1rem 1rem;
+        gap: 2rem;
+    }
+    
+    .footerSection {
+        min-width: auto;
+        margin-bottom: 0;
+    }
+    
+    .footerSection h4::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .footerSection.footerLinks a {
+        text-align: center;
+        padding-left: 0;
+    }
+    
+    .footerSection.footerLinks a:hover {
+        padding-left: 0;
+        transform: translateY(-2px);
+    }
+    
+    .footerSection.footerLinks a::before {
+        display: none;
+    }
+    
+    .footerSection.brand .versionInfo {
+        justify-content: center;
+    }
+    
+    .footerSection.info .techStack {
+        justify-content: center;
+    }
+    
+    .footerBottom {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    footer {
+        margin-top: 2rem;
+    }
+    
+    .footerContainer {
+        padding: 1.5rem 0.5rem 1rem 0.5rem;
+    }
+    
+    .footerSection.brand .footerLogo {
+        font-size: 1.5rem;
+    }
+    
+    .footerSection h4 {
+        font-size: 1.1rem;
+    }
+    
+    .footerSection.brand .versionInfo {
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: center;
+    }
+    
+    .footerSection.brand .versionLabel {
+        min-width: auto;
+        text-align: center;
+    }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+    .footerSection.brand .versionInfo,
+    .footerSection.footerLinks a,
+    .footerSection.info .tech {
+        transition: none;
+    }
+}
+
+/* ===== DARK MODE SPECIFIC ADJUSTMENTS ===== */
+body.dark-theme .footerSection.brand .footerVersion {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+body.dark-theme .footerSection.brand .footerVersion:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }

@@ -123,7 +123,7 @@ function sanitizeInput(input){
      * // Triggered by button click
      */
     document.getElementById("submitActionForm").addEventListener("click", async function (){
-        // Example: get input values
+        // get input values
         const username = sanitizeInput(document.getElementById("username")?.value || "");
         const password = sanitizeInput(document.getElementById("password")?.value || "");
         const role = sanitizeInput(document.getElementById("role")?.value || "");
