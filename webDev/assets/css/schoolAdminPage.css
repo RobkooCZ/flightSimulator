@@ -1,4 +1,4 @@
-/* ===== MAIN CONTENT CONTAINER ===== */
+/* ===== BASE STYLES ===== */
 body {
     background: linear-gradient(135deg, var(--body-bg-color) 0%, var(--header-bg-color) 100%);
     min-height: 100vh;
@@ -11,7 +11,6 @@ main {
     min-height: calc(100vh - var(--header-height) - 4rem);
 }
 
-/* ===== CONTENT WRAPPER ===== */
 #content {
     display: flex;
     flex-direction: column;
@@ -22,7 +21,7 @@ main {
     padding: 1rem 0;
 }
 
-/* ===== ADMIN HEADER ===== */
+/* ===== ADMIN PAGE HEADER ===== */
 .adminPageHeader {
     background: linear-gradient(135deg, var(--div-bg-color), var(--header-bg-color));
     border: var(--div-border);
@@ -84,23 +83,6 @@ main {
     }
 }
 
-/* ===== STATIC TABLE SECTION ===== */
-#staticTable {
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-#staticTable::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--info-color), var(--success-color));
-    z-index: 1;
-}
-
 .sectionHeader {
     display: flex;
     flex-direction: column;
@@ -119,7 +101,273 @@ main {
     text-transform: uppercase;
 }
 
-/* ===== SELECT DROPDOWN STYLING ===== */
+.sectionHeader h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    text-align: center;
+    margin: 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* ===== STATIC TABLE SECTION ===== */
+#staticTable {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+#staticTable::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--info-color), var(--success-color));
+    z-index: 1;
+}
+
+/* ===== FILTER SECTION ===== */
+.filterSection {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: rgba(var(--info-color-rgb), 0.05);
+    border: 1px solid rgba(var(--info-color-rgb), 0.2);
+    border-radius: var(--border-radius);
+}
+
+.filterControls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1rem;
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filterGroup label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.filterGroup select,
+.filterGroup input {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    font-size: 0.9rem;
+    transition: all var(--transition-time) ease;
+}
+
+.filterGroup select:hover,
+.filterGroup input:hover {
+    border-color: var(--info-color);
+}
+
+.filterGroup select:focus,
+.filterGroup input:focus {
+    outline: none;
+    border-color: var(--info-color);
+    box-shadow: 0 0 0 2px rgba(var(--info-color-rgb), 0.2);
+}
+
+.filterActions {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+}
+
+.filterActions button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-time) ease;
+    font-size: 0.9rem;
+}
+
+#applyFilter {
+    background: linear-gradient(135deg, var(--info-color), var(--accent-color));
+    color: white;
+}
+
+#applyFilter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--info-color-rgb), 0.3);
+}
+
+#clearFilter {
+    background: linear-gradient(135deg, var(--warning-color), var(--error-color));
+    color: white;
+}
+
+#clearFilter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--warning-color-rgb), 0.3);
+}
+
+.filterStatus {
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: var(--border-radius);
+    background-color: rgba(var(--text-color-rgb), 0.05);
+}
+
+.filter-active {
+    background-color: rgba(var(--success-color-rgb), 0.1) !important;
+    color: var(--success-color) !important;
+    border: 1px solid rgba(var(--success-color-rgb), 0.3);
+}
+
+/* ===== ACTION TABLE SECTION ===== */
+#actionTable {
+    padding: 1.5rem;
+}
+
+#actionTable::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--warning-color), var(--failure-color));
+    z-index: 1;
+}
+
+/* ===== TWO TABLES SECTION ===== */
+#twoTablesSection {
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+#twoTablesSection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--warning-color), var(--error-color));
+    z-index: 1;
+}
+
+.twoTablesControls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: end;
+}
+
+.tableSelectGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tableSelectGroup label {
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.tableSelectGroup select {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    font-weight: 500;
+    transition: all var(--transition-time) ease;
+}
+
+.tableSelectGroup select:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+}
+
+#loadTwoTablesBtn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--accent-color), var(--success-color));
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-time) ease;
+    box-shadow: 0 2px 8px rgba(var(--accent-color-rgb), 0.3);
+}
+
+#loadTwoTablesBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(var(--accent-color-rgb), 0.4);
+}
+
+.twoTablesContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.tableColumn {
+    background-color: var(--div-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.tableColumn h3 {
+    background: linear-gradient(135deg, var(--info-color), var(--accent-color));
+    color: white;
+    margin: 0;
+    padding: 1rem;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.tableColumn .tableDisplay {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.joinedTableContainer {
+    background-color: var(--div-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.joinedTableContainer h3 {
+    background: linear-gradient(135deg, var(--success-color), var(--warning-color));
+    color: white;
+    margin: 0;
+    padding: 1rem;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.joinedTableContainer .tableDisplay {
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+/* ===== COMMON DROPDOWN STYLING ===== */
 select[name="tableSelect"],
 select[name="actionSelect"] {
     padding: 0.75rem 1.25rem;
@@ -164,7 +412,7 @@ select option {
     font-weight: 500;
 }
 
-/* ===== UNIFIED TABLE CONTAINER STYLING ===== */
+/* ===== TABLE CONTAINERS ===== */
 #tableDisplay,
 #actionDisplay {
     background-color: var(--div-bg-color);
@@ -179,7 +427,12 @@ select option {
     min-width: 100%;
 }
 
-/* ===== UNIFIED TABLE STYLING ===== */
+.tablePrintout {
+    width: 100%;
+    overflow: visible;
+}
+
+/* ===== TABLE STYLING ===== */
 #tableDisplay .tablePrintout,
 #actionDisplay table,
 #actionDisplay .tableForm table {
@@ -241,23 +494,71 @@ select option {
     background-color: rgba(var(--text-color-rgb), 0.02);
 }
 
-/* ===== ACTION TABLE SECTION ===== */
-#actionTable {
-    padding: 1.5rem;
-}
-
-#actionTable::before {
-    content: '';
+/* ===== ROW ACTION BUTTONS ===== */
+.row-actions {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--warning-color), var(--failure-color));
-    z-index: 1;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 5px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 10;
 }
 
-/* ===== FORM INPUT STYLING ===== */
+#actionDisplay tr {
+    position: relative;
+}
+
+#actionDisplay tr:hover .row-actions {
+    opacity: 1;
+    visibility: visible;
+}
+
+.row-action-btn {
+    padding: 4px 8px;
+    border: none;
+    border-radius: calc(var(--border-radius) / 2);
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 45px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.edit-btn {
+    background: linear-gradient(135deg, var(--info-color) 0%, var(--success-color) 100%);
+    color: white;
+}
+
+.edit-btn:hover {
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--info-color) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(var(--info-color), 0.3);
+}
+
+.delete-btn {
+    background: linear-gradient(135deg, var(--failure-color) 0%, var(--warning-color) 100%);
+    color: white;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(135deg, var(--warning-color) 0%, var(--failure-color) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(var(--failure-color), 0.3);
+}
+
+#actionDisplay td:last-child {
+    padding-right: 120px;
+    position: relative;
+}
+
+/* ===== FORM INPUTS ===== */
 .addInputs {
     width: 100%;
     padding: 0.4rem 0.6rem;
@@ -353,7 +654,7 @@ select.addInputs {
     transform: translateY(-1px) scale(0.98);
 }
 
-/* ===== UNIFIED SCROLLBARS ===== */
+/* ===== SCROLLBARS ===== */
 #tableDisplay::-webkit-scrollbar,
 #actionDisplay::-webkit-scrollbar {
     width: 8px;
@@ -379,7 +680,56 @@ select.addInputs {
     background: linear-gradient(135deg, var(--info-color), var(--accent-color));
 }
 
+/* ===== UTILITY CLASSES ===== */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    color: var(--accent-color);
+}
+
+.loading::after {
+    content: '';
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(var(--text-color-rgb), 0.1);
+    border-left-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.no-data, .error {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-color);
+    font-style: italic;
+}
+
+.error {
+    color: var(--error-color);
+}
+
+/* ===== DARK MODE SPECIFICS ===== */
+body.dark-theme #tableDisplay .tablePrintout th,
+body.dark-theme #actionDisplay th {
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme #tableDisplay .tablePrintout tr:hover td,
+body.dark-theme #actionDisplay tr:hover td {
+    box-shadow: inset 0 0 0 1px rgba(var(--accent-color), 0.3);
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
+
+/* Large tablets and small desktops */
 @media (max-width: 1024px) {
     main {
         padding: 0 1rem;
@@ -387,7 +737,8 @@ select.addInputs {
     }
     
     #staticTable,
-    #actionTable {
+    #actionTable,
+    #twoTablesSection {
         padding: 1.25rem;
     }
     
@@ -406,6 +757,7 @@ select.addInputs {
     }
 }
 
+/* Tablets */
 @media (max-width: 768px) {
     .adminPageHeader h1 {
         font-size: 1.7rem;
@@ -416,7 +768,8 @@ select.addInputs {
     }
     
     #staticTable,
-    #actionTable {
+    #actionTable,
+    #twoTablesSection {
         padding: 1rem;
     }
     
@@ -454,8 +807,42 @@ select.addInputs {
         font-size: 0.75rem;
         min-height: 24px;
     }
+    
+    /* Filter responsive */
+    .filterControls {
+        grid-template-columns: 1fr;
+    }
+    
+    .filterActions {
+        flex-direction: row;
+    }
+    
+    .filterActions button {
+        flex: 1;
+    }
+    
+    /* Two tables responsive */
+    .twoTablesContainer {
+        grid-template-columns: 1fr;
+    }
+    
+    .twoTablesControls {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Row action buttons responsive */
+    .row-action-btn {
+        padding: 3px 6px;
+        font-size: 0.65rem;
+        min-width: 35px;
+    }
+    
+    #actionDisplay td:last-child {
+        padding-right: 90px;
+    }
 }
 
+/* Mobile phones */
 @media (max-width: 480px) {
     main {
         margin: 0.5rem auto;
@@ -463,7 +850,8 @@ select.addInputs {
     
     .adminPageHeader,
     #staticTable,
-    #actionTable {
+    #actionTable,
+    #twoTablesSection {
         padding: 0.75rem;
     }
     
@@ -471,7 +859,8 @@ select.addInputs {
         font-size: 1.4rem;
     }
     
-    .sectionHeader label {
+    .sectionHeader label,
+    .sectionHeader h2 {
         font-size: 1rem;
     }
     
@@ -490,6 +879,25 @@ select.addInputs {
     #actionDisplay {
         max-height: 250px;
     }
+    
+    /* Row action buttons on mobile */
+    .row-actions {
+        position: static;
+        transform: none;
+        opacity: 1;
+        visibility: visible;
+        margin-top: 5px;
+    }
+    
+    #actionDisplay td:last-child {
+        padding-right: 0.5rem;
+    }
+    
+    .row-action-btn {
+        font-size: 0.6rem;
+        padding: 2px 4px;
+        min-width: 30px;
+    }
 }
 
 /* ===== ACCESSIBILITY ===== */
@@ -502,40 +910,4 @@ select.addInputs {
         transform: none;
         transition: none;
     }
-}
-
-/* ===== LOADING STATES ===== */
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-    color: var(--accent-color);
-}
-
-.loading::after {
-    content: '';
-    width: 30px;
-    height: 30px;
-    border: 3px solid rgba(var(--text-color-rgb), 0.1);
-    border-left-color: var(--accent-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* ===== DARK MODE SPECIFIC ===== */
-body.dark-theme #tableDisplay .tablePrintout th,
-body.dark-theme #actionDisplay th {
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1);
-}
-
-body.dark-theme #tableDisplay .tablePrintout tr:hover td,
-body.dark-theme #actionDisplay tr:hover td {
-    box-shadow: inset 0 0 0 1px rgba(var(--accent-color), 0.3);
 }

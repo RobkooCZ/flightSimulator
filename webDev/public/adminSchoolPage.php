@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.8
+ * @version 0.7.9
  * @see TableRenderer, Table, Database, AuthorizationException, AppException, User
  * @todo Add more admin features and validation
  */
@@ -106,6 +106,51 @@ require_once __DIR__ . '/../assets/constants/ConstantsLoader.php';
                 ?>
             </select>
         </div>
+        
+        <!-- NEW FILTER SECTION -->
+        <div class="filterSection">
+            <div class="filterControls">
+                <div class="filterGroup">
+                    <label for="filterColumn">Filter by:</label>
+                    <select name="filterColumn" id="filterColumn">
+                        <option value="" disabled selected>Select column first</option>
+                        <option value="id">ID</option>
+                        <option value="username">Username</option>
+                        <option value="role">Role</option>
+                        <option value="status">Status</option>
+                        <option value="ipAddress">IP Address</option>
+                    </select>
+                </div>
+                
+                <div class="filterGroup">
+                    <label for="filterOperator">Operator:</label>
+                    <select name="filterOperator" id="filterOperator">
+                        <option value="=" selected>=</option>
+                        <option value="LIKE">Contains</option>
+                        <option value="!=">≠</option>
+                        <option value=">">></option>
+                        <option value="<"><</option>
+                        <option value=">=">≥</option>
+                        <option value="<=">≤</option>
+                    </select>
+                </div>
+                
+                <div class="filterGroup">
+                    <label for="filterValue">Value:</label>
+                    <input type="text" name="filterValue" id="filterValue" placeholder="Enter filter value">
+                </div>
+                
+                <div class="filterActions">
+                    <button type="button" id="applyFilter">Apply Filter</button>
+                    <button type="button" id="clearFilter">Clear Filter</button>
+                </div>
+            </div>
+            
+            <div class="filterStatus">
+                <span id="filterStatusText">No filter applied</span>
+            </div>
+        </div>
+        
         <div id="<?= $consts->adminSchool->content->staticTable->display ?>" class="tablePrintout"></div>
     </section>
 
@@ -123,6 +168,61 @@ require_once __DIR__ . '/../assets/constants/ConstantsLoader.php';
         </div>
         <div id="<?= $consts->adminSchool->content->actionTable->display ?>" class="tableForm"></div>
         <button type="button" id="submitActionForm">Execute Action</button>
+    </section>
+    <section id="twoTablesSection" class="adminSection">
+        <div class="sectionHeader">
+            <h2>Connected Tables View</h2>
+            <div class="twoTablesControls">
+                <div class="tableSelectGroup">
+                    <label for="primaryTableSelect">Primary Table:</label>
+                    <select name="primaryTableSelect" id="primaryTableSelect">
+                        <?php
+                            $tableNames = Database::getInstance()->getTableNames();
+                            $dropdownHtml = TableRenderer::getTableNamesDropdown($tableNames);
+                            echo $dropdownHtml !== false
+                                ? $dropdownHtml
+                                : "<option value='' disabled>Error loading table names</option>";
+                        ?>
+                    </select>
+                </div>
+                
+                <div class="tableSelectGroup">  
+                    <label for="secondaryTableSelect">Secondary Table:</label>
+                    <select name="secondaryTableSelect" id="secondaryTableSelect">
+                        <?php echo $dropdownHtml !== false ? $dropdownHtml : "<option value='' disabled>Error loading table names</option>"; ?>
+                    </select>
+                </div>
+                
+                <div class="tableSelectGroup">
+                    <label for="joinColumnSelect">Join Column:</label>
+                    <select name="joinColumnSelect" id="joinColumnSelect">
+                        <option value="" disabled selected>Select tables first</option>
+                        <option value="id">ID</option>
+                        <option value="userId">User ID</option>
+                        <option value="uid">UID</option>
+                    </select>
+                </div>
+                
+                <button type="button" id="loadTwoTablesBtn">Load Connected Tables</button>
+            </div>
+        </div>
+        
+        <div class="twoTablesContainer">
+            <div class="tableColumn">
+                <h3 id="primaryTableTitle">Primary Table</h3>
+                <div id="primaryTableDisplay" class="tableDisplay"></div>
+            </div>
+            
+            <div class="tableColumn">
+                <h3 id="secondaryTableTitle">Secondary Table</h3>
+                <div id="secondaryTableDisplay" class="tableDisplay"></div>
+            </div>
+        </div>
+        
+        <div class="joinedTableContainer">
+            <h3>Joined Table View</h3>
+            <div id="joinedTableDisplay" class="tableDisplay"></div>
+        </div>
     </section>
 </div>
 

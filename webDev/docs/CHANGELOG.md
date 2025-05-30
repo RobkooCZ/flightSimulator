@@ -53,14 +53,24 @@ It also includes a short name for the update.
     - [0.7.6](#version-076---06052025) - "User data handling expansion"
     - [0.7.7](#version-077---28052025) - "Profile Tab Addition"
     - [0.7.8](#version-078---30052025) - "Huge Front-End Update"
+    - [0.7.9](#version-079---30052025) - "School admin page expansion"
 
 ---
 
 ## ALPHA VERSIONS
 
+### [VERSION 0.7.9] - 30.05.2025
+
+#### Added
+- Comprehensive filtering to the admin school page
+- Display of two joined tables
+- very simply styled, quickly put together editing and deleted of selected rows from a selected table (will be polished in upcoming updates)
+- styling for all the new features
+- .htaccess file for the free-hosted website to use my custom `router.php`
+
 ### [VERSION 0.7.8] - 30.05.2025
 
-### Added
+#### Added
 - a logo (finally...)
 - a simple check on the profile page to prevent access when not logged in
 - a home page which only logged in users can access
@@ -76,7 +86,7 @@ It also includes a short name for the update.
     - FAQ
     - buttons for navigation
 
-### Changed
+#### Changed
 - Improved the footer to show more info, such as game and website versions, links to other stuff and miscellaneous info
 - Improved `theme.css`
     - Better grouped vars
@@ -87,7 +97,7 @@ It also includes a short name for the update.
 - Improved styling across all public pages
 - Tweaked the HTML structure to compliment the new styles
 
-### Fixed
+#### Fixed
 - Fixed an issue where the `antiquewhite` color would show in the profile picture instead of the div background color
 - Fixed issues with styling in the CGT theme
 - Fixed a bug where `AdminSchoolAjax.php` couldn't find the constants file.

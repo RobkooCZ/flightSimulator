@@ -12,7 +12,7 @@
  * @package UI
  * @author Robkoo
  * @license TBD
- * @version 0.7.8
+ * @version 0.7.9
  * @see Table, Logger, RoleManager, ConfigurationException, ValidationException, DatabaseException, PHPException
  * @todo Add more rendering options and validation
  */
@@ -331,46 +331,99 @@ class TableRenderer {
 
         echo "<tr>";
 
-        foreach ($headerData as $header){
-            $fieldName = $header['Field'];
-
-            switch ($fieldName){
-                case "id":
-                    $id = $this->table->getNextId();
-                    echo '<td><input class="addInputs noBorder" type="text" pattern="[0-9]*" name="' . $fieldName . '" value="' . $id . '" disabled></td>';
-                    break;
-
-                case "profilePicture":
-                case "lastActivityAt":
-                case "createdAt":
-                case "lastLoginAt":
-                case "updatedAt":
-                case "salt":
-                    echo '<td><input class="addInputs noBorder" type="text" name="' . $fieldName . '" value="---------" disabled></td>';
-                    break;
-
-                case "role":
-                    $rolesDropdown = $this->getRolesDropdown($userId);
-                    if ($rolesDropdown !== false){
-                        echo '<td><select id="role" class="addInputs noBorder" name="role">' . $rolesDropdown . '</select></td>';
+        switch ($action){
+            case 'add':
+                foreach ($headerData as $header){
+                    $fieldName = $header['Field'];
+        
+                    switch ($fieldName){
+                        case "id":
+                            $id = $this->table->getNextId();
+                            echo '<td><input class="addInputs noBorder" type="text" pattern="[0-9]*" name="' . $fieldName . '" value="' . $id . '" disabled></td>';
+                            break;
+        
+                        case "profilePicture":
+                        case "lastActivityAt":
+                        case "createdAt":
+                        case "lastLoginAt":
+                        case "updatedAt":
+                        case "salt":
+                            echo '<td><input class="addInputs noBorder" type="text" name="' . $fieldName . '" value="---------" disabled></td>';
+                            break;
+        
+                        case "role":
+                            $rolesDropdown = $this->getRolesDropdown($userId);
+                            if ($rolesDropdown !== false){
+                                echo '<td><select id="role" class="addInputs noBorder" name="role">' . $rolesDropdown . '</select></td>';
+                            }
+                            else {
+                                echo '<td><input class="addInputs noBorder" type="text" name="role" value="Error loading roles" disabled></td>';
+                            }
+                            break;
+        
+                        case "status":
+                            echo '<td><input class="addInputs noBorder" type="text" name="status" value="active" disabled></td>';
+                            break;
+        
+                        case "failedLoginAttempts":
+                            echo '<td><input class="addInputs noBorder" type="text" name="failedLoginAttempts" value="0" disabled></td>';
+                            break;
+        
+                        default:
+                            echo '<td><input class="addInputs" id="' . $fieldName . '" name="' . $fieldName . '"></td>';
+                            break;
                     }
-                    else {
-                        echo '<td><input class="addInputs noBorder" type="text" name="role" value="Error loading roles" disabled></td>';
+                }
+                break;
+            case 'edit':
+                // For edit, show all current data in the table with input fields
+                foreach ($headerData as $header){
+                    $fieldName = $header['Field'];
+                    
+                    switch ($fieldName){
+                        case "id":
+                            echo '<td><input class="editInputs" type="hidden" id="' . $fieldName . '" name="' . $fieldName . '" value=""><span class="field-display">Will be filled when row is selected</span></td>';
+                            break;
+                        
+                        case "profilePicture":
+                        case "lastActivityAt":
+                        case "createdAt":
+                        case "lastLoginAt":
+                        case "updatedAt":
+                        case "salt":
+                            echo '<td><input class="editInputs noBorder" type="text" name="' . $fieldName . '" value="Auto-managed" disabled></td>';
+                            break;
+                        
+                        case "role":
+                            $rolesDropdown = $this->getRolesDropdown($userId);
+                            if ($rolesDropdown !== false){
+                                echo '<td><select id="role" class="editInputs" name="role">' . $rolesDropdown . '</select></td>';
+                            }
+                            else {
+                                echo '<td><input class="editInputs noBorder" type="text" name="role" value="Error loading roles" disabled></td>';
+                            }
+                            break;
+                        
+                        case "password":
+                            echo '<td><input class="editInputs" type="password" id="' . $fieldName . '" name="' . $fieldName . '" placeholder="Leave blank to keep current"></td>';
+                            break;
+                        
+                        default:
+                            echo '<td><input class="editInputs" id="' . $fieldName . '" name="' . $fieldName . '" value=""></td>';
+                            break;
                     }
-                    break;
-
-                case "status":
-                    echo '<td><input class="addInputs noBorder" type="text" name="status" value="active" disabled></td>';
-                    break;
-
-                case "failedLoginAttempts":
-                    echo '<td><input class="addInputs noBorder" type="text" name="failedLoginAttempts" value="0" disabled></td>';
-                    break;
-
-                default:
-                    echo '<td><input class="addInputs" id="' . $fieldName . '" name="' . $fieldName . '"></td>';
-                    break;
-            }
+                }
+                break;
+                
+            case 'delete':
+                // For delete, show read-only fields
+                foreach ($headerData as $header){
+                    $fieldName = $header['Field'];
+                    echo '<td><input class="deleteInputs noBorder" type="text" id="' . $fieldName . '" name="' . $fieldName . '" value="" readonly></td>';
+                }
+                break;
+            default:
+                return false;
         }
 
         echo "</tr>";

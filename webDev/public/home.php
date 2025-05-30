@@ -9,7 +9,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.8
+ * @version 0.7.9
  * @see home.js
  * @todo Add features marked as `TBD`
  */
@@ -82,10 +82,10 @@ include __DIR__ . '/../templates/header.php';
                     <tr>
                         <td>Server</td>
                         <td class="statusCell">
-                            <span class="statusDot offline"></span>
-                            Offline
+                            <span class="statusDot online"></span>
+                            Online
                         </td>
-                        <td>Locally hosted</td>
+                        <td></td>
                     </tr>
                     <tr>
                         <td>Database</td>
@@ -154,116 +154,118 @@ include __DIR__ . '/../templates/header.php';
                 </div>
                 <div id="tabContent">
                     <div id="webLog" class="visible">
-                        <h2>VERSION 0.7.7 - 28.05.2025</h2>
-                        <h3>Added</h3>
-                        <ul>
-                            <li>profile tab
-                                <ul>
-                                    <li>contains data about the user</li>
-                                    <li>forms to change some data</li>
-                                    <li>statistics about the game (none yet as the game isn't nearly done)</li>
-                                </ul>
-                            </li>
-                            <li>profile picture functionality with either a link to an image or an image</li>
-                            <li>classes with methods to handle the upload,validation and storage of profile pictures</li>
-                            <li>styling for the profile page</li>
-                            <li>AJAX-based profile picture upload (file and link support)</li>
-                            <li>backend endpoint for profile picture upload (<code>profileAjax.php</code>)</li>
-                            <li>improved documentation and code comments for profile-related files</li>
-                            <li>fallback/default profile picture if none is set</li>
-                            <li>modal for profile picture upload with validation and error messages</li>
-                            <li>A character limit to the username.
-                                <ul>
-                                    <li>Minimum length: 3 characters</li>
-                                    <li>Maximum length: 20 characters</li>
-                                </ul>
-                            </li>
-                            <li>Input fields to change your username or bio</li>
-                            <li>Bio</li>
-                            <li>validation checks on both the frontend and backend for data changing</li>
-                        </ul>
+                        <h2>Alpha v0.7.9 - 30.05.2025</h2>
+                            <h3>Added</h3>
+                            <ul>
+                                <li>Comprehensive filtering to the admin school page</li>
+                                <li>Display of two joined tables</li>
+                                <li>very simply styled, quickly put together editing and deleted of selected rows from a selected table (will be polished in upcoming updates)</li>
+                                <li>styling for all the new features</li>
+                            </ul>
 
-                        <h3>Changed</h3>
-                        <ul>
-                            <li>header reworked to now include profile and logout under the user's profile picture in the navbar
-                                <ul>
-                                    <li>on pfp click, dropdown shows with those options</li>
-                                </ul>
-                            </li>
-                            <li>improved file structure for profile page assets</li>
-                            <li>updated profile page to use new AJAX and backend logic for profile picture</li>
-                            <li>improved error handling and logging for profile picture upload</li>
-                        </ul>
+                            <hr>
 
-                        <h3>Fixed</h3>
-                        <ul>
-                            <li>bug where backend would not always return JSON on error</li>
-                        </ul>
+                            <h2>Alpha v0.7.8 - 30.05.2025</h2>
+                            <h3>Added</h3>
+                            <ul>
+                                <li>a logo (finally...)</li>
+                                <li>a simple check on the profile page to prevent access when not logged in</li>
+                                <li>a home page which only logged in users can access
+                                    <ul>
+                                        <li>as of right now doesn't contain much</li>
+                                        <li>only templates/prototypes for when the game will actually be playable and the home page would gain meaning</li>
+                                        <li>info about the server (again, dummy for now)</li>
+                                    </ul>
+                                </li>
+                                <li>box shadow to profile divs</li>
+                                <li>proper, standardized styling for the home page</li>
+                                <li>added general styling to the table in the admin page</li>
+                                <li>a proper landing page
+                                    <ul>
+                                        <li>hero section</li>
+                                        <li>features section</li>
+                                        <li>FAQ</li>
+                                        <li>buttons for navigation</li>
+                                    </ul>
+                                </li>
+                            </ul>
 
-                        <hr>
+                            <h3>Changed</h3>
+                            <ul>
+                                <li>Improved the footer to show more info, such as game and website versions, links to other stuff and miscellaneous info</li>
+                                <li>Improved <code>theme.css</code>
+                                    <ul>
+                                        <li>Better grouped vars</li>
+                                        <li>Some new vars</li>
+                                        <li>Different, better colors
+                                            <ul>
+                                                <li>themes were modified, the dark theme was changed the most for a more darker-blue style</li>
+                                            </ul>
+                                        </li>
+                                        <li>Better general styles</li>
+                                    </ul>
+                                </li>
+                                <li>Improved styling across all public pages</li>
+                                <li>Tweaked the HTML structure to compliment the new styles</li>
+                            </ul>
 
-                        <h2>VERSION 0.7.6 - 06.05.2025</h2>
-                        <h3>Added</h3>
-                        <ul>
-                            <li>Methods in <code>Users</code> to:
-                                <ul>
-                                    <li>retrieve the user's IPv4 address</li>
-                                    <li>validate the user's IPv4 address</li>
-                                    <li>add it to the database and check if the database IP is the same or different than the user's IPv4 address</li>
-                                </ul>
-                            </li>
-                            <li>New class <code>UserAgent</code>, which:
-                                <ul>
-                                    <li>has methods to:
-                                        <ul>
-                                            <li>retrieve user agent data</li>
-                                            <li>parse user agent data</li>
-                                            <li>save it into the database (table userAgents) if not previously saved</li>
-                                            <li>log any new user agent data</li>
-                                        </ul>
-                                    </li>
-                                    <li>holds UA data in a singleton pattern for each logged in user</li>
-                                </ul>
-                            </li>
-                            <li>Getters in <code>Users</code> to be able to get the new properties</li>
-                            <li><em>Basic</em> anti bot and anti script defense in <code>router.php</code></li>
-                            <li>one method to update the db with one query after login (IP, status, failed logins, last login, last activity)</li>
-                            <li>lastLoginAt and failedLoginAttempts functionality
-                                <ul>
-                                    <li>very basic right now, failedLoginAttempts doesn't time you out or anything so far</li>
-                                </ul>
-                            </li>
-                            <li>on logout reset failedLoginAttempts</li>
-                            <li>safeguards for the new functionality (checking failedLoginAttempts from the db call and more)</li>
-                            <li>logging suspicious UA/IP</li>
-                        </ul>
+                            <h3>Fixed</h3>
+                            <ul>
+                                <li>Fixed an issue where the <code>antiquewhite</code> color would show in the profile picture instead of the div background color</li>
+                                <li>Fixed issues with styling in the CGT theme</li>
+                                <li>Fixed a bug where <code>AdminSchoolAjax.php</code> couldn't find the constants file.</li>
+                            </ul>
 
-                        <h3>Fixed</h3>
-                        <ul>
-                            <li>a bug where if you selected a new table on <code>adminSchoolPage.php</code>, it wouldn't accordingly update the action form below</li>
-                        </ul>
+                            <hr>
 
-                        <hr>
+                            <h2>Alpha v0.7.7 - 28.05.2025</h2>
+                            <h3>Added</h3>
+                            <ul>
+                                <li>profile tab
+                                    <ul>
+                                        <li>contains data about the user</li>
+                                        <li>forms to change some data</li>
+                                        <li>statistics about the game (none yet as the game isn't nearly done)</li>
+                                    </ul>
+                                </li>
+                                <li>profile picture functionality with either a link to an image or an image</li>
+                                <li>classes with methods to handle the upload,validation and storage of profile pictures</li>
+                                <li>styling for the profile page</li>
+                                <li>AJAX-based profile picture upload (file and link support)</li>
+                                <li>backend endpoint for profile picture upload (<code>profileAjax.php</code>)</li>
+                                <li>improved documentation and code comments for profile-related files</li>
+                                <li>fallback/default profile picture if none is set</li>
+                                <li>modal for profile picture upload with validation and error messages</li>
+                                <li>A character limit to the username.
+                                    <ul>
+                                        <li>Minimum length: 3 characters</li>
+                                        <li>Maximum length: 20 characters</li>
+                                    </ul>
+                                </li>
+                                <li>Input fields to change your username or bio</li>
+                                <li>Bio</li>
+                                <li>validation checks on both the frontend and backend for data changing</li>
+                            </ul>
 
-                        <h2>VERSION 0.7.5 - 29.04.2025</h2>
-                        <h3>Changed</h3>
-                        <ul>
-                            <li>Moved AJAX logic from header.php to a separate JS file
-                                <blockquote>(note: I should've done this in Alpha v0.7.2)</blockquote>
-                            </li>
-                            <li>Moved PHP AJAX receiving backend to a separate files
-                                <blockquote>(note: also should've been done in Alpha v0.7.2)</blockquote>
-                            </li>
-                        </ul>
+                            <h3>Changed</h3>
+                            <ul>
+                                <li>header reworked to now include profile and logout under the user's profile picture in the navbar
+                                    <ul>
+                                        <li>on pfp click, dropdown shows with those options</li>
+                                    </ul>
+                                </li>
+                                <li>improved file structure for profile page assets</li>
+                                <li>updated profile page to use new AJAX and backend logic for profile picture</li>
+                                <li>improved error handling and logging for profile picture upload</li>
+                            </ul>
 
-                        <h3>Fixed</h3>
-                        <ul>
-                            <li>Wrong comments in JS files</li>
-                        </ul>
-                    </div>
-
+                            <h3>Fixed</h3>
+                            <ul>
+                                <li>bug where backend would not always return JSON on error</li>
+                            </ul>
+                        </div>
                     <div id="gameLog">
-                        <h2>Version 0.3.3 - 06.03.2025</h2>
+                        <h2>Alpha v0.3.3 - 06.03.2025</h2>
                         <h3>Added</h3>
                         <ul>
                             <li>Fuel capacity, fuel burn, mass lowering when fuel burns</li>
@@ -289,7 +291,7 @@ include __DIR__ . '/../templates/header.php';
 
                         <hr>
 
-                        <h2>Version 0.3.2 - 02.03.2025</h2>
+                        <h2>Alpha v0.3.2 - 02.03.2025</h2>
                         <h3>Added</h3>
                         <ul>
                             <li>Logger.c (/.h) for easier debugging and logging of values</li>
@@ -329,7 +331,7 @@ include __DIR__ . '/../templates/header.php';
 
                         <hr>
 
-                        <h2>Version 0.3.1 - 28.02.2025</h2>
+                        <h2>Alpha v0.3.1 - 28.02.2025</h2>
                         <h3>Added</h3>
                         <ul>
                             <li>Gauge for speed

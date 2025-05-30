@@ -1,16 +1,16 @@
 <?php
 /**
- * Action Script
+ * Action ScripAddresst
  *
  * Handles AJAX actions for user and table management (add, edit, delete, etc.).
  * Processes POST requests for admin/school admin interfaces.
  *
- * @file actionScript.php
+ * @file actionScripAddresst.php
  * @since 0.1
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.3
+ * @version 0.7.9
  * @see Database, User, AppException, DatabaseException, PHPException
  * @todo Add more actions (edit, delete), validation, and error handling
  */
@@ -28,17 +28,6 @@ use WebDev\Exception\PHPException;
 
 // load the appexception class and all its subclasses
 AppException::init();
-
-// global handler for any thrown exceptions
-set_exception_handler(function (Throwable $ae){
-    if (AppException::globalHandle($ae)){ // appException or its subclasses
-        // error page or smth would go here (todo) for now just exit the script
-        exit;
-    }
-    else { // anything but appException and its subclasses
-        error_log($ae->getMessage()); // temporary
-    }
-});
 
 // get a file wide db conn
 $db = Database::getInstance();
@@ -61,14 +50,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
                 // Get data
                 $tableIdentifier = htmlspecialchars(urldecode($_POST['tableName']));
                 $username = htmlspecialchars(urldecode($_POST['username']));
+                $bio = htmlspecialchars(urldecode($_POST['bio']));
+                $ipAddress = htmlspecialchars(urldecode($_POST['ipAddress']));
                 $password = htmlspecialchars(urldecode($_POST['password']));
                 $role = htmlspecialchars(urldecode($_POST['role']));
 
                 // Check if the table exists; if it doesn't, throw an exception
                 if (!$db->tableExists($tableIdentifier)){
                     throw new DatabaseException(
-                        "Table '{$tableIdentifier}' doesn't exist.",
-                        400 // Bad Request
+                        "Table '{$tableIdentifier}' does not exist."
                     );
                 }
 
@@ -89,6 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
                 // Prepare parameter array
                 $parameters = [
                     ':username' => $username,
+                    ':bio' => $bio,
+                    ':ipAddress' => $ipAddress,
                     ':password' => $passwordHash,
                     ':salt' => $salt,
                     ':role' => $role,
@@ -97,8 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 
                 // Execute query; if it fails, throw an exception
                 if (!$db->execute(
-                    "INSERT INTO users (username, password, salt, role, status, lastActivityAt, createdAt, updatedAt) 
-                    VALUES (:username, :password, :salt, :role, :status, NOW(), NOW(), NOW())",
+                    "INSERT INTO users (username, bio, ipAddress, password, salt, role, status, lastActivityAt, createdAt, updatedAt) 
+                    VALUES (:username, :bio, :ipAddress, :password, :salt, :role, :status, NOW(), NOW(), NOW())",
                     $parameters
                 )){
                     throw new DatabaseException(
@@ -106,7 +98,103 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
                         500 // Internal Server Error
                     );
                 }
+                
+                echo json_encode(['success' => true, 'message' => 'Record added successfully']);
                 break;
+
+            case 'edit':
+                // Get data for editing
+                $tableIdentifier = htmlspecialchars(urldecode($_POST['tableName']));
+                $username = htmlspecialchars(urldecode($_POST['username']));
+                $bio = htmlspecialchars(urldecode($_POST['bio']));
+                $ipAddress = htmlspecialchars(urldecode($_POST['ipAddress']));
+                $password = htmlspecialchars(urldecode($_POST['password']));
+                $role = htmlspecialchars(urldecode($_POST['role']));
+                $id = htmlspecialchars(urldecode($_POST['id']));
+
+                // Check if the table exists
+                if (!$db->tableExists($tableIdentifier)){
+                    throw new DatabaseException(
+                        "Table '{$tableIdentifier}' does not exist."
+                    );
+                }
+
+                // Prepare parameter array
+                $parameters = [
+                    ':username' => $username,
+                    ':bio' => $bio,
+                    ':ipAddress' => $ipAddress,
+                    ':role' => $role,
+                    ':id' => $id
+                ];
+
+                // Build UPDATE query
+                $sql = "UPDATE {$tableIdentifier} SET username = :username, bio = :bio, ipAddress = :ipAddress, role = :role, updatedAt = NOW()";
+
+                // Only update password if provided
+                if (!empty($password)){
+                    // Generate new salt and hash password
+                    $salt = bin2hex(random_bytes(16));
+                    $passwordHash = password_hash($password . $salt, PASSWORD_DEFAULT);
+                    
+                    if ($passwordHash === false){
+                        throw new PHPException(
+                            "Password hashing failed.",
+                            500
+                        );
+                    }
+                    
+                    $sql .= ", password = :password, salt = :salt";
+                    $parameters[':password'] = $passwordHash;
+                    $parameters[':salt'] = $salt;
+                }
+
+                $sql .= " WHERE id = :id";
+
+                // Execute the UPDATE query
+                if (!$db->execute($sql, $parameters)){
+                    throw new DatabaseException(
+                        "Failed to execute UPDATE statement for record with ID: {$id}",
+                        500
+                    );
+                }
+
+                echo json_encode(['success' => true, 'message' => 'Record updated successfully']);
+                break;
+
+            case 'delete':
+                // Get data for deletion
+                $tableIdentifier = htmlspecialchars(urldecode($_POST['tableName']));
+                $id = htmlspecialchars(urldecode($_POST['id']));
+
+                // Check if the table exists
+                if (!$db->tableExists($tableIdentifier)){
+                    throw new DatabaseException(
+                        "Table '{$tableIdentifier}' does not exist."
+                    );
+                }
+
+                // Prepare parameter array
+                $parameters = [
+                    ':id' => $id
+                ];
+
+                // Execute the DELETE query
+                if (!$db->execute(
+                    "DELETE FROM {$tableIdentifier} WHERE id = :id",
+                    $parameters
+                )){
+                    throw new DatabaseException(
+                        "Failed to execute DELETE statement for record with ID: {$id}",
+                        500
+                    );
+                }
+
+                echo json_encode(['success' => true, 'message' => 'Record deleted successfully']);
+                break;
+
+            default:
+                throw new AppException("Invalid action: {$action}");
         }
     }
 }
