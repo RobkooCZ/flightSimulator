@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.9
+ * @version 0.7.10
  * @see Database, User, AppException, DatabaseException, PHPException
  * @todo Add more actions (edit, delete), validation, and error handling
  */
@@ -189,6 +189,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
                         500
                     );
                 }
+
+                // Update the AUTO_INCREMENT value
+                $maxIdResult = $db->query("SELECT MAX(id) as maxId FROM {$tableIdentifier}");
+                $maxId = $maxIdResult[0]['maxId'];
+
+                // set the new auto increment accordingly. either 1 if no max id is found, or the max id + 1
+                if ($maxId === null) $newAutoIncrement = 1;
+                else $newAutoIncrement = (int)$maxId + 1;
+
+                // execute ALTER TABLE to change AUTO_INCREMENT
+                $db->execute("ALTER TABLE {$tableIdentifier} AUTO_INCREMENT = {$newAutoIncrement}");
 
                 echo json_encode(['success' => true, 'message' => 'Record deleted successfully']);
                 break;

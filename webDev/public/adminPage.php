@@ -10,13 +10,14 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.8
+ * @version 0.7.10
  * @see TableRenderer, Table, Database, AuthorizationException, AppException, User
  * @todo Add more admin features and validation
  */
 
 declare(strict_types=1);
 
+use WebDev\Auth\AccessControl;
 use WebDev\Bootstrap;
 Bootstrap::init();
 
@@ -60,26 +61,14 @@ use WebDev\UI\TableRenderer;
 
 // Exceptions
 use WebDev\Exception\AppException;
-use WebDev\Exception\AuthorizationException;
 
 // User
 use WebDev\Auth\User;
 
 AppException::init();
 
-if (!isset($_SESSION['id']) || !in_array($_SESSION['id'], [1, 2])){
-    throw new AuthorizationException(
-        message: "Unauthorized access attempt to admin page",
-        code: 403,
-        userRole: 'user',
-        resource: "/admin",
-        actionAttempted: "view",
-        requiredRole: "co-owner",
-        ipv4: $_SERVER['REMOTE_ADDR'] ?? 'Unknown',
-        userId: $_SESSION['id'] ?? null,
-        previous: null
-    );
-}
+// check permission
+AccessControl::requireAccess('admin');
 
 $db = Database::getInstance();
 

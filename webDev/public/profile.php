@@ -9,10 +9,11 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.8
+ * @version 0.7.10
  */
 declare(strict_types=1);
 
+use WebDev\Auth\AccessControl;
 use WebDev\Auth\User;
 
 /**
@@ -24,10 +25,7 @@ $startSession = false;
 session_start();
 
 // immediatelly check whether the user trying to access the site is logged in or not
-if (!isset($_SESSION[User::SESSION_ID_KEY])){
-    header('Location: /');
-    exit;
-}
+AccessControl::requireAuth();
 
 // for loading the pfp
 use WebDev\Utilities\FileHandler;

@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.3
+ * @version 0.7.10
  * @see Auth, CSRF, templates/header.php, templates/footer.php
  * @todo Add more registration features and validation
  */
@@ -45,6 +45,8 @@ if (isset($_SESSION['message'])) {
 }
 ?>
 
+<script src="../assets/js/register.js" type="module"></script>
+
 <!-- The register modal -->
 <div class="registerModal">
     <h2>REGISTER</h2>
@@ -57,6 +59,7 @@ if (isset($_SESSION['message'])) {
         <input name="password" type="password" placeholder="Password" required>
         <input name="passwordRepeat" type="password" placeholder="Repeat Password" required>    
 
+        <p id="passwordStrengthInfo"></p>
         <p><?= htmlspecialchars($message); ?></p>
 
         <input type="submit" name="submit" value="Register">

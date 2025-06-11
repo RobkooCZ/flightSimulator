@@ -10,7 +10,7 @@
  * @package Database
  * @author Robkoo
  * @license TBD
- * @version 0.7.1
+ * @version 0.7.10
  * @see Database
  * @todo Add more table utility methods
  */
@@ -297,8 +297,14 @@ class Table {
             Loggers::CMD
         );
 
+        /**
+         * THe database name.
+         * @var string
+         */
+        $dbName = $_ENV['DB_NAME'] ?? "webDev";
+
         $parameters = [
-            ":db" => "webDev",
+            ":db" => $dbName,
             ":table" => $this->tableName
         ];
 

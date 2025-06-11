@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.8
+ * @version 0.7.10
  * @see Bootstrap, AppException, Logger
  * @todo Add dynamic route support, improve error handling, and static file types
  */
@@ -224,6 +224,37 @@ function handleRequest($uri): void {
             include __DIR__ . '/api/profileAjax.php';
             break;
         
+        // error codes
+        case '/403':
+            Logger::log(
+                "Routing to 403.php.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            include __DIR__ . '/public/error/403.php';
+            break;
+
+        case '/404':
+            Logger::log(
+                "Routing to 404.php.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            include __DIR__ . '/public/error/404.php';
+            break;
+
+        case '/500':
+            Logger::log(
+                "Routing to 500.php.",
+                LogLevel::INFO,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            include __DIR__ . '/public/error/500.php';
+            break;
+
         // static files
         case (preg_match('/^\/assets\/([a-zA-Z0-9]+)\/(.+)$/', $uri, $matches) ? true : false): // expression to match assets/css
             // match assets/css
@@ -250,8 +281,7 @@ function handleRequest($uri): void {
                 LoggerType::NORMAL,
                 Loggers::CMD
             );
-            http_response_code(404);
-            echo "404 file not found";
+            include __DIR__ . '/public/error/404.php';
             break;
     }
 }

@@ -9,12 +9,13 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.9
+ * @version 0.7.10
  * @see home.js
  * @todo Add features marked as `TBD`
  */
 declare(strict_types=1);
 
+use WebDev\Auth\AccessControl;
 use WebDev\Auth\User;
 use WebDev\Bootstrap;
 Bootstrap::init();
@@ -27,10 +28,7 @@ $startSession = false;
 session_start();
 
 // prevent not logged in users from accessing
-if (!isset($_SESSION[User::SESSION_ID_KEY])){
-    header('Location: /');
-    exit;
-}
+AccessControl::requireAuth();
 
 /**
  * Title of the website.
@@ -113,7 +111,7 @@ include __DIR__ . '/../templates/header.php';
                     </tr>
                 </table>
                 <div id="userStats">
-                    <span>Users: 13 total | 1 active</span>
+                    <span>Users: <?= User::totalUsers() ?> total | <?= User::loggedInUsers() ?> active</span>
                 </div>
             </div>
         </div>
@@ -154,116 +152,95 @@ include __DIR__ . '/../templates/header.php';
                 </div>
                 <div id="tabContent">
                     <div id="webLog" class="visible">
+                        <h2>Alpha v0.7.10 - 11.06.2025</h2>
+                        <h3>Added</h3>
+                        <ul>
+                            <li>Total registered users and logged in users showing up on home page instead of hard-coded data</li>
+                            <li>A dynamic box with info about password strength to the register modal</li>
+                            <li>Two dummy features to the homepage marked as "TBD"</li>
+                            <li>A template error page, where you define for each HTTP error code some info to put on the page</li>
+                            <li>Pages for <code>403</code>, <code>404</code> and <code>500</code> HTTP status codes</li>
+                            <li>Changed <code>.htaccess</code> to make it more secure to prevent unauthorized access to <code>.php.bak</code>, <code>.env</code> and <code>.log</code> files</li>
+                            <li>New class <code>AccessControl</code>, which has static methods to authorize access</li>
+                        </ul>
+
+                        <h3>Changed</h3>
+                        <ul>
+                            <li>Instead of checks inside specific pages, such as admin or profile, use the new methods of the new class <code>AccessControl</code></li>
+                        </ul>
+
+                        <h3>Fixed</h3>
+                        <ul>
+                            <li>Auto Increment ID in database not updating when deleting rows on the school admin page</li>
+                            <li>User chosen theme not saving on the hosted website. This was caused due to hardcoded database name, which didn't match the one on the hosting</li>
+                            <li>Backend not fetching user theme properly when loading the profile page to put the correct option into the select dropdown</li>
+                            <li>A bug where JS would attempt to add event listeners to non-existent elements in pages without the header (login, register)</li>
+                        </ul>
+
+                        <hr>
+                        
                         <h2>Alpha v0.7.9 - 30.05.2025</h2>
-                            <h3>Added</h3>
-                            <ul>
-                                <li>Comprehensive filtering to the admin school page</li>
-                                <li>Display of two joined tables</li>
-                                <li>very simply styled, quickly put together editing and deleted of selected rows from a selected table (will be polished in upcoming updates)</li>
-                                <li>styling for all the new features</li>
-                            </ul>
+                        <h3>Added</h3>
+                        <ul>
+                            <li>Comprehensive filtering to the admin school page</li>
+                            <li>Display of two joined tables</li>
+                            <li>very simply styled, quickly put together editing and deleted of selected rows from a selected table (will be polished in upcoming updates)</li>
+                            <li>styling for all the new features</li>
+                        </ul>
 
-                            <hr>
+                        <hr>
 
-                            <h2>Alpha v0.7.8 - 30.05.2025</h2>
-                            <h3>Added</h3>
-                            <ul>
-                                <li>a logo (finally...)</li>
-                                <li>a simple check on the profile page to prevent access when not logged in</li>
-                                <li>a home page which only logged in users can access
-                                    <ul>
-                                        <li>as of right now doesn't contain much</li>
-                                        <li>only templates/prototypes for when the game will actually be playable and the home page would gain meaning</li>
-                                        <li>info about the server (again, dummy for now)</li>
-                                    </ul>
-                                </li>
-                                <li>box shadow to profile divs</li>
-                                <li>proper, standardized styling for the home page</li>
-                                <li>added general styling to the table in the admin page</li>
-                                <li>a proper landing page
-                                    <ul>
-                                        <li>hero section</li>
-                                        <li>features section</li>
-                                        <li>FAQ</li>
-                                        <li>buttons for navigation</li>
-                                    </ul>
-                                </li>
-                            </ul>
+                        <h2>Alpha v0.7.8 - 30.05.2025</h2>
+                        <h3>Added</h3>
+                        <ul>
+                            <li>a logo (finally...)</li>
+                            <li>a simple check on the profile page to prevent access when not logged in</li>
+                            <li>a home page which only logged in users can access
+                                <ul>
+                                    <li>as of right now doesn't contain much</li>
+                                    <li>only templates/prototypes for when the game will actually be playable and the home page would gain meaning</li>
+                                    <li>info about the server (again, dummy for now)</li>
+                                </ul>
+                            </li>
+                            <li>box shadow to profile divs</li>
+                            <li>proper, standardized styling for the home page</li>
+                            <li>added general styling to the table in the admin page</li>
+                            <li>a proper landing page
+                                <ul>
+                                    <li>hero section</li>
+                                    <li>features section</li>
+                                    <li>FAQ</li>
+                                    <li>buttons for navigation</li>
+                                </ul>
+                            </li>
+                        </ul>
 
-                            <h3>Changed</h3>
-                            <ul>
-                                <li>Improved the footer to show more info, such as game and website versions, links to other stuff and miscellaneous info</li>
-                                <li>Improved <code>theme.css</code>
-                                    <ul>
-                                        <li>Better grouped vars</li>
-                                        <li>Some new vars</li>
-                                        <li>Different, better colors
-                                            <ul>
-                                                <li>themes were modified, the dark theme was changed the most for a more darker-blue style</li>
-                                            </ul>
-                                        </li>
-                                        <li>Better general styles</li>
-                                    </ul>
-                                </li>
-                                <li>Improved styling across all public pages</li>
-                                <li>Tweaked the HTML structure to compliment the new styles</li>
-                            </ul>
+                        <h3>Changed</h3>
+                        <ul>
+                            <li>Improved the footer to show more info, such as game and website versions, links to other stuff and miscellaneous info</li>
+                            <li>Improved <code>theme.css</code>
+                                <ul>
+                                    <li>Better grouped vars</li>
+                                    <li>Some new vars</li>
+                                    <li>Different, better colors
+                                        <ul>
+                                            <li>themes were modified, the dark theme was changed the most for a more darker-blue style</li>
+                                        </ul>
+                                    </li>
+                                    <li>Better general styles</li>
+                                </ul>
+                            </li>
+                            <li>Improved styling across all public pages</li>
+                            <li>Tweaked the HTML structure to compliment the new styles</li>
+                        </ul>
 
-                            <h3>Fixed</h3>
-                            <ul>
-                                <li>Fixed an issue where the <code>antiquewhite</code> color would show in the profile picture instead of the div background color</li>
-                                <li>Fixed issues with styling in the CGT theme</li>
-                                <li>Fixed a bug where <code>AdminSchoolAjax.php</code> couldn't find the constants file.</li>
-                            </ul>
-
-                            <hr>
-
-                            <h2>Alpha v0.7.7 - 28.05.2025</h2>
-                            <h3>Added</h3>
-                            <ul>
-                                <li>profile tab
-                                    <ul>
-                                        <li>contains data about the user</li>
-                                        <li>forms to change some data</li>
-                                        <li>statistics about the game (none yet as the game isn't nearly done)</li>
-                                    </ul>
-                                </li>
-                                <li>profile picture functionality with either a link to an image or an image</li>
-                                <li>classes with methods to handle the upload,validation and storage of profile pictures</li>
-                                <li>styling for the profile page</li>
-                                <li>AJAX-based profile picture upload (file and link support)</li>
-                                <li>backend endpoint for profile picture upload (<code>profileAjax.php</code>)</li>
-                                <li>improved documentation and code comments for profile-related files</li>
-                                <li>fallback/default profile picture if none is set</li>
-                                <li>modal for profile picture upload with validation and error messages</li>
-                                <li>A character limit to the username.
-                                    <ul>
-                                        <li>Minimum length: 3 characters</li>
-                                        <li>Maximum length: 20 characters</li>
-                                    </ul>
-                                </li>
-                                <li>Input fields to change your username or bio</li>
-                                <li>Bio</li>
-                                <li>validation checks on both the frontend and backend for data changing</li>
-                            </ul>
-
-                            <h3>Changed</h3>
-                            <ul>
-                                <li>header reworked to now include profile and logout under the user's profile picture in the navbar
-                                    <ul>
-                                        <li>on pfp click, dropdown shows with those options</li>
-                                    </ul>
-                                </li>
-                                <li>improved file structure for profile page assets</li>
-                                <li>updated profile page to use new AJAX and backend logic for profile picture</li>
-                                <li>improved error handling and logging for profile picture upload</li>
-                            </ul>
-
-                            <h3>Fixed</h3>
-                            <ul>
-                                <li>bug where backend would not always return JSON on error</li>
-                            </ul>
-                        </div>
+                        <h3>Fixed</h3>
+                        <ul>
+                            <li>Fixed an issue where the <code>antiquewhite</code> color would show in the profile picture instead of the div background color</li>
+                            <li>Fixed issues with styling in the CGT theme</li>
+                            <li>Fixed a bug where <code>AdminSchoolAjax.php</code> couldn't find the constants file.</li>
+                        </ul>
+                    </div>
                     <div id="gameLog">
                         <h2>Alpha v0.3.3 - 06.03.2025</h2>
                         <h3>Added</h3>
@@ -349,24 +326,63 @@ include __DIR__ . '/../templates/header.php';
                 </div>
             </div>
         </div>
-        <div id="statistics">
-            <h2 style="text-align:center;">Basic Statistics Prototype TBD</h2>
+        <div id="pilotDashboard">
+            <h2>PILOT DASHBOARD</h2>
+            <div class="statusGrid">
+                <div class="statusItem">
+                    <span class="statusIndicator offline"></span>
+                    <span class="statusText">Flight Simulator Status: Offline</span>
+                </div>
+                <div class="statusItem">
+                    <span class="statusIcon">👥</span>
+                    <span class="statusText"><span id="activePilots">12</span> Active Pilots</span>
+                </div>
+                <div class="statusItem">
+                    <span class="statusIcon">🎖️</span>
+                    <span class="statusText">Rank: <span id="pilotRank">Lieutenant</span></span>
+                </div>
+                <div class="statusItem">
+                    <span class="statusIcon">🎯</span>
+                    <span class="statusText">Next: <span id="nextMission">Combat Training</span></span>
+                </div>
+                <div class="statusItem">
+                    <span class="statusIcon">⏱️</span>
+                    <span class="statusText">Last Flight: <span id="lastFlight">2 hours ago</span></span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<h2
-style="
-margin-top: 2vh;
-text-align:center;
-"
->
-Game Status Info Prototype & Play Game Button TBD
-</h2>
-
-<!-- <div id="gameStatus"></div>
-
-<button id="playGame">PLAY</button> -->
+<div id="flightOperations">
+    <h2>FLIGHT OPERATIONS</h2>
+    <div class="operationsGrid">
+        <div class="opsRow">
+            <span class="opsLabel">Weather:</span>
+            <span class="opsValue" id="weatherStatus">Clear Skies</span>
+        </div>
+        <div class="opsRow">
+            <span class="opsLabel">Recommended:</span>
+            <span class="opsValue" id="recommendedAircraft">JA37C Jaktviggen</span>
+        </div>
+        <div class="opsRow">
+            <span class="opsLabel">Aircraft Status:</span>
+            <span class="opsValue statusReady" id="aircraftStatus">Ready</span>
+        </div>
+        <div class="opsRow">
+            <span class="opsLabel">Connection:</span>
+            <span class="opsValue statusStable" id="connectionStatus">Stable</span>
+        </div>
+    </div>
+    
+    <div id="launchSection">
+        <button id="launchSimulator" class="launchBtn" disabled>
+            <span class="btnIcon">🚁</span>
+            <span class="btnText">LAUNCH SIMULATOR</span>
+            <span class="btnSubtitle">Coming Soon</span>
+        </button>
+    </div>
+</div>
 
 <!-- include the js script -->
 <script type="module" src="../assets/js/home.js"></script>

@@ -54,10 +54,31 @@ It also includes a short name for the update.
     - [0.7.7](#version-077---28052025) - "Profile Tab Addition"
     - [0.7.8](#version-078---30052025) - "Huge Front-End Update"
     - [0.7.9](#version-079---30052025) - "School admin page expansion"
+    - [0.7.10](#version-0710---10062025) - "Front-End polishing"
 
 ---
 
 ## ALPHA VERSIONS
+
+### [VERSION 0.7.10] - 11.06.2025
+
+#### Added
+- Total registered users and logged in users showing up on home page instead of hard-coded data
+- A dynamic box with info about password strength to the register modal
+- Two dummy features to the homepage marked as "TBD"
+- A template error page, where you define for each HTTP error code some info to put on the page
+- Pages for `403`, `404` and `500` HTTP status codes
+- Changed `.htaccess` to make it more secure to prevent unauthorized access to `.php.bak`, `.env` and `.log` files
+- New class `AccessControl`, which has static methods to authorize access.
+
+#### Changed
+- Instead of checks inside specific pages, such as admin or profile, use the new methods of the new class `AccessControl`
+
+#### Fixed
+- Auto Increment ID in database not updating when deleting rows on the school admin page
+- User chosen theme not saving on the hosted website. This was caused due to hardcoded database name, which didn't match the one on the hosting
+- Backend not fetching user theme properly when loading the profile page to put the correct option into the select dropdown
+- A bug where JS would attempt to add event listeners to non-existent elements in pages without the header (login, register)
 
 ### [VERSION 0.7.9] - 30.05.2025
 

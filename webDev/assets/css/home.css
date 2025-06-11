@@ -347,9 +347,241 @@
 }
 
 /* ===== BOTTOM SECTION ===== */
-/* Game Status Info Prototype styling will go here when implemented */
+/* ===== PILOT DASHBOARD (right bottom) ===== */
+#twoColumnContent #right #pilotDashboard {
+    background-color: var(--div-bg-color);
+    color: var(--div-color);
+    border: var(--div-border);
+    border-radius: var(--border-radius);
+    padding: var(--padding-size);
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+#twoColumnContent #right #pilotDashboard h2 {
+    margin: 0 0 var(--gap-size) 0;
+    font-size: 1.1em;
+    text-align: center;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: calc(var(--gap-size) / 2);
+}
+
+#twoColumnContent #right #pilotDashboard .statusGrid {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--gap-size) / 2);
+}
+
+#twoColumnContent #right #pilotDashboard .statusItem {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: calc(var(--border-radius) / 2);
+    font-size: 0.9em;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+#twoColumnContent #right #pilotDashboard .statusItem:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+#twoColumnContent #right #pilotDashboard .statusIndicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: calc(var(--gap-size) / 2);
+    flex-shrink: 0;
+}
+
+#twoColumnContent #right #pilotDashboard .statusIndicator.online {
+    background-color: var(--success-color);
+    border-left-color: var(--success-color);
+}
+
+#twoColumnContent #right #pilotDashboard .statusIndicator.offline {
+    background-color: var(--failure-color);
+}
+
+#twoColumnContent #right #pilotDashboard .statusItem:has(.statusIndicator.offline) {
+    border-left-color: var(--failure-color);
+}
+
+#twoColumnContent #right #pilotDashboard .statusIcon {
+    margin-right: calc(var(--gap-size) / 2);
+    font-size: 1.1em;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+}
+
+#twoColumnContent #right #pilotDashboard .statusText {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+/* ===== FLIGHT OPERATIONS (below two-column content) ===== */
+#flightOperations {
+    background-color: var(--div-bg-color);
+    color: var(--div-color);
+    border: var(--div-border);
+    border-radius: var(--border-radius);
+    padding: var(--padding-size);
+    box-shadow: var(--box-shadow);
+    width: 95%;
+    margin: var(--vertical-gap-size) auto;
+}
+
+#flightOperations h2 {
+    margin: 0 0 var(--gap-size) 0;
+    font-size: 1.2em;
+    text-align: center;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: calc(var(--gap-size) / 2);
+}
+
+#flightOperations h2 .icon {
+    margin-right: calc(var(--gap-size) / 2);
+    font-size: 1.3em;
+    vertical-align: middle;
+}
+
+#flightOperations .operationsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--gap-size);
+    margin-bottom: calc(var(--gap-size) * 1.5);
+}
+
+#flightOperations .opsRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: calc(var(--border-radius) / 2);
+    border-left: 3px solid var(--accent-color);
+    transition: all 0.2s ease;
+}
+
+#flightOperations .opsRow:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    transform: translateX(2px);
+}
+
+#flightOperations .opsLabel {
+    font-weight: 600;
+    font-size: 0.95em;
+    color: var(--text-color);
+    opacity: 0.9;
+}
+
+#flightOperations .opsValue {
+    font-weight: 500;
+    font-size: 0.9em;
+    color: var(--text-color);
+    text-align: right;
+}
+
+#flightOperations .opsValue.statusReady {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+#flightOperations .opsValue.statusStable {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+/* ===== LAUNCH SECTION ===== */
+#launchSection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: var(--gap-size);
+    border-top: 1px solid var(--border-color);
+}
+
+#launchSimulator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--padding-size) * 1.5);
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-color-dark, #1a5490));
+    color: white;
+    border: none;
+    border-radius: calc(var(--border-radius) * 1.5);
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--box-shadow);
+    position: relative;
+    overflow: hidden;
+    min-width: 200px;
+}
+
+#launchSimulator:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+#launchSimulator:disabled {
+    background: linear-gradient(135deg, #666, #555);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+#launchSimulator .btnIcon {
+    font-size: 2em;
+    margin-bottom: calc(var(--gap-size) / 3);
+    animation: pulse 2s infinite;
+}
+
+#launchSimulator:disabled .btnIcon {
+    animation: none;
+}
+
+#launchSimulator .btnText {
+    font-size: 1.1em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: calc(var(--gap-size) / 4);
+}
+
+#launchSimulator .btnSubtitle {
+    font-size: 0.8em;
+    font-weight: 400;
+    opacity: 0.9;
+    font-style: italic;
+}
+
+/* Pulse animation for the launch button icon */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
 
 /* ===== RESPONSIVE LAYOUT ===== */
+@media screen and (max-width: 768px) {
+    #flightOperations .operationsGrid {
+        grid-template-columns: 1fr;
+    }
+    
+    #launchSimulator {
+        min-width: 150px;
+        padding: var(--padding-size);
+    }
+    
+    #launchSimulator .btnText {
+        font-size: 1em;
+    }
+}
 @media screen and (max-width: 768px){
     #twoColumnContent {
         flex-direction: column;

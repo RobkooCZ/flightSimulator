@@ -10,7 +10,7 @@
  * @package ProfilePage
  * @author Robkoo
  * @license TBD
- * @version 0.7.8
+ * @version 0.7.10
  * @see profile.php
  */
 
@@ -486,21 +486,38 @@ document.addEventListener("DOMContentLoaded", () => {
     // load the user prefered theme from the db to correctly set the select
     (async () => {
         try {
-            const data = new FormData();
-
             const result = await ajaxHandler.send(
                 "/api/profile?action=themeChoice&themeAction=load",
-                {
-                    body: data
-                },
+                {},
                 'GET'
             );
             
             // set the value and default to dark-theme if the HTMLElement wasn't selected properly
-            themeSelect ? themeSelect.value = result.data : 'dark-theme';
+            if (themeSelect){
+                themeSelect.value = result.data || 'dark-theme';
+                
+                // Also apply the theme to the body immediately
+                if (result.data === "light"){
+                    document.body.className = "";
+                }
+                else {
+                    document.body.className = result.data || 'dark-theme';
+                }
+            }
         }
         catch (error){
-            console.error("Error response from `profileAjax.php` (Theme sending): ", error.backendMessage);
+            console.error("Error response from `profileAjax.php` (Theme loading):", {
+                fullError: error,
+                message: error.message || 'Unknown error',
+                backendMessage: error.backendMessage || 'No backend message available',
+                errorString: error.toString()
+            });
+            
+            // Set default theme on error
+            if (themeSelect) {
+                themeSelect.value = 'dark-theme';
+                document.body.className = 'dark-theme';
+            }
         }
     })();
 });

@@ -9,7 +9,7 @@
  * @package AJAX
  * @author Robkoo
  * @license TBD
- * @version 0.7.8
+ * @version 0.7.10
  * @see /utils/ajaxHandler.js, /webDev/api/headerAjax.php
  * @todo ---
  */
@@ -53,30 +53,38 @@ const links = document.getElementsByClassName("links");
     });
 });
 
-// on pfp click, show the dropdown
 /**
- * @type {HTMLElement|false} User's profile that functions as a dropdown when clicked.
+ * @type {boolean} True if the element exists, false if it doesn't
  */
-const profile = document.getElementById("profile");
+const headerExists = !!document.querySelector("header");
 
-/**
- * @type {HTMLElement|false} The dropdown content.
- */
-const dropdownContent = document.getElementById("dropdownContent");
+// if the header exists, add the event listeners
+if (headerExists === true){
+    // on pfp click, show the dropdown
+    /**
+     * @type {HTMLElement|false} User's profile that functions as a dropdown when clicked.
+     */
+    const profile = document.getElementById("profile");
 
-// For opening the dropdown
-profile.addEventListener('click', (e) => {
-    e.preventDefault(); // prevent default link behaviour
-    e.stopPropagation(); // Prevent closing immediately due to document listener
-    dropdownContent.classList.toggle("displayBlock");
-});
+    /**
+     * @type {HTMLElement|false} The dropdown content.
+     */
+    const dropdownContent = document.getElementById("dropdownContent");
 
-// Close dropdown when clicking anywhere else on the page
-document.addEventListener('click', (e) => {
-    // Check if dropdown is open and click wasn't inside the dropdown content
-    if (dropdownContent.classList.contains("displayBlock") && // if it is opened
-        !dropdownContent.contains(e.target) && // if the user didn't click on the dropdown
-        e.target !== profile){ // or on the profile picture
-        dropdownContent.classList.remove("displayBlock"); // close it
-    }
-});
+    // For opening the dropdown
+    profile.addEventListener('click', (e) => {
+        e.preventDefault(); // prevent default link behaviour
+        e.stopPropagation(); // Prevent closing immediately due to document listener
+        dropdownContent.classList.toggle("displayBlock");
+    });
+
+    // Close dropdown when clicking anywhere else on the page
+    document.addEventListener('click', (e) => {
+        // Check if dropdown is open and click wasn't inside the dropdown content
+        if (dropdownContent.classList.contains("displayBlock") && // if it is opened
+            !dropdownContent.contains(e.target) && // if the user didn't click on the dropdown
+            e.target !== profile){ // or on the profile picture
+            dropdownContent.classList.remove("displayBlock"); // close it
+        }
+    });
+}

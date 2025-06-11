@@ -8,7 +8,7 @@
  * @since 0.7.2
  * @author Robkoo
  * @license TBD
- * @version 0.7.7
+ * @version 0.7.10
  * @see /webDev/assets/js/utils/ajaxHandler.js, /webDev/src/API/ApiResponse.php
  * @todo Add support for custom response types (e.g., text, blob), request timeouts, and progress events.
  */
@@ -31,7 +31,7 @@ export default class ajaxHandler {
      * @example
      * const valid = ajaxHandler.#validateData({foo: 1});
      */
-    static #validateData(data){
+    static #validateData(data, method = 'POST'){
         /**
          * return structure for the validation
          * @type {{success: boolean, message: string}}
@@ -59,7 +59,7 @@ export default class ajaxHandler {
         }
 
         // if the length of the provided data is zero
-        if (Object.keys(data).length === 0){
+        if (method === 'POST' && Object.keys(data).length === 0){
             returnData.success = false;
             returnData.message += "Data is empty. Please provide data to send.\n";
         }
@@ -274,7 +274,7 @@ export default class ajaxHandler {
         }
     ){
         // Validate the provided data using private static methods defined above
-        const dataResult = ajaxHandler.#validateData(data);
+        const dataResult = ajaxHandler.#validateData(data, method);
         if (!dataResult.success) throw new Error(dataResult.message);
 
         const methodResult = ajaxHandler.#validateMethod(method);

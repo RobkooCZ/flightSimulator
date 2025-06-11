@@ -9,7 +9,7 @@
  * @file User.php
  * @since 0.7
  * @package Auth
- * @version 0.7.7
+ * @version 0.7.10
  * @see Database, Auth, Logger
  * @todo Implement user preferences
  */
@@ -28,7 +28,7 @@ use WebDev\Database\Database;
 // Enums
 use WebDev\Database\Enum\Status;
 use WebDev\Database\Enum\Role;
-
+use WebDev\Database\Table;
 // Exceptions
 use WebDev\Exception\DatabaseException;
 use WebDev\Exception\PHPException;
@@ -2063,5 +2063,55 @@ class User {
             Loggers::CMD
         );
         self::$userRegistry = [];
+    }
+
+    /**
+     * Finds out how many users are logged in.
+     *
+     * @return int How many users are logged in.
+     */
+    public static function loggedInUsers(): int {
+        /**
+         * The session path.
+         * @var string|false $sessionPath
+         */
+        $sessionPath = session_save_path();
+
+        // If we can't get the session path, get the temporary dir path
+        if (empty($sessionPath)) $sessionPath = sys_get_temp_dir();
+
+        // get the session files
+        /**
+         * Session files
+         * @var array<int,string>
+         */
+        $sessionFiles = glob($sessionPath . '/sess_*');
+
+        /**
+         * Found active users.
+         * @var int
+         */
+        $activeUsers = 0;
+
+        // loop through the session files and check if it contains the User ID key (that would indicate a logged in user)
+        foreach ($sessionFiles as $file){
+            /**
+             * @var string
+             */
+            $sessionData = file_get_contents($file);
+
+            if (strpos($sessionData, self::SESSION_ID_KEY) !== false) $activeUsers++;
+        }
+
+        return $activeUsers;
+    }
+
+    /**
+     * Finds out how many users are registered in total on the website.
+     *
+     * @return int The amount of total users.
+     */
+    public static function totalUsers(): int {
+        return (int)Table::getInstance("users")->getNextId() - 1;
     }
 }
