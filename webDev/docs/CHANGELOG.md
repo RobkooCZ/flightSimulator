@@ -55,10 +55,15 @@ It also includes a short name for the update.
     - [0.7.8](#version-078---30052025) - "Huge Front-End Update"
     - [0.7.9](#version-079---30052025) - "School admin page expansion"
     - [0.7.10](#version-0710---10062025) - "Front-End polishing"
-
+        - [0.7.10.1](#version-07101---11062025) - "Active users fetch fix"
 ---
 
 ## ALPHA VERSIONS
+
+### [VERSION 0.7.10.1] - 11.06.2025
+
+#### Fixed
+- Unoptimized method to determine active users via session file. Now checks last activity in the database, and if there's activity in the last 5 minutes, the user is determined to be active
 
 ### [VERSION 0.7.10] - 11.06.2025
 
@@ -69,7 +74,7 @@ It also includes a short name for the update.
 - A template error page, where you define for each HTTP error code some info to put on the page
 - Pages for `403`, `404` and `500` HTTP status codes
 - Changed `.htaccess` to make it more secure to prevent unauthorized access to `.php.bak`, `.env` and `.log` files
-- New class `AccessControl`, which has static methods to authorize access.
+- New class `AccessControl`, which has static methods to authorize access
 
 #### Changed
 - Instead of checks inside specific pages, such as admin or profile, use the new methods of the new class `AccessControl`

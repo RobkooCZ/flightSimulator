@@ -152,6 +152,14 @@ include __DIR__ . '/../templates/header.php';
                 </div>
                 <div id="tabContent">
                     <div id="webLog" class="visible">
+                        <h2>Alpha v0.7.10.1 - 11.06.2025</h2>
+                        <h3>Fixed</h3>
+                        <ul>
+                            <li>Unoptimized method to determine active users via session file. Now checks last activity in the database, and if there's activity in the last 5 minutes, the user is determined to be active</li>
+                        </ul>
+
+                        <hr>
+
                         <h2>Alpha v0.7.10 - 11.06.2025</h2>
                         <h3>Added</h3>
                         <ul>

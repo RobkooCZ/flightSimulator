@@ -9,7 +9,7 @@
  * @file User.php
  * @since 0.7
  * @package Auth
- * @version 0.7.10
+ * @version 0.7.10.1
  * @see Database, Auth, Logger
  * @todo Implement user preferences
  */
@@ -286,7 +286,7 @@ class User {
 
             // bio must pass validation
             Auth::validateBio($userData['bio'] ?? "none");
-        } catch (ValidationException $ve) {
+        } catch (ValidationException $ve){
             Logger::log(
                 "Validation error: {$ve->getMessage()} for user ID: {$userData['id']}",
                 LogLevel::ERROR,
@@ -2071,39 +2071,48 @@ class User {
      * @return int How many users are logged in.
      */
     public static function loggedInUsers(): int {
-        /**
-         * The session path.
-         * @var string|false $sessionPath
-         */
-        $sessionPath = session_save_path();
+        // Skip session file (bad) method entirely
+        return self::loggedInUsersFromDatabase();
+    }
 
-        // If we can't get the session path, get the temporary dir path
-        if (empty($sessionPath)) $sessionPath = sys_get_temp_dir();
-
-        // get the session files
-        /**
-         * Session files
-         * @var array<int,string>
-         */
-        $sessionFiles = glob($sessionPath . '/sess_*');
-
-        /**
-         * Found active users.
-         * @var int
-         */
-        $activeUsers = 0;
-
-        // loop through the session files and check if it contains the User ID key (that would indicate a logged in user)
-        foreach ($sessionFiles as $file){
-            /**
-             * @var string
-             */
-            $sessionData = file_get_contents($file);
-
-            if (strpos($sessionData, self::SESSION_ID_KEY) !== false) $activeUsers++;
+    /**
+     * Alternative method to count logged in users from database activity.
+     * 
+     * @return int The amount of users active in the last 5 minutes
+     */
+    private static function loggedInUsersFromDatabase(): int {
+        try {
+            $db = Database::getInstance();
+            $threshold = date('Y-m-d H:i:s', time() - (5 * 60)); // 5 minutes ago
+            
+            $query = "SELECT COUNT(*) as count FROM users 
+                    WHERE lastActivityAt > :threshold 
+                    AND status = 'active'";
+            
+            $result = $db->query($query, ['threshold' => $threshold]);
+            $count = (int)($result[0]['count'] ?? 0);
+            
+            Logger::log(
+                "Database method returned $count active users (threshold: $threshold)",
+                LogLevel::DEBUG,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            
+            return $count;
+            
         }
-
-        return $activeUsers;
+        catch (\Exception $e){
+            Logger::log(
+                "Database method failed: " . $e->getMessage(),
+                LogLevel::ERROR,
+                LoggerType::NORMAL,
+                Loggers::CMD
+            );
+            
+            // Return 0 if everything fails to prevent homepage breaking
+            return 0;
+        }
     }
 
     /**

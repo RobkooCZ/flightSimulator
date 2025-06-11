@@ -10,7 +10,7 @@
  * @package FlightSimWeb
  * @author Robkoo
  * @license TBD
- * @version 0.7.10
+ * @version 0.7.10.1
  * @see templates/header.php
  * @todo Add more footer content and links
  */
@@ -28,7 +28,7 @@ declare(strict_types=1);
                 
                 <div class="versionInfo">
                     <span class="versionLabel">Website:</span>
-                    <span class="footerVersion website">Alpha v0.7.10</span>
+                    <span class="footerVersion website">Alpha v0.7.10.1</span>
                 </div>
                 
                 <div class="versionInfo">
